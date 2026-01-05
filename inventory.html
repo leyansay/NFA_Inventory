@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin-left: 250px;
+        }
+
+        /* Sidebar iframe container */
+        #sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            z-index: 1000;
+            border: none;
+        }
+
+        #sidebar-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1657ba;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1d2e;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #8b92b0;
+            text-transform: uppercase;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #5b8dee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #e0e4e9;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #5b8dee;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #1657ba;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #1657ba;
+        }
+
+        .filter-btn:hover {
+            background: #f0f5ff;
+        }
+
+        .filter-btn.active {
+            background: #1657ba;
+            color: white;
+        }
+
+        .warehouse-section {
+            margin-bottom: 3rem;
+        }
+
+        .warehouse-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1657ba;
+            margin-bottom: 1rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1657ba;
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fb;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 1rem;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .warehouse-section.hidden {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                margin-left: 0;
+            }
+
+            #sidebar-container {
+                transform: translateX(-250px);
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar-container.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .filter-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Load Sidebar from separate file -->
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Inventory</h1>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">Hi, nfa_admin</div>
+                    <div class="user-role">USER</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <div class="search-box">
+                <input type="text" placeholder="Search inventory..." id="searchInput">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn preview-btn" onclick="previewInventory()">
+                    👁️ Preview
+                </button>
+                <button class="filter-btn rice-btn" id="riceBtn" onclick="filterByType('rice')">
+                    Rice
+                </button>
+                <button class="filter-btn palay-btn" id="palayBtn" onclick="filterByType('palay')">
+                    Palay
+                </button>
+            </div>
+        </div>
+
+        <!-- Rice Warehouse Sections -->
+        <div class="warehouse-section rice-section" data-type="rice">
+            <h2 class="warehouse-title">GID 1 - Rice</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No rice data in GID 1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="warehouse-section rice-section" data-type="rice">
+            <h2 class="warehouse-title">GID 2 - Rice</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No rice data in GID 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Palay Warehouse Sections -->
+        <div class="warehouse-section palay-section" data-type="palay">
+            <h2 class="warehouse-title">GID 1 - Palay</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No palay data in GID 1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="warehouse-section palay-section" data-type="palay">
+            <h2 class="warehouse-title">GID 2 - Palay</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No palay data in GID 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = 'all'; // Track current filter state
+
+        // Filter by type (Rice or Palay)
+        function filterByType(type) {
+            const riceBtn = document.getElementById('riceBtn');
+            const palayBtn = document.getElementById('palayBtn');
+            const riceSections = document.querySelectorAll('.rice-section');
+            const palaySections = document.querySelectorAll('.palay-section');
+
+            // Toggle filter
+            if (currentFilter === type) {
+                // If clicking the same button, show all
+                currentFilter = 'all';
+                riceBtn.classList.remove('active');
+                palayBtn.classList.remove('active');
+                riceSections.forEach(section => section.classList.remove('hidden'));
+                palaySections.forEach(section => section.classList.remove('hidden'));
+            } else {
+                // Filter by selected type
+                currentFilter = type;
+                
+                // Update button states
+                riceBtn.classList.toggle('active', type === 'rice');
+                palayBtn.classList.toggle('active', type === 'palay');
+
+                // Show/hide sections based on filter
+                if (type === 'rice') {
+                    riceSections.forEach(section => section.classList.remove('hidden'));
+                    palaySections.forEach(section => section.classList.add('hidden'));
+                } else if (type === 'palay') {
+                    riceSections.forEach(section => section.classList.add('hidden'));
+                    palaySections.forEach(section => section.classList.remove('hidden'));
+                }
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.warehouse-section');
+            
+            sections.forEach(section => {
+                // Skip hidden sections from filter
+                if (section.classList.contains('hidden')) return;
+                
+                const rows = section.querySelectorAll('tbody tr');
+                let hasVisibleRow = false;
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const shouldShow = text.includes(searchTerm);
+                    row.style.display = shouldShow ? '' : 'none';
+                    if (shouldShow && !row.querySelector('.no-data')) {
+                        hasVisibleRow = true;
+                    }
+                });
+                
+                // Show/hide entire section if no matches
+                section.style.display = hasVisibleRow || searchTerm === '' ? '' : 'none';
+            });
+        });
+
+        // Preview function
+        function previewInventory() {
+            alert('Preview functionality - Show inventory preview/report');
+        }
+    </script>
+</body>
+</html>

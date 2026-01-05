@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Library - NFA Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            color: #1e5dbf;
+            margin-bottom: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .sort-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sort-section label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .sort-select {
+            padding: 0.65rem 2.5rem 0.65rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            font-size: 0.95rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: #5b8dee;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.65rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-preview {
+            background: white;
+            color: #1e5dbf;
+            border: 2px solid #1e5dbf;
+        }
+
+        .btn-preview:hover {
+            background: #f0f5ff;
+        }
+
+        .btn-add {
+            background: #1e5dbf;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #164a99;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1e5dbf;
+            color: white;
+        }
+
+        thead th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e8eaed;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody td {
+            padding: 1rem;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        tbody td:first-child {
+            color: #1e5dbf;
+            font-weight: 500;
+        }
+
+        .actions-cell {
+            text-align: right;
+            position: relative;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #666;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            color: #1e5dbf;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f5ff;
+            color: #1e5dbf;
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 6px 6px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+            color: #333;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1e5dbf;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 0.875rem;
+            background: #1e5dbf;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #164a99;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .modal {
+                width: 95%;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Warehouse Library</h1>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" onclick="previewWarehouses()">
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" onclick="addWarehouse()">
+                    <span>+</span>
+                    <span>Add Warehouse</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>WAREHOUSE CODE</th>
+                        <th>WAREHOUSE NAME</th>
+                        <th>LOCATION</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="warehouseTableBody">
+                    <tr>
+                        <td>33211</td>
+                        <td>sasda</td>
+                        <td>sdaweeqs123sdad12esad</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editWarehouse('33211')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteWarehouse('33211')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>131</td>
+                        <td>312231</td>
+                        <td>321312312</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editWarehouse('131')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteWarehouse('131')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF WAREHOUSE</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="warehouseForm" onsubmit="saveWarehouse(event)">
+                    <div class="form-group">
+                        <label class="form-label">Warehouse Code:</label>
+                        <input type="text" class="form-input" id="warehouseCode" placeholder="Enter Warehouse Code" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Warehouse Name:</label>
+                        <input type="text" class="form-input" id="warehouseName" placeholder="Enter Warehouse Name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Location:</label>
+                        <input type="text" class="form-input" id="location" placeholder="Enter Location" required>
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Warehouse</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addWarehouse() {
+            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('warehouseForm').reset();
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        function saveWarehouse(event) {
+            event.preventDefault();
+            
+            const warehouseCode = document.getElementById('warehouseCode').value;
+            const warehouseName = document.getElementById('warehouseName').value;
+            const location = document.getElementById('location').value;
+
+            // Here you would typically save to a database
+            // For now, we'll just add it to the table
+            const tbody = document.getElementById('warehouseTableBody');
+            const newRow = tbody.insertRow(0); // Insert at the top
+
+            newRow.innerHTML = `
+                <td>${warehouseCode}</td>
+                <td>${warehouseName}</td>
+                <td>${location}</td>
+                <td class="actions-cell">
+                    <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item" onclick="editWarehouse('${warehouseCode}')">Edit</div>
+                        <div class="dropdown-item" onclick="deleteWarehouse('${warehouseCode}')">Delete</div>
+                    </div>
+                </td>
+            `;
+
+            closeModal();
+            alert('Warehouse added successfully!');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modalOverlay').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        function previewWarehouses() {
+            alert('Opening Preview mode...');
+        }
+
+        function editWarehouse(code) {
+            alert(`Editing warehouse: ${code}`);
+            closeAllDropdowns();
+        }
+
+        function deleteWarehouse(code) {
+            if (confirm(`Are you sure you want to delete warehouse: ${code}?`)) {
+                alert(`Warehouse ${code} deleted`);
+                closeAllDropdowns();
+            }
+        }
+
+        function toggleActions(button) {
+            closeAllDropdowns();
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('show');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            alert('Sorting by: ' + this.options[this.selectedIndex].text);
+        });
+    </script>
+</body>
+</html>

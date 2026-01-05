@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sack Library - NFA Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            color: #1e5dbf;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+            margin-right: 1rem;
+        }
+
+        .user-greeting {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #5b8dee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .sort-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sort-section label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .sort-select {
+            padding: 0.65rem 2.5rem 0.65rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            font-size: 0.95rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: #5b8dee;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.65rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-preview {
+            background: white;
+            color: #1e5dbf;
+            border: 2px solid #1e5dbf;
+        }
+
+        .btn-preview:hover {
+            background: #f0f5ff;
+        }
+
+        .btn-add {
+            background: #1e5dbf;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #164a99;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1e5dbf;
+            color: white;
+        }
+
+        thead th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e8eaed;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody td {
+            padding: 1rem;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        tbody td:first-child {
+            color: #1e5dbf;
+            font-weight: 500;
+        }
+
+        .actions-cell {
+            text-align: right;
+            position: relative;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #666;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            color: #1e5dbf;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f5ff;
+            color: #1e5dbf;
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 6px 6px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+            color: #333;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1e5dbf;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .section-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 0.875rem;
+            background: #1e5dbf;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #164a99;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .modal {
+                width: 95%;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Sack Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" onclick="previewSacks()">
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" onclick="addSack()">
+                    <span>+</span>
+                    <span>Add Sack</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SACK CODE</th>
+                        <th>BRAND NEW</th>
+                        <th>SECOND HAND</th>
+                        <th>MENDABLE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="sackTableBody">
+                    <tr>
+                        <td>ew1</td>
+                        <td>0.075</td>
+                        <td>123</td>
+                        <td>123</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editSack('ew1')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteSack('ew1')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11111111111</td>
+                        <td>1222</td>
+                        <td>1232</td>
+                        <td>312</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editSack('11111111111')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteSack('11111111111')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3231</td>
+                        <td>123</td>
+                        <td>21313123213213</td>
+                        <td>131321321312312</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editSack('3231')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteSack('3231')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1213123</td>
+                        <td>32113.123</td>
+                        <td>12313.3212131</td>
+                        <td>1231213.3123123</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editSack('1213123')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteSack('1213123')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>13213123</td>
+                        <td>12313</td>
+                        <td>1231</td>
+                        <td>123</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editSack('13213123')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteSack('13213123')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF SACK LIBRARY</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="sackForm" onsubmit="saveSack(event)">
+                    <div class="form-group">
+                        <label class="form-label">Sack Code:</label>
+                        <input type="text" class="form-input" id="sackCode" placeholder="Enter Sack Code" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="section-label">Sack Weight:</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Brand New:</label>
+                        <input type="number" step="0.001" class="form-input" id="brandNew" placeholder="Enter Weight" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Second Hand:</label>
+                        <input type="number" step="0.001" class="form-input" id="secondHand" placeholder="Enter Weight" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mendable:</label>
+                        <input type="number" step="0.001" class="form-input" id="mendable" placeholder="Enter Weight" required>
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Sack</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addSack() {
+            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('sackForm').reset();
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        function saveSack(event) {
+            event.preventDefault();
+            
+            const sackCode = document.getElementById('sackCode').value;
+            const brandNew = document.getElementById('brandNew').value;
+            const secondHand = document.getElementById('secondHand').value;
+            const mendable = document.getElementById('mendable').value;
+
+            // Here you would typically save to a database
+            // For now, we'll just add it to the table
+            const tbody = document.getElementById('sackTableBody');
+            const newRow = tbody.insertRow(0); // Insert at the top
+
+            newRow.innerHTML = `
+                <td>${sackCode}</td>
+                <td>${brandNew}</td>
+                <td>${secondHand}</td>
+                <td>${mendable}</td>
+                <td class="actions-cell">
+                    <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item" onclick="editSack('${sackCode}')">Edit</div>
+                        <div class="dropdown-item" onclick="deleteSack('${sackCode}')">Delete</div>
+                    </div>
+                </td>
+            `;
+
+            closeModal();
+            alert('Sack added successfully!');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modalOverlay').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        function previewSacks() {
+            alert('Opening Preview mode...');
+        }
+
+        function editSack(code) {
+            alert(`Editing sack: ${code}`);
+            closeAllDropdowns();
+        }
+
+        function deleteSack(code) {
+            if (confirm(`Are you sure you want to delete sack: ${code}?`)) {
+                alert(`Sack ${code} deleted`);
+                closeAllDropdowns();
+            }
+        }
+
+        function toggleActions(button) {
+            closeAllDropdowns();
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('show');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            alert('Sorting by: ' + this.options[this.selectedIndex].text);
+        });
+    </script>
+</body>
+</html>

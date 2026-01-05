@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin-left: 250px;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar iframe container */
+        #sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            z-index: 1000;
+            border: none;
+        }
+
+        #sidebar-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1d2e;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e0e4e9;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #5b8dee;
+        }
+
+        .search-bar input::placeholder {
+            color: #a0a7b8;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1d2e;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #8b92b0;
+            text-transform: uppercase;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #5b8dee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1657ba;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .summary-card.yellow {
+            background: linear-gradient(135deg, #f5c469 0%, #e9b855 100%);
+            color: white;
+        }
+
+        .summary-card.red {
+            background: linear-gradient(135deg, #ee7c92 0%, #e5677e 100%);
+            color: white;
+        }
+
+        .summary-card.green {
+            background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
+            color: white;
+        }
+
+        .summary-card.blue {
+            background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                margin-left: 0;
+            }
+
+            #sidebar-container {
+                transform: translateX(-250px);
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar-container.open {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        .menu-toggle {
+            display: none;
+            background: #5b8dee;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-bar {
+                order: 3;
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Load Sidebar from separate file -->
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title">DASHBOARD</h1>
+        
+        <div class="search-bar">
+            <input type="text" placeholder="Search item, warehouse or report...">
+        </div>
+        
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-name">Hi, nfa_admin</div>
+                <div class="user-role">USER</div>
+            </div>
+            <div class="user-avatar">N</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="section-title">Summary Reports</h2>
+        
+        <div class="summary-grid">
+            <div class="summary-card yellow">
+                <div class="card-title">TOTAL RICE EQV'T (DDN)</div>
+                <div class="card-value">49,522</div>
+            </div>
+            
+            <div class="summary-card red">
+                <div class="card-title">TOTAL RICE EQV'T (DDO)</div>
+                <div class="card-value">29,673</div>
+            </div>
+            
+            <div class="summary-card green">
+                <div class="card-title">DAILY CONSUMPTION RATE (DDN)</div>
+                <div class="card-value">8,690 / 3,000</div>
+            </div>
+            
+            <div class="summary-card green">
+                <div class="card-title">DAILY CONSUMPTION RATE 9(DDO)</div>
+                <div class="card-value">7,850</div>
+            </div>
+            
+            <div class="summary-card blue">
+                <div class="card-title">CEREAL PROC'T FUND</div>
+                <div class="card-value">9,969,378.94</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar-container').classList.toggle('open');
+        }
+
+        // Search functionality
+        document.querySelector('.search-bar input').addEventListener('input', function(e) {
+            console.log('Searching for:', e.target.value);
+            // Add your search logic here
+        });
+
+        // Add animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.summary-card').forEach((card) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease-out';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

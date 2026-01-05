@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - NFA Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: white;
+            display: flex;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #5b8dee;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #8b92b0;
+            font-size: 0.95rem;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card {
+            background: rgb(255, 255, 255);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(91, 141, 238, 0.2);
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(91, 141, 238, 0.3);
+            border-color: rgba(91, 141, 238, 0.5);
+        }
+
+        .report-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(91, 141, 238, 0.2);
+            border-radius: 10px;
+        }
+
+        .report-card h3 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .report-card p {
+            color: #8b92b0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #5b8dee;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4a7bd8;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #b0b7d4;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .filters-section {
+            background: linear-gradient(145deg, #1a1d2e 0%, #2a2d3e 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(91, 141, 238, 0.2);
+        }
+
+        .filters-section h2 {
+            color: #5b8dee;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            color: #b0b7d4;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.65rem;
+            border: 1px solid rgba(91, 141, 238, 0.3);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #5b8dee;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .section-title {
+            color: #5b8dee;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(91, 141, 238, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Reports</h1>
+            <p>Generate and view various inventory reports</p>
+        </div>
+
+        <div class="filters-section">
+            <h2>Report Filters</h2>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Date From</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label>Date To</label>
+                    <input type="date" id="dateTo">
+                </div>
+                <div class="filter-group">
+                    <label>Warehouse</label>
+                    <select id="warehouse">
+                        <option value="">All Warehouses</option>
+                        <option value="wh1">Warehouse 1</option>
+                        <option value="wh2">Warehouse 2</option>
+                        <option value="wh3">Warehouse 3</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+            </div>
+        </div>
+
+        <h2 class="section-title">Inventory Reports</h2>
+        <div class="report-grid">
+            <div class="report-card" onclick="generateReport('inventory-summary')">
+                <div class="report-card-header">
+                    <div class="report-icon">📊</div>
+                    <h3>Inventory Summary</h3>
+                </div>
+                <p>Complete overview of all inventory items, quantities, and locations across warehouses.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('inventory-summary')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('inventory-summary')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('stock-levels')">
+                <div class="report-card-header">
+                    <div class="report-icon">📦</div>
+                    <h3>Stock Levels</h3>
+                </div>
+                <p>Current stock levels by cereal type, variety, and warehouse location.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('stock-levels')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('stock-levels')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('low-stock')">
+                <div class="report-card-header">
+                    <div class="report-icon">⚠️</div>
+                    <h3>Low Stock Alert</h3>
+                </div>
+                <p>Items that are running low and need restocking attention.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('low-stock')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('low-stock')">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Transaction Reports</h2>
+        <div class="report-grid">
+            <div class="report-card" onclick="generateReport('transaction-history')">
+                <div class="report-card-header">
+                    <div class="report-icon">💳</div>
+                    <h3>Transaction History</h3>
+                </div>
+                <p>Detailed log of all incoming and outgoing transactions with timestamps.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('transaction-history')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('transaction-history')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('monthly-movement')">
+                <div class="report-card-header">
+                    <div class="report-icon">📈</div>
+                    <h3>Monthly Movement</h3>
+                </div>
+                <p>Summary of inventory movement patterns over the selected period.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('monthly-movement')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('monthly-movement')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('client-transactions')">
+                <div class="report-card-header">
+                    <div class="report-icon">👥</div>
+                    <h3>Client Transactions</h3>
+                </div>
+                <p>Transaction history grouped by client with total quantities and values.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('client-transactions')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('client-transactions')">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Compliance Reports</h2>
+        <div class="report-grid">
+            <div class="report-card" onclick="generateReport('examination-status')">
+                <div class="report-card-header">
+                    <div class="report-icon">🔍</div>
+                    <h3>Examination Status</h3>
+                </div>
+                <p>Status of all inventory examinations and quality control checks.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('examination-status')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('examination-status')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('accountable-officer')">
+                <div class="report-card-header">
+                    <div class="report-icon">👤</div>
+                    <h3>Accountable Officer</h3>
+                </div>
+                <p>Inventory assignments and responsibilities by accountable officer.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('accountable-officer')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('accountable-officer')">Export</button>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="generateReport('audit-trail')">
+                <div class="report-card-header">
+                    <div class="report-icon">📝</div>
+                    <h3>Audit Trail</h3>
+                </div>
+                <p>Complete audit trail of all system activities and changes.</p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); generateReport('audit-trail')">Generate</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); exportReport('audit-trail')">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set default date range (last 30 days)
+        const today = new Date();
+        const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        document.getElementById('dateTo').valueAsDate = today;
+        document.getElementById('dateFrom').valueAsDate = lastMonth;
+
+        function applyFilters() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const warehouse = document.getElementById('warehouse').value;
+            const status = document.getElementById('status').value;
+
+            console.log('Filters Applied:', { dateFrom, dateTo, warehouse, status });
+            alert('Filters applied successfully!');
+        }
+
+        function resetFilters() {
+            document.getElementById('dateFrom').valueAsDate = lastMonth;
+            document.getElementById('dateTo').valueAsDate = today;
+            document.getElementById('warehouse').value = '';
+            document.getElementById('status').value = '';
+            
+            alert('Filters reset to default values.');
+        }
+
+        function generateReport(reportType) {
+            console.log('Generating report:', reportType);
+            alert(`Generating ${reportType} report...`);
+        }
+
+        function exportReport(reportType) {
+            console.log('Exporting report:', reportType);
+            alert(`Exporting ${reportType} report to PDF/Excel...`);
+        }
+    </script>
+</body>
+</html>
