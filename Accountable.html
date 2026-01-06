@@ -4,398 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Accountable Officer</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            margin-left: 250px;
-        }
-
-        /* Sidebar iframe container */
-        #sidebar-container {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 250px;
-            height: 100vh;
-            z-index: 1000;
-            border: none;
-        }
-
-        #sidebar-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-
-        .main-content {
-            padding: 2rem;
-            max-width: 1600px;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1657ba;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-details {
-            text-align: right;
-        }
-
-        .user-name {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #1a1d2e;
-        }
-
-        .user-role {
-            font-size: 0.8rem;
-            color: #8b92b0;
-            text-transform: uppercase;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #5b8dee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .controls-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            max-width: 400px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.75rem 1.25rem;
-            border: 1px solid #e0e4e9;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .search-box input:focus {
-            border-color: #5b8dee;
-        }
-
-        .add-btn {
-            background: #1657ba;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.3s;
-        }
-
-        .add-btn:hover {
-            background: #0d4494;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #1657ba;
-            color: white;
-        }
-
-        th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #f0f2f5;
-            transition: background 0.2s;
-        }
-
-        tbody tr:hover {
-            background: #f8f9fb;
-        }
-
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        td {
-            padding: 1rem;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        td:first-child {
-            color: #1657ba;
-            font-weight: 600;
-        }
-
-        .actions-btn {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            transition: color 0.3s;
-        }
-
-        .actions-btn:hover {
-            color: #1657ba;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e8eaed;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1a1d2e;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #666;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .close-btn:hover {
-            background: #f0f2f5;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #1a1d2e;
-            font-size: 0.95rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #1657ba;
-        }
-
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid #e8eaed;
-            display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .btn-cancel {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid #ddd;
-            background: white;
-            color: #333;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 120px;
-        }
-
-        .btn-cancel:hover {
-            background: #f0f2f5;
-        }
-
-        .btn-submit {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            background: #1657ba;
-            color: white;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 120px;
-        }
-
-        .btn-submit:hover {
-            background: #0d4494;
-        }
-
-        @media (max-width: 1024px) {
-            body {
-                margin-left: 0;
-            }
-
-            #sidebar-container {
-                transform: translateX(-250px);
-                transition: transform 0.3s ease;
-            }
-
-            #sidebar-container.open {
-                transform: translateX(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .controls-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                max-width: 100%;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 1000px;
-            }
-
-            .modal-content {
-                width: 95%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/accountable.css" />
 </head>
 <body>
     <!-- Load Sidebar from separate file -->
@@ -403,8 +12,7 @@
         <iframe id="sidebar-frame" src="sidebar.html"></iframe>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+   <div class="main-content">
         <!-- Page Header -->
         <div class="page-header">
             <h1 class="page-title">Accountable Officer</h1>
@@ -422,14 +30,14 @@
             <div class="search-box">
                 <input type="text" placeholder="Search inventory..." id="searchInput">
             </div>
-            <button class="add-btn" onclick="addOfficer()">
+            <button class="add-btn" id="openModal">
                 + Add Accountable Officer
             </button>
         </div>
 
         <!-- Table -->
         <div class="table-container">
-            <table>
+            <table class="inventory-table">
                 <thead>
                     <tr>
                         <th>OFFICER ID</th>
@@ -442,84 +50,27 @@
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
+                <tbody>
                     <tr>
-                        <td>12345678</td>
-                        <td>Magsalay</td>
-                        <td>Melvin</td>
-                        <td>L.</td>
-                        <td>GID1</td>
-                        <td>123123</td>
-                        <td>2025-12-01 to 2025-12-31</td>
-                        <td><button class="actions-btn">⋮</button></td>
-                    </tr>
-                    <tr>
-                        <td>12344</td>
-                        <td>sa</td>
-                        <td>sa</td>
-                        <td>s</td>
-                        <td>GID1</td>
-                        <td>321312</td>
-                        <td>2025-12-17 to 2025-12-31</td>
-                        <td><button class="actions-btn">⋮</button></td>
-                    </tr>
-                    <tr>
-                        <td>1090</td>
-                        <td>NFa</td>
-                        <td>Nfa</td>
-                        <td>NFA</td>
-                        <td>GID1</td>
-                        <td>Magdum</td>
-                        <td>2025-12-01 to 2025-12-15</td>
-                        <td><button class="actions-btn">⋮</button></td>
-                    </tr>
-                    <tr>
-                        <td>0987654321</td>
-                        <td>Panes</td>
-                        <td>Daryl</td>
-                        <td>L.</td>
-                        <td>321321</td>
-                        <td>GID2</td>
-                        <td>2025-12-25 to 2025-12-31</td>
-                        <td><button class="actions-btn">⋮</button></td>
-                    </tr>
-                    <tr>
-                        <td>111</td>
-                        <td>magdum</td>
-                        <td>nfa</td>
-                        <td>m</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td><button class="actions-btn">⋮</button></td>
-                    </tr>
-                    <tr>
-                        <td>1001</td>
-                        <td>sullan</td>
-                        <td>uj</td>
-                        <td>mancera</td>
-                        <td>waq1</td>
-                        <td>1was</td>
-                        <td>2025-12-19 to 2026-01-10</td>
-                        <td><button class="actions-btn">⋮</button></td>
+                        <td colspan="8" class="loading">Loading data...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal for Add/Edit Officer -->
-    <div id="officerModal" class="modal">
+    <!-- Modal 1: Add Accountable Officer -->
+    <div id="accountableModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Data Entry of Accountable Officer</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <h2 class="modal-title">Add Accountable Officer</h2>
+                <button class="close-btn" id="closeAccountable">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="officerForm">
+                <form id="accountableForm">
                     <div class="form-group">
-                        <label for="employeeNumber">Employee Number</label>
-                        <input type="text" id="employeeNumber" name="employeeNumber" required>
+                        <label for="officerId">Officer ID</label>
+                        <input type="text" id="officerId" name="officerId" required>
                     </div>
                     <div class="form-group">
                         <label for="firstName">First Name</label>
@@ -533,21 +84,424 @@
                         <label for="middleName">Middle Name</label>
                         <input type="text" id="middleName" name="middleName">
                     </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn-submit">Add Officer</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-submit" onclick="submitOfficer()">Add Officer</button>
             </div>
         </div>
     </div>
 
-    
+    <!-- Modal 2: Add/Edit Masterfile -->
+    <div id="masterfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add/Edit Masterfile</h2>
+                <button class="close-btn" id="closeMasterfile">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="masterfileForm">
+                    <div class="form-group">
+                        <label for="officerMaster">Officer ID</label>
+                        <input type="text" id="officerMaster" name="officerMaster" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="officerName">Officer Name</label>
+                        <input type="text" id="officerName" name="officerName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="warehouse">Warehouse Code</label>
+                        <input type="text" id="warehouse" name="warehouse" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="warehouse_name">Warehouse Name</label>
+                        <input type="text" id="warehouse_name" name="warehouse_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fromDate">From Date</label>
+                        <input type="date" id="fromDate" name="fromDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="toDate">To Date</label>
+                        <input type="date" id="toDate" name="toDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="statusExam">Status</label>
+                        <select id="statusExam" name="statusExam" required>
+                            <option value="">Select Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Note</label>
+                        <textarea id="note" name="note" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Masterfile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Test connection
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // Store current officer ID for masterfile editing
+        let currentOfficerDocId = null;
+
+        // Helper function to close all dropdowns
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
+        }
+
+        // Initialize modal functionality
+        function initializeModals() {
+            // ----- ACCOUNTABLE OFFICER MODAL -----
+            const accountableModal = document.getElementById("accountableModal");
+            const openAccountableBtn = document.getElementById("openModal");
+            const closeAccountableBtn = document.getElementById("closeAccountable");
+
+            if (openAccountableBtn) {
+                openAccountableBtn.addEventListener("click", () => {
+                    closeAllDropdowns();
+                    accountableModal.style.display = "flex";
+                });
+            }
+
+            if (closeAccountableBtn) {
+                closeAccountableBtn.addEventListener("click", () => {
+                    accountableModal.style.display = "none";
+                });
+            }
+
+            // ----- MASTERFILE MODAL -----
+            document.getElementById('closeMasterfile')?.addEventListener('click', () => {
+                document.getElementById('masterfileModal').style.display = 'none';
+                currentOfficerDocId = null;
+            });
+
+            document.getElementById('cancelBtn')?.addEventListener('click', () => {
+                document.getElementById('masterfileModal').style.display = 'none';
+                currentOfficerDocId = null;
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener("click", (e) => {
+                if (e.target === accountableModal) {
+                    accountableModal.style.display = "none";
+                }
+                const masterfileModal = document.getElementById('masterfileModal');
+                if (e.target === masterfileModal) {
+                    masterfileModal.style.display = "none";
+                    currentOfficerDocId = null;
+                }
+            });
+        }
+
+        // ----- REALTIME DATABASE: Load Officers -----
+        function loadOfficersFromFirebase() {
+            console.log("Loading officers from Firebase...");
+            const officersRef = database.ref('accountableOfficers');
+            
+            officersRef.once('value')
+                .then((snapshot) => {
+                    console.log("Data received:", snapshot.exists());
+                    const tbody = document.querySelector(".inventory-table tbody");
+                    tbody.innerHTML = "";
+
+                    if (!snapshot.exists()) {
+                        console.log("No data in database");
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = '<td colspan="8" style="text-align: center;">No officers added yet</td>';
+                        tbody.appendChild(tr);
+                        return;
+                    }
+
+                    snapshot.forEach((childSnapshot) => {
+                        const docId = childSnapshot.key;
+                        const data = childSnapshot.val();
+                        console.log("Officer:", docId, data);
+                        addRowToTable(docId, data);
+                    });
+
+                    // Reattach dropdown listeners after loading
+                    attachDropdownListeners();
+                })
+                .catch((error) => {
+                    console.error("Error loading officers:", error);
+                    alert("Error loading data: " + error.message);
+                });
+        }
+
+        // ----- Add row to table -----
+        function addRowToTable(docId, data) {
+            const tbody = document.querySelector(".inventory-table tbody");
+            const tr = document.createElement("tr");
+            tr.dataset.docId = docId;
+
+            // Format period display
+            let periodDisplay = "-";
+            if (data.fromDate && data.toDate) {
+                periodDisplay = `${data.fromDate} to ${data.toDate}`;
+            }
+
+            tr.innerHTML = `
+                <td>${data.officerId || "-"}</td>
+                <td>${data.lastName || "-"}</td>
+                <td>${data.firstName || "-"}</td>
+                <td>${data.middleName || "-"}</td>
+                <td>${data.warehouse || "-"}</td>
+                <td>${data.warehouseName || "-"}</td>
+                <td>${periodDisplay}</td>
+                <td class="action-cell">
+                    <div class="dropdown">
+                        <span class="dot-menu">&#8942;</span>
+                        <div class="dropdown-content">
+                            <button class="masterfile-btn" data-doc-id="${docId}">
+                                <span style="color: #2196F3;">📝</span> Add/Edit Masterfile
+                            </button>
+                            <button class="delete-btn" data-doc-id="${docId}">
+                                <span style="color: #f44336;">🗑️</span> Delete
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        }
+
+        // ----- Handle Accountable Officer form submission -----
+        document.getElementById("accountableForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            console.log("Form submitted");
+
+            const formData = {
+                officerId: document.getElementById("officerId").value,
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                middleName: document.getElementById("middleName").value,
+                warehouse: "",
+                warehouseName: "",
+                fromDate: "",
+                toDate: "",
+                statusExam: "",
+                note: "",
+                createdAt: new Date().toISOString()
+            };
+
+            console.log("Saving accountable officer data:", formData);
+
+            // Save to Realtime Database
+            const newOfficerRef = database.ref('accountableOfficers').push();
+            
+            newOfficerRef.set(formData)
+                .then(() => {
+                    console.log("Officer added successfully to Firebase!");
+                    alert("Officer added successfully! Now add their warehouse details in the Masterfile.");
+                    const accountableModal = document.getElementById("accountableModal");
+                    accountableModal.style.display = "none";
+                    e.target.reset();
+                    loadOfficersFromFirebase();
+                })
+                .catch((error) => {
+                    console.error("Error adding officer:", error);
+                    alert("Failed to add officer: " + error.message);
+                });
+        });
+
+        // ----- Handle Masterfile form submission -----
+        document.getElementById("masterfileForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            console.log("Masterfile form submitted");
+
+            if (!currentOfficerDocId) {
+                alert("No officer selected. Please try again.");
+                return;
+            }
+
+            const warehouseCode = document.getElementById("warehouse").value;
+            const warehouseName = document.getElementById("warehouse_name").value;
+            const fromDate = document.getElementById("fromDate").value;
+            const toDate = document.getElementById("toDate").value;
+            const statusExam = document.getElementById("statusExam").value;
+            const note = document.getElementById("note").value;
+
+            const masterfileData = {
+                warehouse: warehouseCode,
+                warehouseName: warehouseName,
+                fromDate: fromDate,
+                toDate: toDate,
+                statusExam: statusExam,
+                note: note,
+                updatedAt: new Date().toISOString()
+            };
+
+            console.log("Saving masterfile data:", masterfileData);
+
+            // Update the officer record with masterfile data
+            database.ref('accountableOfficers/' + currentOfficerDocId).update(masterfileData)
+                .then(() => {
+                    console.log("Masterfile data saved successfully!");
+                    alert("Masterfile data saved successfully!");
+                    const masterfileModal = document.getElementById('masterfileModal');
+                    masterfileModal.style.display = "none";
+                    e.target.reset();
+                    currentOfficerDocId = null;
+                    loadOfficersFromFirebase();
+                })
+                .catch((error) => {
+                    console.error("Error saving masterfile:", error);
+                    alert("Failed to save masterfile: " + error.message);
+                });
+        });
+
+        // ----- Handle dot-menu dropdowns -----
+        function attachDropdownListeners() {
+            document.querySelectorAll('.dot-menu').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-content').forEach(d => {
+                        if (d !== dot.nextElementSibling) d.style.display = 'none';
+                    });
+                    
+                    const dropdown = dot.nextElementSibling;
+                    
+                    // Toggle dropdown
+                    if (dropdown.style.display === 'block') {
+                        dropdown.style.display = 'none';
+                    } else {
+                        dropdown.style.display = 'block';
+                    }
+                });
+            });
+
+            // Masterfile button handler
+            document.querySelectorAll('.masterfile-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = btn.dataset.docId;
+                    currentOfficerDocId = docId;
+                    
+                    console.log("Opening masterfile for officer:", docId);
+                    
+                    // Close all dropdowns before opening modal
+                    closeAllDropdowns();
+                    
+                    // Load existing data if available
+                    database.ref('accountableOfficers/' + docId).once('value')
+                        .then((snapshot) => {
+                            const data = snapshot.val();
+                            console.log("Officer data loaded:", data);
+                            
+                            if (data) {
+                                // Pre-fill the Officer ID
+                                const officerMasterField = document.getElementById("officerMaster");
+                                if (officerMasterField) {
+                                    officerMasterField.value = data.officerId || "";
+                                }
+                                
+                                // Pre-fill the Officer Name
+                                const officerNameField = document.getElementById("officerName");
+                                if (officerNameField) {
+                                    const lastName = data.lastName || "";
+                                    const firstName = data.firstName || "";
+                                    const middleName = data.middleName || "";
+                                    const fullName = `${lastName}, ${firstName} ${middleName}`.trim();
+                                    officerNameField.value = fullName;
+                                }
+                                
+                                // Pre-fill warehouse code
+                                document.getElementById("warehouse").value = data.warehouse || "";
+                                
+                                // Pre-fill warehouse name
+                                const warehouseNameField = document.getElementById("warehouse_name");
+                                if (warehouseNameField) {
+                                    warehouseNameField.value = data.warehouseName || "";
+                                }
+                                
+                                // Pre-fill dates
+                                document.getElementById("fromDate").value = data.fromDate || "";
+                                document.getElementById("toDate").value = data.toDate || "";
+                                
+                                // Pre-fill status
+                                document.getElementById("statusExam").value = data.statusExam || "";
+                                
+                                // Pre-fill note
+                                const noteInput = document.getElementById("note");
+                                if (noteInput) {
+                                    noteInput.value = data.note || "";
+                                }
+                            }
+                            
+                            const masterfileModal = document.getElementById('masterfileModal');
+                            masterfileModal.style.display = "flex";
+                        })
+                        .catch((error) => {
+                            console.error("Error loading officer data:", error);
+                            const masterfileModal = document.getElementById('masterfileModal');
+                            masterfileModal.style.display = "flex";
+                        });
+                });
+            });
+
+            // Delete button handler
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = btn.dataset.docId;
+                    
+                    // Close dropdown before showing confirm dialog
+                    closeAllDropdowns();
+                    
+                    if (confirm("Are you sure you want to delete this officer?")) {
+                        database.ref('accountableOfficers/' + docId).remove()
+                            .then(() => {
+                                console.log("Officer deleted");
+                                alert("Officer deleted successfully!");
+                                loadOfficersFromFirebase();
+                            })
+                            .catch((error) => {
+                                console.error("Error deleting officer:", error);
+                                alert("Failed to delete: " + error.message);
+                            });
+                    }
+                });
+            });
+        }
+
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#tableBody tr');
+            const rows = document.querySelectorAll('.inventory-table tbody tr');
             
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
@@ -555,48 +509,23 @@
             });
         });
 
-        // Add officer function
-        function addOfficer() {
-            document.getElementById('officerModal').classList.add('show');
-        }
-
-        // Close modal
-        function closeModal() {
-            document.getElementById('officerModal').classList.remove('show');
-        }
-
-        // Submit officer
-        function submitOfficer() {
-            const form = document.getElementById('officerForm');
-            if (form.checkValidity()) {
-                const formData = {
-                    employeeNumber: document.getElementById('employeeNumber').value,
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    middleName: document.getElementById('middleName').value
-                };
-                console.log('Officer data:', formData);
-                alert('Officer added successfully!');
-                closeModal();
-                form.reset();
-            } else {
-                form.reportValidity();
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                closeAllDropdowns();
             }
-        }
+        });
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('officerModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
+        // Close dropdowns when scrolling
+        window.addEventListener('scroll', () => {
+            closeAllDropdowns();
+        }, true);
 
-        // Actions button click
-        document.querySelectorAll('.actions-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                alert('Actions menu - Edit/Delete/View options');
-            });
+        // Load officers when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("Page loaded, initializing...");
+            initializeModals();
+            loadOfficersFromFirebase();
         });
     </script>
 </body>

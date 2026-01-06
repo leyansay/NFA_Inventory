@@ -4,383 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Warehouse Library - NFA Inventory</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            color: #333;
-            display: flex;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: calc(100% - 250px);
-            min-height: 100vh;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header-left h1 {
-            font-size: 2rem;
-            color: #1e5dbf;
-            margin-bottom: 0.5rem;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .sort-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .sort-section label {
-            font-weight: 500;
-            color: #333;
-        }
-
-        .sort-select {
-            padding: 0.65rem 2.5rem 0.65rem 1rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            background: white;
-            color: #333;
-            font-size: 0.95rem;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-        }
-
-        .sort-select:focus {
-            outline: none;
-            border-color: #5b8dee;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .btn {
-            padding: 0.65rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-preview {
-            background: white;
-            color: #1e5dbf;
-            border: 2px solid #1e5dbf;
-        }
-
-        .btn-preview:hover {
-            background: #f0f5ff;
-        }
-
-        .btn-add {
-            background: #1e5dbf;
-            color: white;
-        }
-
-        .btn-add:hover {
-            background: #164a99;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #1e5dbf;
-            color: white;
-        }
-
-        thead th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #e8eaed;
-            transition: background-color 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        tbody td {
-            padding: 1rem;
-            color: #333;
-            font-size: 0.95rem;
-        }
-
-        tbody td:first-child {
-            color: #1e5dbf;
-            font-weight: 500;
-        }
-
-        .actions-cell {
-            text-align: right;
-            position: relative;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            color: #666;
-            font-size: 1.2rem;
-            transition: color 0.3s ease;
-        }
-
-        .action-btn:hover {
-            color: #1e5dbf;
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            right: 0;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: none;
-            min-width: 150px;
-            z-index: 1000;
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f0f5ff;
-            color: #1e5dbf;
-        }
-
-        .dropdown-item:first-child {
-            border-radius: 6px 6px 0 0;
-        }
-
-        .dropdown-item:last-child {
-            border-radius: 0 0 6px 6px;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            padding: 2rem 2rem 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e8eaed;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: #999;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.3s ease;
-        }
-
-        .close-btn:hover {
-            color: #333;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            transition: border-color 0.3s ease;
-            color: #333;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #1e5dbf;
-        }
-
-        .form-input::placeholder {
-            color: #999;
-        }
-
-        .btn-save {
-            width: 100%;
-            padding: 0.875rem;
-            background: #1e5dbf;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .btn-save:hover {
-            background: #164a99;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .button-group {
-                width: 100%;
-            }
-
-            .btn {
-                flex: 1;
-                justify-content: center;
-            }
-
-            table {
-                font-size: 0.85rem;
-            }
-
-            thead th,
-            tbody td {
-                padding: 0.75rem 0.5rem;
-            }
-
-            .modal {
-                width: 95%;
-            }
-
-            .modal-header,
-            .modal-body {
-                padding: 1.5rem;
-            }
-
-            .modal-title {
-                font-size: 1.25rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/warehouse.css" />
 </head>
 <body>
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
 
+   
     <div class="main-content">
         <div class="header">
             <div class="header-left">
                 <h1>Warehouse Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
             </div>
         </div>
 
@@ -395,10 +35,11 @@
                 </select>
             </div>
             <div class="button-group">
-                <button class="btn btn-preview" onclick="previewWarehouses()">
+                <button class="btn btn-preview" id="previewBtn">
+                    <span>👁</span>
                     <span>Preview</span>
                 </button>
-                <button class="btn btn-add" onclick="addWarehouse()">
+                <button class="btn btn-add" id="addWarehouseBtn">
                     <span>+</span>
                     <span>Add Warehouse</span>
                 </button>
@@ -417,28 +58,7 @@
                 </thead>
                 <tbody id="warehouseTableBody">
                     <tr>
-                        <td>33211</td>
-                        <td>sasda</td>
-                        <td>sdaweeqs123sdad12esad</td>
-                        <td class="actions-cell">
-                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" onclick="editWarehouse('33211')">Edit</div>
-                                <div class="dropdown-item" onclick="deleteWarehouse('33211')">Delete</div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>131</td>
-                        <td>312231</td>
-                        <td>321312312</td>
-                        <td class="actions-cell">
-                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" onclick="editWarehouse('131')">Edit</div>
-                                <div class="dropdown-item" onclick="deleteWarehouse('131')">Delete</div>
-                            </div>
-                        </td>
+                        <td colspan="4" style="text-align:center;">Loading warehouses...</td>
                     </tr>
                 </tbody>
             </table>
@@ -450,10 +70,10 @@
         <div class="modal">
             <div class="modal-header">
                 <h2 class="modal-title">DATA ENTRY OF WAREHOUSE</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="warehouseForm" onsubmit="saveWarehouse(event)">
+                <form id="warehouseForm">
                     <div class="form-group">
                         <label class="form-label">Warehouse Code:</label>
                         <input type="text" class="form-input" id="warehouseCode" placeholder="Enter Warehouse Code" required>
@@ -475,90 +95,327 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <script>
-        function addWarehouse() {
-            document.getElementById('modalOverlay').classList.add('show');
-            document.getElementById('warehouseForm').reset();
-        }
+        // ===================== FIREBASE CONFIG =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63"
+        };
 
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('show');
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        function saveWarehouse(event) {
-            event.preventDefault();
-            
-            const warehouseCode = document.getElementById('warehouseCode').value;
-            const warehouseName = document.getElementById('warehouseName').value;
-            const location = document.getElementById('location').value;
+        console.log("Firebase initialized:", firebase.apps.length > 0);
 
-            // Here you would typically save to a database
-            // For now, we'll just add it to the table
-            const tbody = document.getElementById('warehouseTableBody');
-            const newRow = tbody.insertRow(0); // Insert at the top
+        // ===================== GLOBAL VARIABLES =====================
+        let allWarehouses = [];
+        let currentSortOrder = 'newest';
 
-            newRow.innerHTML = `
-                <td>${warehouseCode}</td>
-                <td>${warehouseName}</td>
-                <td>${location}</td>
-                <td class="actions-cell">
-                    <button class="action-btn" onclick="toggleActions(this)">⋮</button>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-item" onclick="editWarehouse('${warehouseCode}')">Edit</div>
-                        <div class="dropdown-item" onclick="deleteWarehouse('${warehouseCode}')">Delete</div>
-                    </div>
-                </td>
-            `;
+        // ===================== MODAL CONTROLS =====================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const addWarehouseBtn = document.getElementById('addWarehouseBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const warehouseForm = document.getElementById('warehouseForm');
 
-            closeModal();
-            alert('Warehouse added successfully!');
-        }
+        // Open modal
+        addWarehouseBtn.addEventListener('click', () => {
+            warehouseForm.reset();
+            warehouseForm.removeAttribute('data-edit-id');
+            modalOverlay.classList.add('show');
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+        });
 
         // Close modal when clicking outside
-        document.getElementById('modalOverlay').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeModal();
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
             }
         });
 
-        function previewWarehouses() {
-            alert('Opening Preview mode...');
-        }
-
-        function editWarehouse(code) {
-            alert(`Editing warehouse: ${code}`);
-            closeAllDropdowns();
-        }
-
-        function deleteWarehouse(code) {
-            if (confirm(`Are you sure you want to delete warehouse: ${code}?`)) {
-                alert(`Warehouse ${code} deleted`);
-                closeAllDropdowns();
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modalOverlay.classList.remove('show');
             }
+        });
+
+        // ===================== SAVE WAREHOUSE =====================
+        warehouseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+
+            const warehouseCode = document.getElementById('warehouseCode').value.trim();
+            const warehouseName = document.getElementById('warehouseName').value.trim();
+            const location = document.getElementById('location').value.trim();
+
+            // Clear previous errors
+            document.querySelectorAll('input').forEach(field => {
+                field.style.border = '';
+            });
+            document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
+
+            // Validate required fields
+            let hasEmptyFields = false;
+            const requiredFields = [
+                { id: 'warehouseCode', label: 'Warehouse Code' },
+                { id: 'warehouseName', label: 'Warehouse Name' },
+                { id: 'location', label: 'Location' }
+            ];
+
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    element.style.border = '2px solid #ff6b6b';
+                    hasEmptyFields = true;
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'field-error-message';
+                    errorMsg.textContent = 'This field is required';
+                    element.parentElement.appendChild(errorMsg);
+                }
+            });
+
+            if (hasEmptyFields) {
+                const firstEmptyField = document.querySelector('[style*="border: 2px solid"]');
+                if (firstEmptyField) {
+                    firstEmptyField.focus();
+                }
+                return;
+            }
+
+            const warehouseData = { 
+                warehouseCode, 
+                warehouseName, 
+                location, 
+                timestamp: Date.now() 
+            };
+
+            if (editId) {
+                // Update existing warehouse
+                warehouseData.updatedAt = new Date().toISOString();
+                database.ref('warehouses/' + editId).update(warehouseData)
+                    .then(() => {
+                        alert('Warehouse updated successfully!');
+                        form.reset();
+                        form.removeAttribute('data-edit-id');
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error updating warehouse:', error);
+                        alert('Error updating warehouse: ' + error.message);
+                    });
+            } else {
+                // Create new warehouse
+                warehouseData.createdAt = new Date().toISOString();
+                database.ref('warehouses').push(warehouseData)
+                    .then(() => {
+                        alert('Warehouse added successfully!');
+                        form.reset();
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error adding warehouse:', error);
+                        alert('Error adding warehouse: ' + error.message);
+                    });
+            }
+        });
+
+        // ===================== LOAD WAREHOUSES FROM FIREBASE =====================
+        function loadWarehouses() {
+            const tbody = document.getElementById('warehouseTableBody');
+            const warehousesRef = database.ref('warehouses');
+
+            warehousesRef.on('value', (snapshot) => {
+                allWarehouses = [];
+
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center;">No warehouses found</td>
+                        </tr>`;
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const docId = childSnapshot.key;
+                    
+                    allWarehouses.push({
+                        id: docId,
+                        data: data
+                    });
+                });
+                
+                sortWarehouses(currentSortOrder);
+            }, (error) => {
+                console.error('Error loading warehouses:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; color: red;">Error loading warehouses: ${error.message}</td>
+                    </tr>`;
+            });
         }
 
-        function toggleActions(button) {
-            closeAllDropdowns();
-            const dropdown = button.nextElementSibling;
-            dropdown.classList.toggle('show');
+        // ===================== SORT WAREHOUSES =====================
+        function sortWarehouses(order) {
+            currentSortOrder = order;
+            
+            allWarehouses.sort((a, b) => {
+                if (order === 'newest' || order === 'oldest') {
+                    const dateA = a.data.timestamp || 0;
+                    const dateB = b.data.timestamp || 0;
+                    return order === 'newest' ? dateB - dateA : dateA - dateB;
+                } else if (order === 'code-asc' || order === 'code-desc') {
+                    const codeA = (a.data.warehouseCode || '').toLowerCase();
+                    const codeB = (b.data.warehouseCode || '').toLowerCase();
+                    return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
+                }
+            });
+            
+            renderWarehouses();
         }
 
+        // ===================== RENDER WAREHOUSES =====================
+        function renderWarehouses() {
+            const tbody = document.getElementById('warehouseTableBody');
+            tbody.innerHTML = '';
+
+            if (allWarehouses.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center;">No warehouses found</td>
+                    </tr>`;
+                return;
+            }
+
+            allWarehouses.forEach(item => {
+                const d = item.data;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.warehouseCode || '-'}</td>
+                    <td>${d.warehouseName || '-'}</td>
+                    <td>${d.location || '-'}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn" data-id="${item.id}">⋮</button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-action="edit" data-id="${item.id}">Edit</button>
+                            <button class="dropdown-item" data-action="delete" data-id="${item.id}">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            attachDropdownListeners();
+        }
+
+        // ===================== DROPDOWN HANDLERS =====================
         function closeAllDropdowns() {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
                 menu.classList.remove('show');
             });
         }
 
+        function attachDropdownListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    const dropdown = btn.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = item.dataset.id;
+                    const action = item.dataset.action;
+                    
+                    closeAllDropdowns();
+                    
+                    if (action === 'edit') {
+                        editWarehouse(id);
+                    } else if (action === 'delete') {
+                        if (confirm('Are you sure you want to delete this warehouse?')) {
+                            deleteWarehouse(id);
+                        }
+                    }
+                });
+            });
+        }
+
         // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('.action-btn')) {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
                 closeAllDropdowns();
             }
         });
 
-        // Sort functionality
-        document.getElementById('sortSelect').addEventListener('change', function() {
-            alert('Sorting by: ' + this.options[this.selectedIndex].text);
+        // ===================== EDIT WAREHOUSE =====================
+        function editWarehouse(id) {
+            database.ref('warehouses/' + id).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert('Warehouse not found!');
+                        return;
+                    }
+                    
+                    const data = snapshot.val();
+                    
+                    document.getElementById('warehouseCode').value = data.warehouseCode || '';
+                    document.getElementById('warehouseName').value = data.warehouseName || '';
+                    document.getElementById('location').value = data.location || '';
+                    
+                    warehouseForm.setAttribute('data-edit-id', id);
+                    modalOverlay.classList.add('show');
+                })
+                .catch((error) => {
+                    console.error('Error loading warehouse:', error);
+                    alert('Error loading warehouse: ' + error.message);
+                });
+        }
+
+        // ===================== DELETE WAREHOUSE =====================
+        function deleteWarehouse(id) {
+            database.ref('warehouses/' + id).remove()
+                .then(() => {
+                    alert('Warehouse deleted successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error deleting warehouse:', error);
+                    alert('Error deleting warehouse: ' + error.message);
+                });
+        }
+
+        // ===================== SORT SELECT HANDLER =====================
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortWarehouses(e.target.value);
+        });
+
+        // ===================== PREVIEW BUTTON =====================
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            alert('Opening Preview mode...');
+        });
+
+        // ===================== INIT =====================
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Warehouse Library page loaded');
+            loadWarehouses();
         });
     </script>
 </body>
