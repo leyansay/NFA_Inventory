@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sack Library - NFA Inventory</title>
+    <link rel="stylesheet" href="css/sack.css" />
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Sack Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" id="previewBtn">
+                    <span>👁</span>
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" id="addSackBtn">
+                    <span>+</span>
+                    <span>Add Sack</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SACK CODE</th>
+                        <th>BRAND NEW</th>
+                        <th>SECOND HAND</th>
+                        <th>MENDABLE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="sackTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align:center;">Loading sacks...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF SACK LIBRARY</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="sackForm">
+                    <div class="form-group">
+                        <label class="form-label">Sack Code:</label>
+                        <input type="text" class="form-input" id="sackCode" placeholder="Enter Sack Code" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="section-label">Sack Weight:</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Brand New:</label>
+                        <input type="number" step="0.001" class="form-input" id="brandNew" placeholder="Enter Weight" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Second Hand:</label>
+                        <input type="number" step="0.001" class="form-input" id="secondHand" placeholder="Enter Weight" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mendable:</label>
+                        <input type="number" step="0.001" class="form-input" id="mendable" placeholder="Enter Weight" required>
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Sack</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // ===================== FIREBASE CONFIGURATION =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // ===================== GLOBAL VARIABLES =====================
+        let allSacks = [];
+        let currentSortOrder = 'newest';
+
+        // ===================== MODAL CONTROLS =====================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const addSackBtn = document.getElementById('addSackBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const sackForm = document.getElementById('sackForm');
+
+        // Open modal
+        addSackBtn.addEventListener('click', () => {
+            sackForm.reset();
+            sackForm.removeAttribute('data-edit-id');
+            modalOverlay.classList.add('show');
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+        });
+
+        // Close modal when clicking outside
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // ===================== SAVE SACK =====================
+        sackForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+
+            const brandNew = parseFloat(document.getElementById('brandNew').value) || 0;
+            const secondHand = parseFloat(document.getElementById('secondHand').value) || 0;
+            const mendable = parseFloat(document.getElementById('mendable').value) || 0;
+            const sackCode = document.getElementById('sackCode').value.trim();
+
+            // Clear previous errors
+            document.querySelectorAll('input').forEach(field => {
+                field.style.border = '';
+            });
+            document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
+
+            // Validate required fields
+            let hasEmptyFields = false;
+
+            if (!sackCode) {
+                const element = document.getElementById('sackCode');
+                element.style.border = '2px solid #ff6b6b';
+                hasEmptyFields = true;
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'field-error-message';
+                errorMsg.textContent = 'This field is required';
+                element.parentElement.appendChild(errorMsg);
+            }
+
+            if (hasEmptyFields) {
+                document.getElementById('sackCode').focus();
+                return;
+            }
+
+            const sackData = { 
+                sackCode, 
+                brandNew, 
+                secondHand, 
+                mendable, 
+                timestamp: Date.now() 
+            };
+
+            if (editId) {
+                // Update existing sack
+                sackData.updatedAt = new Date().toISOString();
+                database.ref('sacks/' + editId).update(sackData)
+                    .then(() => {
+                        alert('Sack updated successfully!');
+                        form.reset();
+                        form.removeAttribute('data-edit-id');
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error updating sack:', error);
+                        alert('Error updating sack: ' + error.message);
+                    });
+            } else {
+                // Create new sack
+                sackData.createdAt = new Date().toISOString();
+                database.ref('sacks').push(sackData)
+                    .then(() => {
+                        alert('Sack added successfully!');
+                        form.reset();
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error adding sack:', error);
+                        alert('Error adding sack: ' + error.message);
+                    });
+            }
+        });
+
+        // ===================== LOAD SACKS FROM FIREBASE =====================
+        function loadSacks() {
+            const tbody = document.getElementById('sackTableBody');
+            const sacksRef = database.ref('sacks');
+
+            sacksRef.on('value', (snapshot) => {
+                allSacks = [];
+
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align:center;">No sacks found</td>
+                        </tr>`;
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const docId = childSnapshot.key;
+                    
+                    allSacks.push({
+                        id: docId,
+                        data: data
+                    });
+                });
+                
+                sortSacks(currentSortOrder);
+            }, (error) => {
+                console.error('Error loading sacks:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: red;">Error loading sacks: ${error.message}</td>
+                    </tr>`;
+            });
+        }
+
+        // ===================== SORT SACKS =====================
+        function sortSacks(order) {
+            currentSortOrder = order;
+            
+            allSacks.sort((a, b) => {
+                if (order === 'newest' || order === 'oldest') {
+                    const dateA = a.data.timestamp || 0;
+                    const dateB = b.data.timestamp || 0;
+                    return order === 'newest' ? dateB - dateA : dateA - dateB;
+                } else if (order === 'code-asc' || order === 'code-desc') {
+                    const codeA = (a.data.sackCode || '').toLowerCase();
+                    const codeB = (b.data.sackCode || '').toLowerCase();
+                    return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
+                }
+            });
+            
+            renderSacks();
+        }
+
+        // ===================== RENDER SACKS =====================
+function renderSacks() {
+    const tbody = document.getElementById('sackTableBody');
+    tbody.innerHTML = '';
+
+    if (allSacks.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align:center;">No sacks found</td>
+            </tr>`;
+        return;
+    }
+
+    allSacks.forEach(item => {
+        const d = item.data;
+        const docId = item.id; // ✓ Define docId here
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${d.sackCode || '-'}</td>
+            <td>${d.brandNew !== undefined ? d.brandNew : '-'}</td>
+            <td>${d.secondHand !== undefined ? d.secondHand : '-'}</td>
+            <td>${d.mendable !== undefined ? d.mendable : '-'}</td>
+            <td class="actions-cell">
+                <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
+                        <span>✏️</span> Edit
+                    </button>
+                    <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
+                        <span>🗑️</span> Delete
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    attachDropdownListeners();
+}
+
+        // ===================== DROPDOWN HANDLERS =====================
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        function attachDropdownListeners() {
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllDropdowns();
+            const dropdown = btn.nextElementSibling;
+            dropdown.classList.toggle('show');
+        });
+    });
+
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = item.dataset.docId; // ✓ Changed from dataset.id
+            const action = item.dataset.action;
+            
+            closeAllDropdowns();
+            
+            if (action === 'edit') {
+                editSack(id);
+            } else if (action === 'delete') {
+                if (confirm('Are you sure you want to delete this sack?')) {
+                    deleteSack(id);
+                }
+            }
+        });
+    });
+}
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ===================== EDIT SACK =====================
+        function editSack(id) {
+            database.ref('sacks/' + id).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert('Sack not found!');
+                        return;
+                    }
+                    
+                    const data = snapshot.val();
+                    
+                    document.getElementById('sackCode').value = data.sackCode || '';
+                    document.getElementById('brandNew').value = data.brandNew !== undefined ? data.brandNew : '';
+                    document.getElementById('secondHand').value = data.secondHand !== undefined ? data.secondHand : '';
+                    document.getElementById('mendable').value = data.mendable !== undefined ? data.mendable : '';
+                    
+                    sackForm.setAttribute('data-edit-id', id);
+                    modalOverlay.classList.add('show');
+                })
+                .catch((error) => {
+                    console.error('Error loading sack:', error);
+                    alert('Error loading sack: ' + error.message);
+                });
+        }
+
+        // ===================== DELETE SACK =====================
+        function deleteSack(id) {
+            database.ref('sacks/' + id).remove()
+                .then(() => {
+                    alert('Sack deleted successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error deleting sack:', error);
+                    alert('Error deleting sack: ' + error.message);
+                });
+        }
+
+        // ===================== SORT SELECT HANDLER =====================
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortSacks(e.target.value);
+        });
+
+        // ===================== PREVIEW BUTTON =====================
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            alert('Opening Preview mode...');
+        });
+
+        // ===================== INIT =====================
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Sack Library page loaded');
+            loadSacks();
+        });
+    </script>
+</body>
+</html>

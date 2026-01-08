@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin-left: 250px;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar iframe container */
+        #sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            z-index: 1000;
+            border: none;
+        }
+
+        #sidebar-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1d2e;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e0e4e9;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #5b8dee;
+        }
+
+        .search-bar input::placeholder {
+            color: #a0a7b8;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1d2e;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #8b92b0;
+            text-transform: uppercase;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #5b8dee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1657ba;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .summary-card.yellow {
+            background: linear-gradient(135deg, #f5c469 0%, #e9b855 100%);
+            color: white;
+        }
+
+        .summary-card.red {
+            background: linear-gradient(135deg, #ee7c92 0%, #e5677e 100%);
+            color: white;
+        }
+
+        .summary-card.green {
+            background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
+            color: white;
+        }
+
+        .summary-card.blue {
+            background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        /* Progress Bar in Cards */
+        .progress-container {
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            transition: width 1s ease-out;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-card h3 {
+            color: #1a1d2e;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Stats Bars */
+        .stats-section {
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #1a1d2e;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #5b8dee;
+        }
+
+        .stat-bar {
+            height: 30px;
+            background: #e8eef5;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: width 1.5s ease-out;
+        }
+
+        .stat-bar-fill.yellow {
+            background: linear-gradient(90deg, #f5c469, #e9b855);
+        }
+
+        .stat-bar-fill.red {
+            background: linear-gradient(90deg, #ee7c92, #e5677e);
+        }
+
+        .stat-bar-fill.green {
+            background: linear-gradient(90deg, #5dd39e, #4bc085);
+        }
+
+        .stat-bar-fill.blue {
+            background: linear-gradient(90deg, #5b8dee, #4a7bd9);
+        }
+
+        .stat-bar-fill.purple {
+            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+        }
+
+        /* Comparison Chart */
+        .comparison-section {
+            margin-top: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-bars {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .comparison-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .comparison-label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #1a1d2e;
+        }
+
+        .comparison-bar-container {
+            flex: 1;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .comparison-bar {
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            color: white;
+            font-weight: 600;
+            transition: width 1s ease-out;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: #5b8dee;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                margin-left: 0;
+            }
+
+            #sidebar-container {
+                transform: translateX(-250px);
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar-container.open {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-bar {
+                order: 3;
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .comparison-label {
+                min-width: 100%;
+            }
+        }
+
+        /* Icon styles */
+        .card-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
+
+        /* Trend indicator */
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .trend-up {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .trend-down {
+            color: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- Load Sidebar from separate file -->
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title">DASHBOARD</h1>
+        
+        <div class="search-bar">
+            <input type="text" placeholder="Search item, warehouse or report...">
+        </div>
+        
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-name">Hi, nfa_admin</div>
+                <div class="user-role">USER</div>
+            </div>
+            <div class="user-avatar">N</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="section-title">Summary Reports</h2>
+        
+        <div class="summary-grid">
+            <div class="summary-card yellow">
+                <span class="card-icon">📦</span>
+                <div class="card-title">TOTAL RICE EQV'T (DDN)</div>
+                <div class="card-value">49,522</div>
+                <div class="card-subtitle">bags available</div>
+                <div class="trend-indicator trend-up">
+                    <span>↗</span> <span>+12% from last month</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 75%;"></div>
+                </div>
+            </div>
+            
+            <div class="summary-card red">
+                <span class="card-icon">🏪</span>
+                <div class="card-title">TOTAL RICE EQV'T (DDO)</div>
+                <div class="card-value">29,673</div>
+                <div class="card-subtitle">bags available</div>
+                <div class="trend-indicator trend-down">
+                    <span>↘</span> <span>-5% from last month</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 60%;"></div>
+                </div>
+            </div>
+            
+            <div class="summary-card green">
+                <span class="card-icon">📊</span>
+                <div class="card-title">DAILY CONSUMPTION RATE (DDN)</div>
+                <div class="card-value">8,690 / 3,000</div>
+                <div class="card-subtitle">bags per day</div>
+                <div class="trend-indicator trend-up">
+                    <span>↗</span> <span>+8% efficiency</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 85%;"></div>
+                </div>
+            </div>
+            
+            <div class="summary-card green">
+                <span class="card-icon">📈</span>
+                <div class="card-title">DAILY CONSUMPTION RATE (DDO)</div>
+                <div class="card-value">7,850</div>
+                <div class="card-subtitle">bags per day</div>
+                <div class="trend-indicator trend-up">
+                    <span>↗</span> <span>+3% from target</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 90%;"></div>
+                </div>
+            </div>
+            
+            <div class="summary-card blue">
+                <span class="card-icon">💰</span>
+                <div class="card-title">CEREAL PROC'T FUND</div>
+                <div class="card-value">₱9,969,378.94</div>
+                <div class="card-subtitle">total budget</div>
+                <div class="trend-indicator trend-up">
+                    <span>↗</span> <span>+15% allocated</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 70%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bars Section -->
+        <h2 class="section-title">Warehouse Statistics</h2>
+        <div class="stats-section">
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">DDN - Warehouse Capacity</span>
+                    <span class="stat-value">49,522 / 65,000</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill yellow" style="width: 76.19%;">76%</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">DDO - Warehouse Capacity</span>
+                    <span class="stat-value">29,673 / 50,000</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill red" style="width: 59.35%;">59%</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">DDN - Monthly Target Achievement</span>
+                    <span class="stat-value">8,690 / 10,000</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill green" style="width: 86.9%;">87%</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">DDO - Monthly Target Achievement</span>
+                    <span class="stat-value">7,850 / 9,000</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill green" style="width: 87.22%;">87%</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">Budget Utilization</span>
+                    <span class="stat-value">₱9.97M / ₱15M</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill blue" style="width: 66.46%;">66%</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <span class="stat-label">Distribution Efficiency</span>
+                    <span class="stat-value">92%</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill purple" style="width: 92%;">92%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <h3>DDN vs DDO Comparison</h3>
+            <div class="comparison-bars">
+                <div class="comparison-item">
+                    <div class="comparison-label">Total Inventory</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar yellow" style="width: 62%;">
+                            DDN: 49,522
+                        </div>
+                        <div class="comparison-bar red" style="width: 38%;">
+                            DDO: 29,673
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-label">Daily Consumption</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar green" style="width: 53%;">
+                            DDN: 8,690
+                        </div>
+                        <div class="comparison-bar green" style="width: 47%;">
+                            DDO: 7,850
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-label">Warehouse Capacity</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar blue" style="width: 76%;">
+                            DDN: 76%
+                        </div>
+                        <div class="comparison-bar blue" style="width: 59%;">
+                            DDO: 59%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <h2 class="section-title">Visual Analytics</h2>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Monthly Inventory Trend</h3>
+                <div class="chart-container">
+                    <canvas id="inventoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Distribution by Category</h3>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Daily Consumption Pattern</h3>
+                <div class="chart-container">
+                    <canvas id="consumptionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Budget Allocation</h3>
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="jscript/user-auth.js"></script>
+
+    <script>
+        
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar-container').classList.toggle('open');
+        }
+
+        // Search functionality
+        document.querySelector('.search-bar input').addEventListener('input', function(e) {
+            console.log('Searching for:', e.target.value);
+        });
+
+        // Initialize Charts
+        window.addEventListener('DOMContentLoaded', function() {
+            // Inventory Trend Chart
+            const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+            new Chart(inventoryCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'DDN',
+                        data: [45000, 46500, 47200, 48000, 48500, 49000, 49522],
+                        borderColor: '#f5c469',
+                        backgroundColor: 'rgba(245, 196, 105, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'DDO',
+                        data: [28000, 28500, 28800, 29000, 29200, 29400, 29673],
+                        borderColor: '#ee7c92',
+                        backgroundColor: 'rgba(238, 124, 146, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Distribution Chart
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['DDN Rice', 'DDO Rice', 'In Transit', 'Reserved'],
+                    datasets: [{
+                        data: [49522, 29673, 5000, 3500],
+                        backgroundColor: [
+                            '#f5c469',
+                            '#ee7c92',
+                            '#5dd39e',
+                            '#5b8dee'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Consumption Pattern Chart
+            const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
+            new Chart(consumptionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'DDN',
+                        data: [8500, 8700, 8600, 8900, 8690, 7500, 6000],
+                        backgroundColor: '#5dd39e',
+                    }, {
+                        label: 'DDO',
+                        data: [7800, 7900, 7850, 8000, 7850, 7200, 5500],
+                        backgroundColor: '#5b8dee',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Budget Chart
+            const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+            new Chart(budgetCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Operations', 'Procurement', 'Distribution', 'Maintenance', 'Other'],
+                    datasets: [{
+                        data: [3500000, 2500000, 2000000, 1500000, 469378.94],
+                        backgroundColor: [
+                            '#5b8dee',
+                            '#5dd39e',
+                            '#f5c469',
+                            '#ee7c92',
+                            '#a78bfa'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.summary-card, .stat-item, .chart-card, .comparison-section').forEach((element) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'all 0.5s ease-out';
+            observer.observe(element);
+        });
+
+        // Animate bars on load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.querySelectorAll('.stat-bar-fill').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+
+                document.querySelectorAll('.comparison-bar').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

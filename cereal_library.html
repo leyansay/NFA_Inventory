@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cereal Library - NFA Inventory</title>
+    <link rel="stylesheet" href="css/cereal.css" />
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+<div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Cereal Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" id="previewBtn">
+                    <span>👁</span>
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" id="addCerealBtn">
+                    <span>+</span>
+                    <span>Add Cereal</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>CEREAL CODE</th>
+                        <th>DESCRIPTION</th>
+                        <th>COMPUTE TA FOR</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="cerealTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align:center;">Loading cereals...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="cerealModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF CEREAL LIBRARY</h2>
+                <button class="close-btn" id="closeModalBtn">×</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="cerealForm">
+                    <!-- Cereal Code -->
+                    <div class="form-group">
+                        <label class="form-label">Cereal Code:</label>
+                        <input type="text" class="form-input" id="cerealCode" placeholder="Enter Cereal Code" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label">Description:</label>
+                        <input type="text" class="form-input" id="description" placeholder="Enter Description" required>
+                    </div>
+
+                    <!-- Compute TA for -->
+                    <div class="form-group">
+                        <label class="form-label">Compute TA for:</label>
+                        <select class="form-select" id="computeTAFor" required>
+                            <option value="">-- Select Option --</option>
+                            <option value="TOTAL WEIGHT LOSS">Total Weight Loss</option>
+                            <option value="NET WEIGHT">Net Weight</option>
+                            <option value="GROSS WEIGHT">Gross Weight</option>
+                        </select>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button type="submit" class="btn-save">Save Cereal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // Global variables
+        let allCereals = [];
+        let currentSortOrder = 'newest';
+
+        // Modal controls
+        const cerealModal = document.getElementById('cerealModal');
+        const addCerealBtn = document.getElementById('addCerealBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cerealForm = document.getElementById('cerealForm');
+
+        // Open modal
+        addCerealBtn.addEventListener('click', () => {
+            cerealForm.reset();
+            cerealForm.removeAttribute('data-edit-id');
+            cerealModal.classList.add('active');
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            cerealModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        cerealModal.addEventListener('click', (e) => {
+            if (e.target === cerealModal) {
+                cerealModal.classList.remove('active');
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerealModal.classList.remove('active');
+            }
+        });
+
+        // Form submit handler
+        cerealForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+            
+            const cerealData = {
+                cerealCode: document.getElementById('cerealCode').value.trim() || "",
+                description: document.getElementById('description').value.trim() || "",
+                computeTAFor: document.getElementById('computeTAFor').value || "",
+                timestamp: Date.now()
+            };
+
+            // Clear previous errors
+            document.querySelectorAll('input, select').forEach(field => {
+                field.style.border = '';
+            });
+            document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
+            
+            // Validate required fields
+            let hasEmptyFields = false;
+            const requiredFields = [
+                { id: 'cerealCode', value: cerealData.cerealCode },
+                { id: 'description', value: cerealData.description },
+                { id: 'computeTAFor', value: cerealData.computeTAFor }
+            ];
+            
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    const element = document.getElementById(field.id);
+                    element.style.border = '2px solid #ff6b6b';
+                    hasEmptyFields = true;
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'field-error-message';
+                    errorMsg.textContent = 'This field is required';
+                    element.parentElement.appendChild(errorMsg);
+                }
+            });
+            
+            if (hasEmptyFields) {
+                const firstEmptyField = document.querySelector('[style*="border: 2px solid"]');
+                if (firstEmptyField) {
+                    firstEmptyField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstEmptyField.focus();
+                }
+                return;
+            }
+            
+            if (editId) {
+                // Update existing cereal
+                cerealData.updatedAt = new Date().toISOString();
+                const cerealRef = database.ref('cereals/' + editId);
+                
+                cerealRef.update(cerealData)
+                    .then(() => {
+                        alert('Cereal updated successfully!');
+                        cerealModal.classList.remove('active');
+                        form.reset();
+                        form.removeAttribute('data-edit-id');
+                    })
+                    .catch((error) => {
+                        console.error('Error updating cereal:', error);
+                        alert('Error updating cereal: ' + error.message);
+                    });
+            } else {
+                // Create new cereal
+                cerealData.createdAt = new Date().toISOString();
+                const cerealsRef = database.ref('cereals');
+                const newCerealRef = cerealsRef.push();
+                
+                newCerealRef.set(cerealData)
+                    .then(() => {
+                        alert('Cereal saved successfully!');
+                        cerealModal.classList.remove('active');
+                        form.reset();
+                    })
+                    .catch((error) => {
+                        console.error('Error saving cereal:', error);
+                        alert('Error saving cereal: ' + error.message);
+                    });
+            }
+        });
+
+        // Sort cereals
+        function sortCereals(order) {
+            currentSortOrder = order;
+            
+            allCereals.sort((a, b) => {
+                if (order === 'newest' || order === 'oldest') {
+                    const dateA = a.data.timestamp || 0;
+                    const dateB = b.data.timestamp || 0;
+                    return order === 'newest' ? dateB - dateA : dateA - dateB;
+                } else if (order === 'code-asc' || order === 'code-desc') {
+                    const codeA = (a.data.cerealCode || '').toLowerCase();
+                    const codeB = (b.data.cerealCode || '').toLowerCase();
+                    return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
+                }
+            });
+            
+            renderCereals();
+        }
+
+        // Render cereals to table
+        function renderCereals() {
+            const tbody = document.getElementById('cerealTableBody');
+            tbody.innerHTML = '';
+            
+            if (allCereals.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center;">No cereals found</td>
+                    </tr>`;
+                return;
+            }
+            
+            allCereals.forEach(item => {
+                const data = item.data;
+                const docId = item.docId;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${data.cerealCode || '-'}</td>
+                    <td>${data.description || '-'}</td>
+                    <td>${data.computeTAFor || '-'}</td>
+
+                    <td class="actions-cell">
+                        <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            attachDropdownListeners();
+        }
+
+        // Attach dropdown listeners
+        function attachDropdownListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    const dropdown = btn.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = item.dataset.docId;
+                    const action = item.dataset.action;
+                    
+                    closeAllDropdowns();
+                    
+                    if (action === 'edit') {
+                        editCereal(docId);
+                    } else if (action === 'delete') {
+                        if (confirm('Are you sure you want to delete this cereal?')) {
+                            deleteCereal(docId);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Close all dropdowns
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Edit cereal
+        function editCereal(docId) {
+            const cerealRef = database.ref('cereals/' + docId);
+            
+            cerealRef.once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert('Cereal not found!');
+                        return;
+                    }
+                    
+                    const data = snapshot.val();
+                    
+                    document.getElementById('cerealCode').value = data.cerealCode || '';
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('computeTAFor').value = data.computeTAFor || '';
+                    
+                    cerealForm.setAttribute('data-edit-id', docId);
+                    cerealModal.classList.add('active');
+                })
+                .catch((error) => {
+                    console.error('Error loading cereal:', error);
+                    alert('Error loading cereal: ' + error.message);
+                });
+        }
+
+        // Delete cereal
+        function deleteCereal(docId) {
+            const cerealRef = database.ref('cereals/' + docId);
+            
+            cerealRef.remove()
+                .then(() => {
+                    alert('Cereal deleted successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error deleting cereal:', error);
+                    alert('Error deleting cereal: ' + error.message);
+                });
+        }
+
+        // Load cereals from Firebase
+        function loadCereals() {
+            const tbody = document.getElementById('cerealTableBody');
+            const cerealsRef = database.ref('cereals');
+
+            cerealsRef.on('value', (snapshot) => {
+                allCereals = [];
+
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center;">No cereals found</td>
+                        </tr>`;
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const docId = childSnapshot.key;
+                    
+                    allCereals.push({
+                        docId: docId,
+                        data: data
+                    });
+                });
+                
+                sortCereals(currentSortOrder);
+            }, (error) => {
+                console.error('Error loading cereals:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; color: red;">Error loading cereals: ${error.message}</td>
+                    </tr>`;
+            });
+        }
+
+        // Sort select handler
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortCereals(e.target.value);
+        });
+
+        // Preview button
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            alert('Opening Preview mode...');
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Cereal Library page loaded');
+            loadCereals();
+        });
+    </script>
+</body>
+</html>

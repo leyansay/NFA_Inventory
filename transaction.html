@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Transaction</title>
+    <link rel="stylesheet" href="css/transaction.css" />
+</head>
+<body>
+    <!-- Load Sidebar from separate file -->
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+    </div>
+
+     <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Transaction</h1>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">Hi, nfa_admin</div>
+                    <div class="user-role">USER</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="sort-section">
+                <label class="sort-label">Sort by:</label>
+                <select class="sort-dropdown" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="preview-btn" id="previewTransaction">👁️ Preview</button>
+                <button class="add-btn" id="addTransaction">+ Add Transaction</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>OFFICER ID</th><th>OFFICER NAME</th><th>WAREHOUSE ID</th><th>WAREHOUSE NAME</th>
+                        <th>PERIOD FROM</th><th>PERIOD TO</th><th>DOCUMENT NO.</th><th>DOCUMENT TYPE</th>
+                        <th>OR NO.</th><th>AI NO.</th><th>REF WSI</th><th>RECD FROM</th><th>DATE</th>
+                        <th>ACTIVITY</th><th>VARIETY</th><th>SACK CODE</th><th>CONDITION</th>
+                        <th>SACK WT</th><th>AGE</th><th>PILE</th><th>BAGS</th><th>GROSS WT</th>
+                        <th>MC%</th><th>NET WT</th><th>CANCELLED</th><th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <tr><td colspan="26" class="loading">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="officerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Accountable Officer</h2>
+                <button class="close-btn" id="closeOfficer">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="officer-table-container">
+                    <table class="officer-table">
+                        <thead>
+                            <tr>
+                                <th>OFFICER ID</th><th>LAST NAME</th><th>FIRST NAME</th>
+                                <th>MIDDLE NAME</th><th>WAREHOUSE CODE</th><th>WAREHOUSE NAME</th>
+                                <th>PERIOD</th><th>SELECT</th>
+                            </tr>
+                        </thead>
+                        <tbody><tr><td colspan="8" class="loading">Loading officers...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Transaction</h2>
+                <button class="close-btn" id="closeTransaction">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Officer ID</label>
+                            <input type="text" class="form-input" id="officerId" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Officer Name</label>
+                            <input type="text" class="form-input" id="officerName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Warehouse ID</label>
+                            <input type="text" class="form-input" id="warehouseId" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Warehouse Name</label>
+                            <input type="text" class="form-input" id="warehouseName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Period From</label>
+                            <input type="text" class="form-input" id="periodFrom" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Period To</label>
+                            <input type="text" class="form-input" id="periodTo" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Document No.</label>
+                            <input type="text" class="form-input" id="documentNo">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="cancelled">
+                                <label for="cancelled">Cancelled</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Document Type</label>
+                            <select class="form-select" id="documentType">
+                                <option value="">Select</option>
+                                <option value="DR">DR</option>
+                                <option value="Issue">Issue</option>
+                                <option value="WSI">WSI</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">OR No.</label>
+                            <input type="text" class="form-input" id="orNo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AI No.</label>
+                            <input type="text" class="form-input" id="aiNo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ref WSI No.</label>
+                            <input type="text" class="form-input" id="refWSINo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Transaction Date</label>
+                            <input type="date" class="form-input" id="transactionDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Recd From / Issd To</label>
+                            <select class="form-select" id="recdFromIssdTo"><option value="">Select</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Activity Code</label>
+                            <select class="form-select" id="activityCode"><option value="">Select</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Variety Code</label>
+                            <select class="form-select" id="varietyCode"><option value="">Select</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sack Code</label>
+                            <select class="form-select" id="sackCode"><option value="">Select</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sack Condition</label>
+                            <select class="form-select" id="sackCondition" disabled>
+                                <option value="">Select</option>
+                                <option value="Brand New">Brand New</option>
+                                <option value="Second Hand">Second Hand</option>
+                                <option value="Mendable">Mendable</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sack Weight</label>
+                            <input type="text" class="form-input" id="sackWeight" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Age (Months)</label>
+                            <input type="text" class="form-input" id="age">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pile No.</label>
+                            <input type="text" class="form-input" id="pileNo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">No. of Bags</label>
+                            <input type="text" class="form-input" id="numberOfBags">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gross Weight</label>
+                            <input type="text" class="form-input" id="grossWeight">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">% MC</label>
+                            <input type="text" class="form-input" id="moistureContent">
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Net Weight</label>
+                            <input type="text" class="form-input" id="netWeight" readonly>
+                        </div>
+                    </div>
+                    <button type="submit" class="save-btn">Save Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/transaction.js"></script>
+</body>
+</html>

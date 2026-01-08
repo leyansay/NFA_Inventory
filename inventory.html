@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Inventory</title>
+    <link rel="stylesheet" href="css/inventory.css" />
+</head>
+<body>
+    <!-- Load Sidebar from separate file -->
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Inventory</h1>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">Hi, nfa_admin</div>
+                    <div class="user-role">USER</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <div class="search-box">
+                <input type="text" placeholder="Search inventory..." id="searchInput">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn preview-btn" onclick="previewInventory()">
+                    👁️ Preview
+                </button>
+                <button class="filter-btn rice-btn" id="riceBtn" onclick="filterByType('rice')">
+                    Rice
+                </button>
+                <button class="filter-btn palay-btn" id="palayBtn" onclick="filterByType('palay')">
+                    Palay
+                </button>
+            </div>
+        </div>
+
+        <!-- Rice Warehouse Sections -->
+        <div class="warehouse-section rice-section" data-type="rice">
+            <h2 class="warehouse-title">GID 1 - Rice</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No rice data in GID 1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="warehouse-section rice-section" data-type="rice">
+            <h2 class="warehouse-title">GID 2 - Rice</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No rice data in GID 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Palay Warehouse Sections -->
+        <div class="warehouse-section palay-section" data-type="palay">
+            <h2 class="warehouse-title">GID 1 - Palay</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No palay data in GID 1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="warehouse-section palay-section" data-type="palay">
+            <h2 class="warehouse-title">GID 2 - Palay</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PILE NO.</th>
+                            <th>AGE(MONTH)</th>
+                            <th>VARIETY</th>
+                            <th>NO. OF BAGS</th>
+                            <th>NET KG.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="no-data">No palay data in GID 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = 'all'; // Track current filter state
+
+        // Filter by type (Rice or Palay)
+        function filterByType(type) {
+            const riceBtn = document.getElementById('riceBtn');
+            const palayBtn = document.getElementById('palayBtn');
+            const riceSections = document.querySelectorAll('.rice-section');
+            const palaySections = document.querySelectorAll('.palay-section');
+
+            // Toggle filter
+            if (currentFilter === type) {
+                // If clicking the same button, show all
+                currentFilter = 'all';
+                riceBtn.classList.remove('active');
+                palayBtn.classList.remove('active');
+                riceSections.forEach(section => section.classList.remove('hidden'));
+                palaySections.forEach(section => section.classList.remove('hidden'));
+            } else {
+                // Filter by selected type
+                currentFilter = type;
+                
+                // Update button states
+                riceBtn.classList.toggle('active', type === 'rice');
+                palayBtn.classList.toggle('active', type === 'palay');
+
+                // Show/hide sections based on filter
+                if (type === 'rice') {
+                    riceSections.forEach(section => section.classList.remove('hidden'));
+                    palaySections.forEach(section => section.classList.add('hidden'));
+                } else if (type === 'palay') {
+                    riceSections.forEach(section => section.classList.add('hidden'));
+                    palaySections.forEach(section => section.classList.remove('hidden'));
+                }
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.warehouse-section');
+            
+            sections.forEach(section => {
+                // Skip hidden sections from filter
+                if (section.classList.contains('hidden')) return;
+                
+                const rows = section.querySelectorAll('tbody tr');
+                let hasVisibleRow = false;
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const shouldShow = text.includes(searchTerm);
+                    row.style.display = shouldShow ? '' : 'none';
+                    if (shouldShow && !row.querySelector('.no-data')) {
+                        hasVisibleRow = true;
+                    }
+                });
+                
+                // Show/hide entire section if no matches
+                section.style.display = hasVisibleRow || searchTerm === '' ? '' : 'none';
+            });
+        });
+
+        // Preview function
+        function previewInventory() {
+            alert('Preview functionality - Show inventory preview/report');
+        }
+    </script>
+</body>
+</html>

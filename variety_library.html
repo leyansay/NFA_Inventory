@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variety Library - NFA Inventory</title>
+    <link rel="stylesheet" href="css/variety.css" />
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+     <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Variety Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" id="previewBtn">
+                    <span>👁</span>
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" id="addVarietyBtn">
+                    <span>+</span>
+                    <span>Add Variety</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>VARIETY CODE</th>
+                        <th>DESCRIPTION</th>
+                        <th>CEREAL TYPE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="varietyTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align:center;">Loading varieties...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF VARIETY LIBRARY</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="varietyForm">
+                    <div class="form-group">
+                        <label class="form-label">Variety Code:</label>
+                        <input type="text" class="form-input" id="varietyCode" placeholder="Enter Variety Code" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description:</label>
+                        <input type="text" class="form-input" id="description" placeholder="Enter Description" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cereal Type:</label>
+                        <input type="text" class="form-input" id="cerealType" placeholder="Enter Cereal Type" required>
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Variety</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // ===================== FIREBASE CONFIGURATION =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // ===================== GLOBAL VARIABLES =====================
+        let allVarieties = [];
+        let currentSortOrder = 'newest';
+
+        // ===================== MODAL CONTROLS =====================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const addVarietyBtn = document.getElementById('addVarietyBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const varietyForm = document.getElementById('varietyForm');
+
+        // Open modal
+        addVarietyBtn.addEventListener('click', () => {
+            varietyForm.reset();
+            varietyForm.removeAttribute('data-edit-id');
+            modalOverlay.classList.add('show');
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+        });
+
+        // Close modal when clicking outside
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // ===================== SAVE VARIETY =====================
+        varietyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+
+            const varietyCode = document.getElementById('varietyCode').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const cerealType = document.getElementById('cerealType').value.trim();
+
+            // Clear previous errors
+            document.querySelectorAll('input').forEach(field => {
+                field.style.border = '';
+            });
+            document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
+
+            // Validate required fields
+            let hasEmptyFields = false;
+            const requiredFields = [
+                { id: 'varietyCode', value: varietyCode, label: 'Variety Code' },
+                { id: 'description', value: description, label: 'Description' },
+                { id: 'cerealType', value: cerealType, label: 'Cereal Type' }
+            ];
+
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    const element = document.getElementById(field.id);
+                    element.style.border = '2px solid #ff6b6b';
+                    hasEmptyFields = true;
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'field-error-message';
+                    errorMsg.textContent = 'This field is required';
+                    element.parentElement.appendChild(errorMsg);
+                }
+            });
+
+            if (hasEmptyFields) {
+                const firstEmptyField = document.querySelector('[style*="border: 2px solid"]');
+                if (firstEmptyField) {
+                    firstEmptyField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstEmptyField.focus();
+                }
+                return;
+            }
+
+            const varietyData = { 
+                varietyCode, 
+                description, 
+                cerealType, 
+                timestamp: Date.now() 
+            };
+
+            if (editId) {
+                // Update existing variety
+                varietyData.updatedAt = new Date().toISOString();
+                database.ref('varieties/' + editId).update(varietyData)
+                    .then(() => {
+                        alert('Variety updated successfully!');
+                        form.reset();
+                        form.removeAttribute('data-edit-id');
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error updating variety:', error);
+                        alert('Error updating variety: ' + error.message);
+                    });
+            } else {
+                // Create new variety
+                varietyData.createdAt = new Date().toISOString();
+                database.ref('varieties').push(varietyData)
+                    .then(() => {
+                        alert('Variety added successfully!');
+                        form.reset();
+                        modalOverlay.classList.remove('show');
+                    })
+                    .catch((error) => {
+                        console.error('Error adding variety:', error);
+                        alert('Error adding variety: ' + error.message);
+                    });
+            }
+        });
+
+        // ===================== LOAD VARIETIES FROM FIREBASE =====================
+        function loadVarieties() {
+            const tbody = document.getElementById('varietyTableBody');
+            const varietiesRef = database.ref('varieties');
+
+            varietiesRef.on('value', (snapshot) => {
+                allVarieties = [];
+
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center;">No varieties found</td>
+                        </tr>`;
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const docId = childSnapshot.key;
+                    
+                    allVarieties.push({
+                        id: docId,
+                        data: data
+                    });
+                });
+                
+                sortVarieties(currentSortOrder);
+            }, (error) => {
+                console.error('Error loading varieties:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; color: red;">Error loading varieties: ${error.message}</td>
+                    </tr>`;
+            });
+        }
+
+        // ===================== SORT VARIETIES =====================
+        function sortVarieties(order) {
+            currentSortOrder = order;
+            
+            allVarieties.sort((a, b) => {
+                if (order === 'newest' || order === 'oldest') {
+                    const dateA = a.data.timestamp || 0;
+                    const dateB = b.data.timestamp || 0;
+                    return order === 'newest' ? dateB - dateA : dateA - dateB;
+                } else if (order === 'code-asc' || order === 'code-desc') {
+                    const codeA = (a.data.varietyCode || '').toLowerCase();
+                    const codeB = (b.data.varietyCode || '').toLowerCase();
+                    return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
+                }
+            });
+            
+            renderVarieties();
+        }
+
+        // ===================== RENDER VARIETIES =====================
+        function renderVarieties() {
+            const tbody = document.getElementById('varietyTableBody');
+            tbody.innerHTML = '';
+
+            if (allVarieties.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center;">No varieties found</td>
+                    </tr>`;
+                return;
+            }
+
+            allVarieties.forEach(item => {
+                const d = item.data;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.varietyCode || '-'}</td>
+                    <td>${d.description || '-'}</td>
+                    <td>${d.cerealType || '-'}</td>
+
+                    <td class="actions-cell">
+                <button class="action-btn" data-id="${item.id}" title="More actions">⋮</button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" data-action="edit" data-id="${item.id}">
+                        <span>✏️</span> Edit
+                    </button>
+                    <button class="dropdown-item" data-action="delete" data-id="${item.id}">
+                        <span>🗑️</span> Delete
+                    </button>
+                </div>
+            </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            attachDropdownListeners();
+        }
+
+        // ===================== DROPDOWN HANDLERS =====================
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        function attachDropdownListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    const dropdown = btn.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = item.dataset.id;
+                    const action = item.dataset.action;
+                    
+                    closeAllDropdowns();
+                    
+                    if (action === 'edit') {
+                        editVariety(id);
+                    } else if (action === 'delete') {
+                        if (confirm('Are you sure you want to delete this variety?')) {
+                            deleteVariety(id);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ===================== EDIT VARIETY =====================
+        function editVariety(id) {
+            database.ref('varieties/' + id).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert('Variety not found!');
+                        return;
+                    }
+                    
+                    const data = snapshot.val();
+                    
+                    document.getElementById('varietyCode').value = data.varietyCode || '';
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('cerealType').value = data.cerealType || '';
+                    
+                    varietyForm.setAttribute('data-edit-id', id);
+                    modalOverlay.classList.add('show');
+                })
+                .catch((error) => {
+                    console.error('Error loading variety:', error);
+                    alert('Error loading variety: ' + error.message);
+                });
+        }
+
+        // ===================== DELETE VARIETY =====================
+        function deleteVariety(id) {
+            database.ref('varieties/' + id).remove()
+                .then(() => {
+                    alert('Variety deleted successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error deleting variety:', error);
+                    alert('Error deleting variety: ' + error.message);
+                });
+        }
+
+        // ===================== SORT SELECT HANDLER =====================
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortVarieties(e.target.value);
+        });
+
+        // ===================== PREVIEW BUTTON =====================
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            alert('Opening Preview mode...');
+        });
+
+        // ===================== INIT =====================
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Variety Library page loaded');
+            loadVarieties();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Library - NFA Inventory</title>
+    <link rel="stylesheet" href="css/location.css" />
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Location Library</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="sort-section">
+                <label>Sort by:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="code-asc">Code (A-Z)</option>
+                    <option value="code-desc">Code (Z-A)</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-preview" onclick="previewLocations()">
+                    <span>Preview</span>
+                </button>
+                <button class="btn btn-add" onclick="openModal()">
+                    <span>+</span>
+                    <span>Add Location</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>LOCATION CODE</th>
+                        <th>PROVINCE NAME</th>
+                        <th>ABBREVIATION</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="locationTableBody">
+                    <tr>
+                        <td>asd</td>
+                        <td>asda</td>
+                        <td>adaada</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editLocation('asd')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteLocation('asd')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Hellow123</td>
+                        <td>japantukan</td>
+                        <td>jap</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editLocation('Hellow123')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteLocation('Hellow123')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ASD</td>
+                        <td>ASD</td>
+                        <td>ASD</td>
+                        <td class="actions-cell">
+                            <button class="action-btn" onclick="toggleActions(this)">⋮</button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="editLocation('ASD')">Edit</div>
+                                <div class="dropdown-item" onclick="deleteLocation('ASD')">Delete</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="locationModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">DATA ENTRY OF LOCATION LIBRARY</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="locationForm">
+                    <!-- Location Code -->
+                    <div class="form-group">
+                        <label class="form-label">Location Code:</label>
+                        <input type="text" class="form-input" id="locationCode" placeholder="Enter Location Code" required>
+                    </div>
+
+                    <!-- Province Name -->
+                    <div class="form-group">
+                        <label class="form-label">Province Name:</label>
+                        <input type="text" class="form-input" id="provinceName" placeholder="Enter Province Name" required>
+                    </div>
+
+                    <!-- Abbreviation -->
+                    <div class="form-group">
+                        <label class="form-label">Abbreviation:</label>
+                        <input type="text" class="form-input" id="abbreviation" placeholder="Enter Abbreviation" required>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button type="submit" class="btn-save">Save Location</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Open Modal
+        function openModal() {
+            document.getElementById('locationModal').classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('locationModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('locationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Form Submit Handler
+        document.getElementById('locationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                locationCode: document.getElementById('locationCode').value,
+                provinceName: document.getElementById('provinceName').value,
+                abbreviation: document.getElementById('abbreviation').value
+            };
+
+            console.log('Form Data:', formData);
+            alert('Location saved successfully!');
+
+            // Reset form and close modal
+            this.reset();
+            closeModal();
+        });
+
+        function previewLocations() {
+            alert('Opening Preview mode...');
+        }
+
+        function editLocation(code) {
+            alert(`Editing location: ${code}`);
+            closeAllDropdowns();
+        }
+
+        function deleteLocation(code) {
+            if (confirm(`Are you sure you want to delete location: ${code}?`)) {
+                alert(`Location ${code} deleted`);
+                closeAllDropdowns();
+            }
+        }
+
+        function toggleActions(button) {
+            closeAllDropdowns();
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('show');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            alert('Sorting by: ' + this.options[this.selectedIndex].text);
+        });
+    </script>
+</body>
+</html>

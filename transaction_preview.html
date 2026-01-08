@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .back-btn, .print-btn {
+            padding: 12px 30px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .back-btn:hover {
+            background: #c82333;
+        }
+
+        .print-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #218838;
+        }
+
+        .print-paper {
+            background: white;
+            width: 297mm;
+            min-height: 210mm;
+            margin: 20px auto;
+            padding: 15mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        .header-text h1 {
+            font-size: 20px;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+
+        .header-text p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            font-size: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            min-width: 150px;
+            font-size: 9px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 9px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 6px;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+
+        th {
+            background: white;
+            color: black;
+            padding: 3px 1px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #000;
+            font-size: 6px;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        td {
+            padding: 2px 1px;
+            border: 1px solid #000;
+            font-size: 6px;
+            text-align: center;
+            word-wrap: break-word;
+            overflow: hidden;
+            line-height: 1.2;
+        }
+
+        /* Set specific column widths to optimize space */
+        th:nth-child(1), td:nth-child(1) { width: 3%; } /* Officer ID */
+        th:nth-child(2), td:nth-child(2) { width: 5%; } /* Officer Name */
+        th:nth-child(3), td:nth-child(3) { width: 3%; } /* WH ID */
+        th:nth-child(4), td:nth-child(4) { width: 5%; } /* WH Name */
+        th:nth-child(5), td:nth-child(5) { width: 4%; } /* Period From */
+        th:nth-child(6), td:nth-child(6) { width: 4%; } /* Period To */
+        th:nth-child(7), td:nth-child(7) { width: 4%; } /* Doc No */
+        th:nth-child(8), td:nth-child(8) { width: 3%; } /* Cancelled */
+        th:nth-child(9), td:nth-child(9) { width: 3%; } /* Doc Type */
+        th:nth-child(10), td:nth-child(10) { width: 4%; } /* OR No */
+        th:nth-child(11), td:nth-child(11) { width: 4%; } /* AI No */
+        th:nth-child(12), td:nth-child(12) { width: 4%; } /* Ref WSI */
+        th:nth-child(13), td:nth-child(13) { width: 5%; } /* Recd/Issd */
+        th:nth-child(14), td:nth-child(14) { width: 4%; } /* Date */
+        th:nth-child(15), td:nth-child(15) { width: 4%; } /* Activity */
+        th:nth-child(16), td:nth-child(16) { width: 4%; } /* Variety */
+        th:nth-child(17), td:nth-child(17) { width: 3%; } /* Sack */
+        th:nth-child(18), td:nth-child(18) { width: 3%; } /* Cond */
+        th:nth-child(19), td:nth-child(19) { width: 3%; } /* Sack Wt */
+        th:nth-child(20), td:nth-child(20) { width: 3%; } /* Age */
+        th:nth-child(21), td:nth-child(21) { width: 3%; } /* Pile */
+        th:nth-child(22), td:nth-child(22) { width: 3%; } /* Bags */
+        th:nth-child(23), td:nth-child(23) { width: 4%; } /* Gross */
+        th:nth-child(24), td:nth-child(24) { width: 3%; } /* MC% */
+        th:nth-child(25), td:nth-child(25) { width: 4%; } /* Net Wt */
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .signature-box {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 2px solid #000;
+        }
+
+        .signature-label {
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+            }
+
+            .button-container {
+                display: none;
+            }
+
+            .print-paper {
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 10mm;
+            }
+
+            table {
+                font-size: 5.5px;
+            }
+
+            th, td {
+                padding: 2px 1px;
+                font-size: 5.5px;
+            }
+
+            .header-text h1 {
+                font-size: 18px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+        <button class="back-btn" onclick="window.location.href='transaction.html'">← Back to Transactions</button>
+    </div>
+
+    <div class="print-paper">
+        <div class="header">
+            <img src="images/nfa.png" alt="NFA Logo" class="logo">
+            <div class="header-text">
+                <h1>NATIONAL FOOD AUTHORITY</h1>
+                <p>Rice Inventory Transaction Report</p>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <span class="info-label">Name of Accountable Officer:</span>
+                <span class="info-value" id="officerName">Multiple Officers</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Report Generated:</span>
+                <span class="info-value" id="reportDate"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Warehouse Name:</span>
+                <span class="info-value" id="warehouseName">Multiple Warehouses</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Transactions:</span>
+                <span class="info-value" id="totalTransactions">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Warehouse Location:</span>
+                <span class="info-value" id="warehouseLocation">Various Locations</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Period Covered:</span>
+                <span class="info-value" id="periodCovered">N/A to N/A</span>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Officer ID</th>
+                    <th>Officer Name</th>
+                    <th>WH ID</th>
+                    <th>WH Name</th>
+                    <th>Period From</th>
+                    <th>Period To</th>
+                    <th>Doc No.</th>
+                    <th>Cancelled</th>
+                    <th>Doc Type</th>
+                    <th>OR No.</th>
+                    <th>AI No.</th>
+                    <th>Ref WSI</th>
+                    <th>Recd/Issd</th>
+                    <th>Date</th>
+                    <th>Activity</th>
+                    <th>Variety</th>
+                    <th>Sack</th>
+                    <th>Cond.</th>
+                    <th>Sack Wt</th>
+                    <th>Age</th>
+                    <th>Pile</th>
+                    <th>Bags</th>
+                    <th>Gross</th>
+                    <th>MC%</th>
+                    <th>Net Wt</th>
+                </tr>
+            </thead>
+            <tbody id="previewBody">
+                <tr>
+                    <td colspan="25" class="loading">Loading transactions...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-label">Prepared By</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-label">Verified By</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-label">Approved By</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Set report date with real-time update
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            document.getElementById('reportDate').textContent = now.toLocaleString('en-US', options);
+        }
+
+        // Update time immediately and then every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        function loadTransactionsForPreview() {
+            const tbody = document.getElementById('previewBody');
+            
+            database.ref('transactions').once('value').then((snapshot) => {
+                tbody.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    tbody.innerHTML = '<tr><td colspan="25" style="text-align:center;">No transactions found</td></tr>';
+                    return;
+                }
+
+                const transactions = [];
+                const officers = new Set();
+                const warehouses = new Set();
+                const periods = [];
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    transactions.push({
+                        id: childSnapshot.key,
+                        data: data
+                    });
+                    
+                    if (data.officerName) officers.add(data.officerName);
+                    if (data.warehouseName) warehouses.add(data.warehouseName);
+                    if (data.periodFrom) periods.push(data.periodFrom);
+                    if (data.periodTo) periods.push(data.periodTo);
+                });
+
+                // Update summary info
+                document.getElementById('totalTransactions').textContent = transactions.length;
+                
+                if (officers.size === 1) {
+                    document.getElementById('officerName').textContent = Array.from(officers)[0];
+                }
+                
+                if (warehouses.size === 1) {
+                    document.getElementById('warehouseName').textContent = Array.from(warehouses)[0];
+                }
+
+                if (periods.length > 0) {
+                    periods.sort();
+                    document.getElementById('periodCovered').textContent = 
+                        `${periods[0]} to ${periods[periods.length - 1]}`;
+                }
+
+                // Sort by date
+                transactions.sort((a, b) => {
+                    const dateA = new Date(a.data.transactionDate || '1900-01-01');
+                    const dateB = new Date(b.data.transactionDate || '1900-01-01');
+                    return dateB - dateA;
+                });
+
+                transactions.forEach((item) => {
+                    const data = item.data;
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${data.officerId || '-'}</td>
+                        <td>${data.officerName || '-'}</td>
+                        <td>${data.warehouseId || '-'}</td>
+                        <td>${data.warehouseName || '-'}</td>
+                        <td>${data.periodFrom || '-'}</td>
+                        <td>${data.periodTo || '-'}</td>
+                        <td>${data.documentNo || '-'}</td>
+                        <td>${data.cancelled ? 'Yes' : 'No'}</td>
+                        <td>${data.documentType || '-'}</td>
+                        <td>${data.orNo || '-'}</td>
+                        <td>${data.aiNo || '-'}</td>
+                        <td>${data.refWSINo || '-'}</td>
+                        <td>${data.recdFromIssdTo || '-'}</td>
+                        <td>${data.transactionDate || '-'}</td>
+                        <td>${data.activityCode || '-'}</td>
+                        <td>${data.varietyCode || '-'}</td>
+                        <td>${data.sackCode || '-'}</td>
+                        <td>${data.sackCondition || '-'}</td>
+                        <td>${data.sackWeight || '-'}</td>
+                        <td>${data.age || '-'}</td>
+                        <td>${data.pileNo || '-'}</td>
+                        <td>${data.numberOfBags || '-'}</td>
+                        <td>${data.grossWeight || '-'}</td>
+                        <td>${data.moistureContent || '-'}</td>
+                        <td>${data.netWeight || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }).catch((error) => {
+                tbody.innerHTML = '<tr><td colspan="25" style="text-align:center;">Error loading transactions</td></tr>';
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', loadTransactionsForPreview);
+    </script>
+</body>
+</html>
