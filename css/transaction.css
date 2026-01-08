@@ -33,8 +33,11 @@ th { padding: 0.875rem 0.625rem; text-align: left; font-weight: 600; font-size: 
 tbody tr { border-bottom: 1px solid #f0f2f5; transition: background 0.2s; }
 tbody tr:hover { background: #f8f9fb; }
 tbody tr:last-child { border-bottom: none; }
-td { padding: 1rem 0.75rem; color: #333; font-size: 0.9rem; word-wrap: break-word; }
+td { padding: 1rem 0.75rem; color: #333; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 td:first-child { color: #1657ba; font-weight: 600; }
+td:last-child { position: sticky; right: 0; background: white; z-index: 5; box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05); }
+tbody tr:hover td:last-child { background: #f8f9fb; }
+th:last-child { position: sticky; right: 0; background: #1657ba; z-index: 10; box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1); }
 
 .action-cell { position: relative; }
 .dropdown { position: relative; display: inline-block; }

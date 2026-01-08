@@ -80,6 +80,46 @@
         </div>
     </div>
 
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Report to Preview</h2>
+                <button class="close-btn" id="closePreview">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="previewForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Officer ID *</label>
+                            <input type="text" class="form-input" id="previewOfficerId" placeholder="Enter Officer ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Officer Name</label>
+                            <input type="text" class="form-input" id="previewOfficerName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Warehouse Name</label>
+                            <input type="text" class="form-input" id="previewWarehouseName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Warehouse Location</label>
+                            <input type="text" class="form-input" id="previewWarehouseLocation" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Period From *</label>
+                            <input type="date" class="form-input" id="previewPeriodFrom" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Period To *</label>
+                            <input type="date" class="form-input" id="previewPeriodTo" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="save-btn">🖨️ Print Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="transactionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">

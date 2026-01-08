@@ -121,7 +121,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 6px;
+            font-size: 9px;
             margin-bottom: 20px;
             table-layout: fixed;
         }
@@ -129,51 +129,37 @@
         th {
             background: white;
             color: black;
-            padding: 3px 1px;
+            padding: 6px 3px;
             text-align: center;
             font-weight: bold;
             border: 1px solid #000;
-            font-size: 6px;
+            font-size: 8px;
             word-wrap: break-word;
-            line-height: 1.2;
+            line-height: 1.3;
         }
 
         td {
-            padding: 2px 1px;
+            padding: 4px 3px;
             border: 1px solid #000;
-            font-size: 6px;
+            font-size: 8px;
             text-align: center;
             word-wrap: break-word;
             overflow: hidden;
-            line-height: 1.2;
+            line-height: 1.3;
         }
 
-        /* Set specific column widths to optimize space */
-        th:nth-child(1), td:nth-child(1) { width: 3%; } /* Officer ID */
-        th:nth-child(2), td:nth-child(2) { width: 5%; } /* Officer Name */
-        th:nth-child(3), td:nth-child(3) { width: 3%; } /* WH ID */
-        th:nth-child(4), td:nth-child(4) { width: 5%; } /* WH Name */
-        th:nth-child(5), td:nth-child(5) { width: 4%; } /* Period From */
-        th:nth-child(6), td:nth-child(6) { width: 4%; } /* Period To */
-        th:nth-child(7), td:nth-child(7) { width: 4%; } /* Doc No */
-        th:nth-child(8), td:nth-child(8) { width: 3%; } /* Cancelled */
-        th:nth-child(9), td:nth-child(9) { width: 3%; } /* Doc Type */
-        th:nth-child(10), td:nth-child(10) { width: 4%; } /* OR No */
-        th:nth-child(11), td:nth-child(11) { width: 4%; } /* AI No */
-        th:nth-child(12), td:nth-child(12) { width: 4%; } /* Ref WSI */
-        th:nth-child(13), td:nth-child(13) { width: 5%; } /* Recd/Issd */
-        th:nth-child(14), td:nth-child(14) { width: 4%; } /* Date */
-        th:nth-child(15), td:nth-child(15) { width: 4%; } /* Activity */
-        th:nth-child(16), td:nth-child(16) { width: 4%; } /* Variety */
-        th:nth-child(17), td:nth-child(17) { width: 3%; } /* Sack */
-        th:nth-child(18), td:nth-child(18) { width: 3%; } /* Cond */
-        th:nth-child(19), td:nth-child(19) { width: 3%; } /* Sack Wt */
-        th:nth-child(20), td:nth-child(20) { width: 3%; } /* Age */
-        th:nth-child(21), td:nth-child(21) { width: 3%; } /* Pile */
-        th:nth-child(22), td:nth-child(22) { width: 3%; } /* Bags */
-        th:nth-child(23), td:nth-child(23) { width: 4%; } /* Gross */
-        th:nth-child(24), td:nth-child(24) { width: 3%; } /* MC% */
-        th:nth-child(25), td:nth-child(25) { width: 4%; } /* Net Wt */
+        /* Set specific column widths */
+        th:nth-child(1), td:nth-child(1) { width: 8%; } /* Date */
+        th:nth-child(2), td:nth-child(2) { width: 15%; } /* Received From */
+        th:nth-child(3), td:nth-child(3) { width: 8%; } /* Variety */
+        th:nth-child(4), td:nth-child(4) { width: 10%; } /* WSER/WSI No */
+        th:nth-child(5), td:nth-child(5) { width: 10%; } /* AI No */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* OR No */
+        th:nth-child(7), td:nth-child(7) { width: 12%; } /* MTS TYPE */
+        th:nth-child(8), td:nth-child(8) { width: 7%; } /* Bags */
+        th:nth-child(9), td:nth-child(9) { width: 10%; } /* Gross WT */
+        th:nth-child(10), td:nth-child(10) { width: 10%; } /* Net WT */
+        th:nth-child(11), td:nth-child(11) { width: 7%; } /* MC % */
 
         .loading {
             text-align: center;
@@ -217,12 +203,12 @@
             }
 
             table {
-                font-size: 5.5px;
+                font-size: 7px;
             }
 
             th, td {
-                padding: 2px 1px;
-                font-size: 5.5px;
+                padding: 3px 2px;
+                font-size: 7px;
             }
 
             .header-text h1 {
@@ -252,7 +238,7 @@
             <img src="images/nfa.png" alt="NFA Logo" class="logo">
             <div class="header-text">
                 <h1>NATIONAL FOOD AUTHORITY</h1>
-                <p>Rice Inventory Transaction Report</p>
+                <p>Statement of Palay Received from Procurement</p>
             </div>
         </div>
 
@@ -262,60 +248,46 @@
                 <span class="info-value" id="officerName">Multiple Officers</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Report Generated:</span>
+                <span class="info-label">Rundate:</span>
                 <span class="info-value" id="reportDate"></span>
             </div>
             <div class="info-item">
-                <span class="info-label">Warehouse Name:</span>
+                <span class="info-label">Warehouse Name & Location:</span>
                 <span class="info-value" id="warehouseName">Multiple Warehouses</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Total Transactions:</span>
-                <span class="info-value" id="totalTransactions">0</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Warehouse Location:</span>
-                <span class="info-value" id="warehouseLocation">Various Locations</span>
+                <span class="info-label">Page:</span>
+                <span class="info-value" id="pageNumber">1</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Period Covered:</span>
                 <span class="info-value" id="periodCovered">N/A to N/A</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Transactions:</span>
+                <span class="info-value" id="totalTransactions">0</span>
             </div>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th>Officer ID</th>
-                    <th>Officer Name</th>
-                    <th>WH ID</th>
-                    <th>WH Name</th>
-                    <th>Period From</th>
-                    <th>Period To</th>
-                    <th>Doc No.</th>
-                    <th>Cancelled</th>
-                    <th>Doc Type</th>
-                    <th>OR No.</th>
-                    <th>AI No.</th>
-                    <th>Ref WSI</th>
-                    <th>Recd/Issd</th>
-                    <th>Date</th>
-                    <th>Activity</th>
-                    <th>Variety</th>
-                    <th>Sack</th>
-                    <th>Cond.</th>
-                    <th>Sack Wt</th>
-                    <th>Age</th>
-                    <th>Pile</th>
-                    <th>Bags</th>
-                    <th>Gross</th>
-                    <th>MC%</th>
-                    <th>Net Wt</th>
+                    <th>DATE OF<br>TRANSACTION</th>
+                    <th>RECEIVED FROM</th>
+                    <th>VARIETY</th>
+                    <th>WSER NO. /<br>WSI NO</th>
+                    <th>AI NO</th>
+                    <th>OR NO</th>
+                    <th>MTS TYPE /<br>CCMD / WT.</th>
+                    <th>BAGS</th>
+                    <th>GROSS WT</th>
+                    <th>NET WT</th>
+                    <th>MC %</th>
                 </tr>
             </thead>
             <tbody id="previewBody">
                 <tr>
-                    <td colspan="25" class="loading">Loading transactions...</td>
+                    <td colspan="11" class="loading">Loading transactions...</td>
                 </tr>
             </tbody>
         </table>
@@ -352,6 +324,16 @@
         }
         const database = firebase.database();
 
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const officerId = urlParams.get('officerId');
+        const officerName = urlParams.get('officerName');
+        const warehouseId = urlParams.get('warehouseId');
+        const warehouseName = urlParams.get('warehouseName');
+        const warehouseLocation = urlParams.get('warehouseLocation');
+        const periodFrom = urlParams.get('periodFrom');
+        const periodTo = urlParams.get('periodTo');
+
         // Set report date with real-time update
         function updateDateTime() {
             const now = new Date();
@@ -374,54 +356,63 @@
         function loadTransactionsForPreview() {
             const tbody = document.getElementById('previewBody');
             
+            // Update header information
+            if (officerName) {
+                document.getElementById('officerName').textContent = officerName;
+            }
+            if (warehouseName && warehouseLocation) {
+                document.getElementById('warehouseName').textContent = `${warehouseName}, ${warehouseLocation}`;
+            } else if (warehouseName) {
+                document.getElementById('warehouseName').textContent = warehouseName;
+            }
+            if (periodFrom && periodTo) {
+                document.getElementById('periodCovered').textContent = `${periodFrom} to ${periodTo}`;
+            }
+            
             database.ref('transactions').once('value').then((snapshot) => {
                 tbody.innerHTML = '';
                 
                 if (!snapshot.exists()) {
-                    tbody.innerHTML = '<tr><td colspan="25" style="text-align:center;">No transactions found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No transactions found</td></tr>';
                     return;
                 }
 
                 const transactions = [];
-                const officers = new Set();
-                const warehouses = new Set();
-                const periods = [];
+                const fromDate = periodFrom ? new Date(periodFrom) : null;
+                const toDate = periodTo ? new Date(periodTo) : null;
 
                 snapshot.forEach((childSnapshot) => {
                     const data = childSnapshot.val();
+                    
+                    // Filter by officer and warehouse if parameters are provided
+                    if (officerId && data.officerId !== officerId) return;
+                    if (warehouseId && data.warehouseId !== warehouseId) return;
+                    
+                    // Filter by date range
+                    if (fromDate && toDate && data.transactionDate) {
+                        const transDate = new Date(data.transactionDate);
+                        if (transDate < fromDate || transDate > toDate) return;
+                    }
+                    
                     transactions.push({
                         id: childSnapshot.key,
                         data: data
                     });
-                    
-                    if (data.officerName) officers.add(data.officerName);
-                    if (data.warehouseName) warehouses.add(data.warehouseName);
-                    if (data.periodFrom) periods.push(data.periodFrom);
-                    if (data.periodTo) periods.push(data.periodTo);
                 });
 
-                // Update summary info
+                // Update transaction count
                 document.getElementById('totalTransactions').textContent = transactions.length;
-                
-                if (officers.size === 1) {
-                    document.getElementById('officerName').textContent = Array.from(officers)[0];
-                }
-                
-                if (warehouses.size === 1) {
-                    document.getElementById('warehouseName').textContent = Array.from(warehouses)[0];
-                }
 
-                if (periods.length > 0) {
-                    periods.sort();
-                    document.getElementById('periodCovered').textContent = 
-                        `${periods[0]} to ${periods[periods.length - 1]}`;
+                if (transactions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No transactions found for the selected period</td></tr>';
+                    return;
                 }
 
                 // Sort by date
                 transactions.sort((a, b) => {
                     const dateA = new Date(a.data.transactionDate || '1900-01-01');
                     const dateB = new Date(b.data.transactionDate || '1900-01-01');
-                    return dateB - dateA;
+                    return dateA - dateB; // Oldest first for reports
                 });
 
                 transactions.forEach((item) => {
@@ -429,36 +420,22 @@
                     
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${data.officerId || '-'}</td>
-                        <td>${data.officerName || '-'}</td>
-                        <td>${data.warehouseId || '-'}</td>
-                        <td>${data.warehouseName || '-'}</td>
-                        <td>${data.periodFrom || '-'}</td>
-                        <td>${data.periodTo || '-'}</td>
-                        <td>${data.documentNo || '-'}</td>
-                        <td>${data.cancelled ? 'Yes' : 'No'}</td>
-                        <td>${data.documentType || '-'}</td>
-                        <td>${data.orNo || '-'}</td>
-                        <td>${data.aiNo || '-'}</td>
-                        <td>${data.refWSINo || '-'}</td>
-                        <td>${data.recdFromIssdTo || '-'}</td>
                         <td>${data.transactionDate || '-'}</td>
-                        <td>${data.activityCode || '-'}</td>
+                        <td>${data.recdFromIssdTo || '-'}</td>
                         <td>${data.varietyCode || '-'}</td>
-                        <td>${data.sackCode || '-'}</td>
-                        <td>${data.sackCondition || '-'}</td>
-                        <td>${data.sackWeight || '-'}</td>
-                        <td>${data.age || '-'}</td>
-                        <td>${data.pileNo || '-'}</td>
+                        <td>${data.refWSINo || data.documentNo || '-'}</td>
+                        <td>${data.aiNo || '-'}</td>
+                        <td>${data.orNo || '-'}</td>
+                        <td>${data.documentType || '-'}</td>
                         <td>${data.numberOfBags || '-'}</td>
                         <td>${data.grossWeight || '-'}</td>
-                        <td>${data.moistureContent || '-'}</td>
                         <td>${data.netWeight || '-'}</td>
+                        <td>${data.moistureContent || '-'}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             }).catch((error) => {
-                tbody.innerHTML = '<tr><td colspan="25" style="text-align:center;">Error loading transactions</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Error loading transactions</td></tr>';
             });
         }
 

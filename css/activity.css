@@ -159,13 +159,14 @@
             color: white;
         }
 
-        thead th {
+       thead th {
             padding: 1rem;
             text-align: left;
             font-weight: 600;
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         tbody tr {
@@ -199,6 +200,7 @@
             cursor: pointer;
             padding: 0.5rem;
             color: #666;
+            margin-right: 50px;
             font-size: 1.2rem;
             transition: color 0.3s ease;
         }

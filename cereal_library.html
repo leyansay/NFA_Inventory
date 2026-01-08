@@ -92,8 +92,11 @@
                         <select class="form-select" id="computeTAFor" required>
                             <option value="">-- Select Option --</option>
                             <option value="TOTAL WEIGHT LOSS">Total Weight Loss</option>
-                            <option value="NET WEIGHT">Net Weight</option>
-                            <option value="GROSS WEIGHT">Gross Weight</option>
+                            <option value="MC">MC</option>
+                            <option value="Shrinkage Estimation Protocol">Shrinkage Estimation Protocol</option>
+                            <option value="Insect Infestation">Insect Infestation</option>
+                            <option value="Bird Infestation">Bird Infestation</option>
+                            <option value="Rodent Infestation">Rodent Infestation</option>
                         </select>
                     </div>
 
@@ -290,7 +293,6 @@
                     <td>${data.cerealCode || '-'}</td>
                     <td>${data.description || '-'}</td>
                     <td>${data.computeTAFor || '-'}</td>
-<<<<<<< HEAD
 
                     <td class="actions-cell">
                         <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
@@ -301,13 +303,6 @@
                             <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
                                 <span>🗑️</span> Delete
                             </button>
-=======
-                    <td class="actions-cell">
-                        <button class="action-btn" data-doc-id="${docId}">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">Edit</button>
-                            <button class="dropdown-item" data-action="delete" data-doc-id="${docId}">Delete</button>
->>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
                         </div>
                     </td>
                 `;

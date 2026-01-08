@@ -54,7 +54,7 @@
                         <th>ABBREVIATION</th>
                         <th>INCLUDE IN TA</th>
                         <th>IN-WHSE. ACT.</th>
-                        <th></th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="activityTableBody">
@@ -308,7 +308,6 @@
                     <td>${data.includeTA || '-'}</td>
                     <td>${data.inWhse || '-'}</td>
                     <td class="actions-cell">
-<<<<<<< HEAD
                         <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
                         <div class="dropdown-menu">
                             <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
@@ -317,12 +316,6 @@
                             <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
                                 <span>🗑️</span> Delete
                             </button>
-=======
-                        <button class="action-btn" data-doc-id="${docId}">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">Edit</button>
-                            <button class="dropdown-item" data-action="delete" data-doc-id="${docId}">Delete</button>
->>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
                         </div>
                     </td>
                 `;

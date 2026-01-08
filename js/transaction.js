@@ -66,11 +66,25 @@ function loadDropdownOptions() {
         const select = document.getElementById('recdFromIssdTo');
         select.innerHTML = '<option value="">Select</option>';
         if (snapshot.exists()) {
+            const locations = [];
             snapshot.forEach((child) => {
                 const data = child.val();
+                // Use province name if available, fallback to other name fields
+                const displayName = data.province || data.provinceName || data.locationName || data.name || data.location || child.key;
+                locations.push({
+                    value: displayName,
+                    text: displayName
+                });
+            });
+            
+            // Sort alphabetically
+            locations.sort((a, b) => a.text.localeCompare(b.text));
+            
+            // Add to dropdown
+            locations.forEach(loc => {
                 const option = document.createElement('option');
-                option.value = data.locationName || data.name || data.location || child.key;
-                option.textContent = data.locationName || data.name || data.location || child.key;
+                option.value = loc.value;
+                option.textContent = loc.text;
                 select.appendChild(option);
             });
         }
@@ -137,6 +151,172 @@ function loadOfficersFromFirebase() {
     });
 }
 
+/* LOAD OFFICERS FOR PREVIEW */
+let officersData = {};
+let transactionsData = {};
+let warehousesData = {};
+
+function loadPreviewData() {
+    // Load all necessary data when preview modal opens
+    Promise.all([
+        database.ref('accountableOfficers').once('value'),
+        database.ref('transactions').once('value'),
+        database.ref('warehouses').once('value')
+    ]).then(([officersSnapshot, transactionsSnapshot, warehousesSnapshot]) => {
+        
+        // Store officers data
+        officersData = {};
+        if (officersSnapshot.exists()) {
+            officersSnapshot.forEach((child) => {
+                const data = child.val();
+                const key = `${data.officerId}_${data.warehouse}`;
+                officersData[data.officerId] = data;
+            });
+        }
+
+        // Store warehouses data
+        warehousesData = {};
+        if (warehousesSnapshot.exists()) {
+            warehousesSnapshot.forEach((child) => {
+                const data = child.val();
+                warehousesData[data.warehouseId] = data.location || '-';
+            });
+        }
+
+        // Store transactions data
+        transactionsData = {};
+        if (transactionsSnapshot.exists()) {
+            transactionsSnapshot.forEach((child) => {
+                const data = child.val();
+                const key = `${data.officerId}_${data.warehouseId}`;
+                if (!transactionsData[key]) {
+                    transactionsData[key] = [];
+                }
+                transactionsData[key].push(data);
+            });
+        }
+
+        setupPreviewForm();
+    }).catch((error) => {
+        console.error('Error loading preview data:', error);
+        alert('Error loading data. Please try again.');
+    });
+}
+
+function setupPreviewForm() {
+    const officerIdInput = document.getElementById('previewOfficerId');
+    const officerNameInput = document.getElementById('previewOfficerName');
+    const warehouseNameInput = document.getElementById('previewWarehouseName');
+    const warehouseLocationInput = document.getElementById('previewWarehouseLocation');
+    const periodFromInput = document.getElementById('previewPeriodFrom');
+    const periodToInput = document.getElementById('previewPeriodTo');
+    const transactionCountInput = document.getElementById('previewTransactionCount');
+
+    // Listen for officer ID input
+    officerIdInput.addEventListener('input', function() {
+        const officerId = this.value.trim();
+        
+        if (officerId && officersData[officerId]) {
+            const officer = officersData[officerId];
+            
+            // Populate officer details
+            const fullName = `${officer.lastName || ''}, ${officer.firstName || ''} ${officer.middleName || ''}`.trim();
+            officerNameInput.value = fullName;
+            warehouseNameInput.value = officer.warehouseName || '-';
+            warehouseLocationInput.value = warehousesData[officer.warehouse] || '-';
+            
+            // Set default period if available
+            if (officer.fromDate) {
+                periodFromInput.value = officer.fromDate;
+            }
+            if (officer.toDate) {
+                periodToInput.value = officer.toDate;
+            }
+            
+            // Update transaction count
+            updateTransactionCount();
+        } else {
+            // Clear fields if officer not found
+            officerNameInput.value = '';
+            warehouseNameInput.value = '';
+            warehouseLocationInput.value = '';
+            transactionCountInput.value = '0 transactions';
+        }
+    });
+
+    // Listen for period changes to update transaction count
+    periodFromInput.addEventListener('change', updateTransactionCount);
+    periodToInput.addEventListener('change', updateTransactionCount);
+
+    function updateTransactionCount() {
+        const officerId = officerIdInput.value.trim();
+        
+        if (officerId && officersData[officerId]) {
+            const officer = officersData[officerId];
+            const key = `${officerId}_${officer.warehouse}`;
+            const transactions = transactionsData[key] || [];
+            
+            const periodFrom = periodFromInput.value;
+            const periodTo = periodToInput.value;
+            
+            if (periodFrom && periodTo) {
+                // Filter transactions by date range
+                const fromDate = new Date(periodFrom);
+                const toDate = new Date(periodTo);
+                
+                const filteredTransactions = transactions.filter(t => {
+                    if (!t.transactionDate) return false;
+                    const transDate = new Date(t.transactionDate);
+                    return transDate >= fromDate && transDate <= toDate;
+                });
+                
+                transactionCountInput.value = `${filteredTransactions.length} transaction(s) in selected period`;
+            } else {
+                transactionCountInput.value = `${transactions.length} total transaction(s)`;
+            }
+        }
+    }
+}
+
+/* HANDLE PREVIEW FORM SUBMISSION */
+document.getElementById('previewForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const officerId = document.getElementById('previewOfficerId').value.trim();
+    const officerName = document.getElementById('previewOfficerName').value;
+    const warehouseName = document.getElementById('previewWarehouseName').value;
+    const warehouseLocation = document.getElementById('previewWarehouseLocation').value;
+    const periodFrom = document.getElementById('previewPeriodFrom').value;
+    const periodTo = document.getElementById('previewPeriodTo').value;
+    
+    if (!officerId || !officerName || !periodFrom || !periodTo) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    const officer = officersData[officerId];
+    if (!officer) {
+        alert('Officer not found. Please enter a valid Officer ID.');
+        return;
+    }
+
+    const params = new URLSearchParams({
+        officerId: officerId,
+        officerName: officerName,
+        warehouseId: officer.warehouse,
+        warehouseName: warehouseName,
+        warehouseLocation: warehouseLocation,
+        periodFrom: periodFrom,
+        periodTo: periodTo
+    });
+    
+    window.open(`transaction_preview_modified.html?${params.toString()}`, '_blank');
+    document.getElementById('previewModal').classList.remove('active');
+    
+    // Reset form
+    this.reset();
+});
+
 /* OPEN OFFICER MODAL */
 document.getElementById("addTransaction").onclick = () => {
     loadOfficersFromFirebase();
@@ -145,15 +325,16 @@ document.getElementById("addTransaction").onclick = () => {
 };
 
 document.getElementById("previewTransaction").onclick = () => {
-<<<<<<< HEAD
-    window.open("transaction_preview.html", "_blank");
-=======
-    window.open("preview.html", "_blank");
->>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
+    loadPreviewData();
+    document.getElementById('previewModal').classList.add('active');
 };
 
 document.getElementById("closeOfficer").onclick = () => {
     document.getElementById('officerModal').classList.remove('active');
+};
+
+document.getElementById("closePreview").onclick = () => {
+    document.getElementById('previewModal').classList.remove('active');
 };
 
 document.getElementById("closeTransaction").onclick = () => {
