@@ -19,95 +19,235 @@ console.log("Firebase initialized:", firebase.apps.length > 0);
 let allTransactions = [];
 let currentSortOrder = 'newest';
 
+// Store all data for table modals
+let activitiesData = [];
+let sacksData = [];
+let locationsData = [];
+let varietiesData = [];
+
 function closeAllDropdowns() {
     document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
 }
 
 /* LOAD DROPDOWN OPTIONS */
 function loadDropdownOptions() {
+    // Load activities
     database.ref('activities').once('value').then((snapshot) => {
-        const select = document.getElementById('activityCode');
-        select.innerHTML = '<option value="">Select</option>';
+        activitiesData = [];
         if (snapshot.exists()) {
-            const activities = [];
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.activityCode) activities.push({ code: data.activityCode });
+                if (data.activityCode) {
+                    activitiesData.push({
+                        code: data.activityCode,
+                        description: data.description || data.activityDescription || '-',
+                        abbreviation: data.abbreviation ||'-',
+                        includeTA: data.includeTA ||'-',
+                        inWhse: data.inWhse ||'-'
+                    });
+                }
             });
-            activities.sort((a, b) => a.code.localeCompare(b.code));
-            activities.forEach(activity => {
-                const option = document.createElement('option');
-                option.value = activity.code;
-                option.textContent = activity.code;
-                select.appendChild(option);
-            });
+            activitiesData.sort((a, b) => a.code.localeCompare(b.code));
         }
     });
 
+    // Load sacks
     database.ref('sacks').once('value').then((snapshot) => {
-        const selectCode = document.getElementById('sackCode');
-        selectCode.innerHTML = '<option value="">Select</option>';
+        sacksData = [];
         if (snapshot.exists()) {
-            const sackCodes = new Set();
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.sackCode) sackCodes.add(data.sackCode);
+                if (data.sackCode) {
+                    sacksData.push({
+                        code: data.sackCode,
+                        brandNew: data.brandNew || 0,
+                        secondHand: data.secondHand || 0,
+                        mendable: data.mendable || 0
+                    });
+                }
             });
-            Array.from(sackCodes).sort().forEach(code => {
-                const option = document.createElement('option');
-                option.value = code;
-                option.textContent = code;
-                selectCode.appendChild(option);
-            });
+            sacksData.sort((a, b) => a.code.localeCompare(b.code));
         }
     });
 
+    // Load locations
     database.ref('locations').once('value').then((snapshot) => {
-        const select = document.getElementById('recdFromIssdTo');
-        select.innerHTML = '<option value="">Select</option>';
+        locationsData = [];
         if (snapshot.exists()) {
-            const locations = [];
             snapshot.forEach((child) => {
                 const data = child.val();
-                // Use province name if available, fallback to other name fields
-                const displayName = data.province || data.provinceName || data.locationName || data.name || data.location || child.key;
-                locations.push({
-                    value: displayName,
-                    text: displayName
+                const displayName = data.abbreviation || data.provinceName || data.locationCode || data.name || data.location || child.key;
+                locationsData.push({
+                    abbreviation: displayName,
+                    locationCode: data.locationCode || '-',
+                    provinceName: data.provinceName || '-'
                 });
             });
-            
-            // Sort alphabetically
-            locations.sort((a, b) => a.text.localeCompare(b.text));
-            
-            // Add to dropdown
-            locations.forEach(loc => {
-                const option = document.createElement('option');
-                option.value = loc.value;
-                option.textContent = loc.text;
-                select.appendChild(option);
-            });
+            locationsData.sort((a, b) => a.name.localeCompare(b.name));
         }
     });
 
+    // Load varieties
     database.ref('varieties').once('value').then((snapshot) => {
-        const select = document.getElementById('varietyCode');
-        select.innerHTML = '<option value="">Select</option>';
+        varietiesData = [];
         if (snapshot.exists()) {
-            const varieties = [];
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.varietyCode) varieties.push({ code: data.varietyCode });
+                if (data.varietyCode) {
+                    varietiesData.push({
+                        code: data.varietyCode,
+                        description: data.description || data.varietyDescription || '-',
+                        cerealType:data.cerealType || "-"
+                    });
+                }
             });
-            varieties.sort((a, b) => a.code.localeCompare(b.code));
-            varieties.forEach(variety => {
-                const option = document.createElement('option');
-                option.value = variety.code;
-                option.textContent = variety.code;
-                select.appendChild(option);
-            });
+            varietiesData.sort((a, b) => a.code.localeCompare(b.code));
         }
     });
+}
+
+/* CREATE SELECTION MODALS */
+function createSelectionModal(title, columns, data, onSelect) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('selectionModal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'selectionModal';
+    modal.className = 'modal active';
+    
+    let tableHeaders = columns.map(col => `<th>${col.label}</th>`).join('');
+    let tableRows = data.map((item, index) => {
+        let cells = columns.map(col => `<td>${item[col.key]}</td>`).join('');
+        return `<tr class="selectable-row" data-index="${index}">${cells}</tr>`;
+    }).join('');
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">${title}</h2>
+                <button class="close-btn" id="closeSelectionModal">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="selectionSearch" class="form-input" placeholder="Search..." style="margin-bottom: 15px;">
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="officer-table">
+                        <thead>
+                            <tr>${tableHeaders}</tr>
+                        </thead>
+                        <tbody id="selectionTableBody">
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close button
+    document.getElementById('closeSelectionModal').onclick = () => modal.remove();
+
+    // Search functionality
+    const searchInput = document.getElementById('selectionSearch');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#selectionTableBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Row selection
+    document.querySelectorAll('.selectable-row').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            onSelect(data[index]);
+            modal.remove();
+        });
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f0f0f0';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+}
+
+/* SHOW ACTIVITY SELECTION */
+function showActivitySelection() {
+    createSelectionModal(
+        'Select Activity Code',
+        [
+            { label: 'Activity Code', key: 'code' },
+            { label: 'Description', key: 'description' },
+            { label: 'Abbreviation', key: 'abbreviation' },
+            { label: 'Include In TA', key: 'includeTA' },
+            { label: 'In-Whse. Act.', key: 'inWhse' }
+            
+
+            
+        ],
+        activitiesData,
+        (selected) => {
+            document.getElementById('activityCode').value = selected.code;
+        }
+    );
+}
+
+/* SHOW SACK SELECTION */
+function showSackSelection() {
+    createSelectionModal(
+        'Select Sack Code',
+        [
+            { label: 'Sack Code', key: 'code' },
+            { label: 'Brand New', key: 'brandNew' },
+            { label: 'Second Hand', key: 'secondHand' },
+            { label: 'Mendable', key: 'mendable' }
+        ],
+        sacksData,
+        (selected) => {
+            document.getElementById('sackCode').value = selected.code;
+            document.getElementById('sackCondition').disabled = false;
+            document.getElementById('sackCondition').value = '';
+            document.getElementById('sackWeight').value = '';
+        }
+    );
+}
+
+/* SHOW LOCATION SELECTION */
+function showLocationSelection() {
+    createSelectionModal(
+        'Select Location',
+        [
+            { label: 'Location Code', key: 'locationCode'},
+            { label: 'Province Name', key: 'provinceName' },
+            { label: 'Abbreviation', key: 'abbreviation' }
+        ],
+        locationsData,
+        (selected) => {
+            document.getElementById('recdFromIssdTo').value = selected.name;
+        }
+    );
+}
+
+/* SHOW VARIETY SELECTION */
+function showVarietySelection() {
+    createSelectionModal(
+        'Select Variety Code',
+        [
+            { label: 'Variety Code', key: 'code' },
+            { label: 'Description', key: 'description' },
+            { label: 'Cereal Type', key: 'cerealType' }
+        ],
+        varietiesData,
+        (selected) => {
+            document.getElementById('varietyCode').value = selected.code;
+        }
+    );
 }
 
 /* LOAD OFFICERS */
@@ -157,24 +297,20 @@ let transactionsData = {};
 let warehousesData = {};
 
 function loadPreviewData() {
-    // Load all necessary data when preview modal opens
     Promise.all([
         database.ref('accountableOfficers').once('value'),
         database.ref('transactions').once('value'),
         database.ref('warehouses').once('value')
     ]).then(([officersSnapshot, transactionsSnapshot, warehousesSnapshot]) => {
         
-        // Store officers data
         officersData = {};
         if (officersSnapshot.exists()) {
             officersSnapshot.forEach((child) => {
                 const data = child.val();
-                const key = `${data.officerId}_${data.warehouse}`;
                 officersData[data.officerId] = data;
             });
         }
 
-        // Store warehouses data
         warehousesData = {};
         if (warehousesSnapshot.exists()) {
             warehousesSnapshot.forEach((child) => {
@@ -183,7 +319,6 @@ function loadPreviewData() {
             });
         }
 
-        // Store transactions data
         transactionsData = {};
         if (transactionsSnapshot.exists()) {
             transactionsSnapshot.forEach((child) => {
@@ -210,72 +345,30 @@ function setupPreviewForm() {
     const warehouseLocationInput = document.getElementById('previewWarehouseLocation');
     const periodFromInput = document.getElementById('previewPeriodFrom');
     const periodToInput = document.getElementById('previewPeriodTo');
-    const transactionCountInput = document.getElementById('previewTransactionCount');
 
-    // Listen for officer ID input
     officerIdInput.addEventListener('input', function() {
         const officerId = this.value.trim();
         
         if (officerId && officersData[officerId]) {
             const officer = officersData[officerId];
             
-            // Populate officer details
             const fullName = `${officer.lastName || ''}, ${officer.firstName || ''} ${officer.middleName || ''}`.trim();
             officerNameInput.value = fullName;
             warehouseNameInput.value = officer.warehouseName || '-';
             warehouseLocationInput.value = warehousesData[officer.warehouse] || '-';
             
-            // Set default period if available
             if (officer.fromDate) {
                 periodFromInput.value = officer.fromDate;
             }
             if (officer.toDate) {
                 periodToInput.value = officer.toDate;
             }
-            
-            // Update transaction count
-            updateTransactionCount();
         } else {
-            // Clear fields if officer not found
             officerNameInput.value = '';
             warehouseNameInput.value = '';
             warehouseLocationInput.value = '';
-            transactionCountInput.value = '0 transactions';
         }
     });
-
-    // Listen for period changes to update transaction count
-    periodFromInput.addEventListener('change', updateTransactionCount);
-    periodToInput.addEventListener('change', updateTransactionCount);
-
-    function updateTransactionCount() {
-        const officerId = officerIdInput.value.trim();
-        
-        if (officerId && officersData[officerId]) {
-            const officer = officersData[officerId];
-            const key = `${officerId}_${officer.warehouse}`;
-            const transactions = transactionsData[key] || [];
-            
-            const periodFrom = periodFromInput.value;
-            const periodTo = periodToInput.value;
-            
-            if (periodFrom && periodTo) {
-                // Filter transactions by date range
-                const fromDate = new Date(periodFrom);
-                const toDate = new Date(periodTo);
-                
-                const filteredTransactions = transactions.filter(t => {
-                    if (!t.transactionDate) return false;
-                    const transDate = new Date(t.transactionDate);
-                    return transDate >= fromDate && transDate <= toDate;
-                });
-                
-                transactionCountInput.value = `${filteredTransactions.length} transaction(s) in selected period`;
-            } else {
-                transactionCountInput.value = `${transactions.length} total transaction(s)`;
-            }
-        }
-    }
 }
 
 /* HANDLE PREVIEW FORM SUBMISSION */
@@ -310,14 +403,13 @@ document.getElementById('previewForm')?.addEventListener('submit', function(e) {
         periodTo: periodTo
     });
     
-    window.open(`transaction_preview_modified.html?${params.toString()}`, '_blank');
+    window.open(`transaction_preview.html?${params.toString()}`, '_blank');
     document.getElementById('previewModal').classList.remove('active');
     
-    // Reset form
     this.reset();
 });
 
-/* OPEN OFFICER MODAL */
+/* OPEN MODALS */
 document.getElementById("addTransaction").onclick = () => {
     loadOfficersFromFirebase();
     loadDropdownOptions();
@@ -358,49 +450,59 @@ function attachOfficerSelectListeners() {
             document.getElementById('officerModal').classList.remove('active');
             document.getElementById('transactionModal').classList.add('active');
             setupSackInteraction();
+            setupFieldClickHandlers();
         });
     });
 }
 
+/* SETUP FIELD CLICK HANDLERS */
+function setupFieldClickHandlers() {
+    // Activity Code
+    const activityInput = document.getElementById('activityCode');
+    activityInput.style.cursor = 'pointer';
+    activityInput.readOnly = true;
+    activityInput.onclick = () => showActivitySelection();
+
+    // Sack Code
+    const sackInput = document.getElementById('sackCode');
+    sackInput.style.cursor = 'pointer';
+    sackInput.readOnly = true;
+    sackInput.onclick = () => showSackSelection();
+
+    // Location
+    const locationInput = document.getElementById('recdFromIssdTo');
+    locationInput.style.cursor = 'pointer';
+    locationInput.readOnly = true;
+    locationInput.onclick = () => showLocationSelection();
+
+    // Variety Code
+    const varietyInput = document.getElementById('varietyCode');
+    varietyInput.style.cursor = 'pointer';
+    varietyInput.readOnly = true;
+    varietyInput.onclick = () => showVarietySelection();
+}
+
 /* SACK INTERACTION */
 function setupSackInteraction() {
-    const sackCodeSelect = document.getElementById('sackCode');
     const sackConditionSelect = document.getElementById('sackCondition');
     const sackWeightInput = document.getElementById('sackWeight');
-    
-    sackCodeSelect.addEventListener('change', function() {
-        if (this.value) {
-            sackConditionSelect.disabled = false;
-            sackConditionSelect.value = "";
-            sackWeightInput.value = "";
-        } else {
-            sackConditionSelect.disabled = true;
-            sackConditionSelect.value = "";
-            sackWeightInput.value = "";
-        }
-    });
+    const sackCodeInput = document.getElementById('sackCode');
     
     sackConditionSelect.addEventListener('change', function() {
-        const selectedCode = sackCodeSelect.value;
+        const selectedCode = sackCodeInput.value;
         const selectedCondition = this.value;
         
         if (selectedCode && selectedCondition) {
-            database.ref('sacks').once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const data = child.val();
-                        if (data.sackCode === selectedCode) {
-                            let weight = 0;
-                            if (selectedCondition === 'Brand New') weight = data.brandNew || 0;
-                            else if (selectedCondition === 'Second Hand') weight = data.secondHand || 0;
-                            else if (selectedCondition === 'Mendable') weight = data.mendable || 0;
-                            
-                            sackWeightInput.value = weight;
-                            computeNetWeight();
-                        }
-                    });
-                }
-            });
+            const sack = sacksData.find(s => s.code === selectedCode);
+            if (sack) {
+                let weight = 0;
+                if (selectedCondition === 'Brand New') weight = sack.brandNew || 0;
+                else if (selectedCondition === 'Second Hand') weight = sack.secondHand || 0;
+                else if (selectedCondition === 'Mendable') weight = sack.mendable || 0;
+                
+                sackWeightInput.value = weight;
+                computeNetWeight();
+            }
         } else {
             sackWeightInput.value = "";
             computeNetWeight();
@@ -458,7 +560,6 @@ document.getElementById("transactionForm").onsubmit = e => {
         timestamp: Date.now()
     };
 
-    // Validation
     document.querySelectorAll('input, select').forEach(field => field.style.border = '');
     
     if (!transactionData.refWSINo) {
@@ -682,6 +783,7 @@ function editTransaction(docId) {
             
             document.getElementById("transactionForm").setAttribute('data-edit-id', docId);
             setupSackInteraction();
+            setupFieldClickHandlers();
             document.getElementById('transactionModal').classList.add('active');
         }, 300);
     });

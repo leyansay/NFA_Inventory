@@ -147,6 +147,7 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding-bottom: 75px;
         }
 
         table {
@@ -193,12 +194,13 @@
             position: relative;
         }
 
-        .action-btn {
+.action-btn {
             background: none;
             border: none;
             cursor: pointer;
             padding: 0.5rem;
             color: #666;
+            margin-right: 50px;
             font-size: 1.2rem;
             transition: color 0.3s ease;
         }
@@ -229,6 +231,10 @@
             transition: background-color 0.2s ease;
             color: #333;
             font-size: 0.9rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
         }
 
         .dropdown-item:hover {
