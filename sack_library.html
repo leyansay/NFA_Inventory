@@ -292,6 +292,7 @@
         }
 
         // ===================== RENDER SACKS =====================
+<<<<<<< HEAD
 function renderSacks() {
     const tbody = document.getElementById('sackTableBody');
     tbody.innerHTML = '';
@@ -330,6 +331,41 @@ function renderSacks() {
 
     attachDropdownListeners();
 }
+=======
+        function renderSacks() {
+            const tbody = document.getElementById('sackTableBody');
+            tbody.innerHTML = '';
+
+            if (allSacks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No sacks found</td>
+                    </tr>`;
+                return;
+            }
+
+            allSacks.forEach(item => {
+                const d = item.data;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.sackCode || '-'}</td>
+                    <td>${d.brandNew !== undefined ? d.brandNew : '-'}</td>
+                    <td>${d.secondHand !== undefined ? d.secondHand : '-'}</td>
+                    <td>${d.mendable !== undefined ? d.mendable : '-'}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn" data-id="${item.id}">⋮</button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-action="edit" data-id="${item.id}">Edit</button>
+                            <button class="dropdown-item" data-action="delete" data-id="${item.id}">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            attachDropdownListeners();
+        }
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
 
         // ===================== DROPDOWN HANDLERS =====================
         function closeAllDropdowns() {
@@ -339,6 +375,7 @@ function renderSacks() {
         }
 
         function attachDropdownListeners() {
+<<<<<<< HEAD
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -366,6 +403,35 @@ function renderSacks() {
         });
     });
 }
+=======
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    const dropdown = btn.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = item.dataset.id;
+                    const action = item.dataset.action;
+                    
+                    closeAllDropdowns();
+                    
+                    if (action === 'edit') {
+                        editSack(id);
+                    } else if (action === 'delete') {
+                        if (confirm('Are you sure you want to delete this sack?')) {
+                            deleteSack(id);
+                        }
+                    }
+                });
+            });
+        }
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {

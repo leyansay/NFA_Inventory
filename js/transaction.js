@@ -145,7 +145,11 @@ document.getElementById("addTransaction").onclick = () => {
 };
 
 document.getElementById("previewTransaction").onclick = () => {
+<<<<<<< HEAD
     window.open("transaction_preview.html", "_blank");
+=======
+    window.open("preview.html", "_blank");
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
 };
 
 document.getElementById("closeOfficer").onclick = () => {

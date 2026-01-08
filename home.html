@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Dashboard</title>
+<<<<<<< HEAD
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+=======
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
     <style>
         * {
             margin: 0;
@@ -138,8 +141,11 @@
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
+<<<<<<< HEAD
             position: relative;
             overflow: hidden;
+=======
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         }
 
         .summary-card:hover {
@@ -180,6 +186,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             line-height: 1.2;
+<<<<<<< HEAD
             margin-bottom: 0.5rem;
         }
 
@@ -361,6 +368,8 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.2rem;
+=======
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         }
 
         @media (max-width: 1024px) {
@@ -384,10 +393,24 @@
             .summary-grid {
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             }
+<<<<<<< HEAD
 
             .charts-grid {
                 grid-template-columns: 1fr;
             }
+=======
+        }
+
+        .menu-toggle {
+            display: none;
+            background: #5b8dee;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         }
 
         @media (max-width: 768px) {
@@ -410,6 +433,7 @@
             .summary-grid {
                 grid-template-columns: 1fr;
             }
+<<<<<<< HEAD
 
             .comparison-item {
                 flex-direction: column;
@@ -446,6 +470,8 @@
 
         .trend-down {
             color: rgba(255, 255, 255, 0.95);
+=======
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         }
     </style>
 </head>
@@ -479,6 +505,7 @@
         
         <div class="summary-grid">
             <div class="summary-card yellow">
+<<<<<<< HEAD
                 <span class="card-icon">📦</span>
                 <div class="card-title">TOTAL RICE EQV'T (DDN)</div>
                 <div class="card-value">49,522</div>
@@ -679,14 +706,42 @@
                 <div class="chart-container">
                     <canvas id="budgetChart"></canvas>
                 </div>
+=======
+                <div class="card-title">TOTAL RICE EQV'T (DDN)</div>
+                <div class="card-value">49,522</div>
+            </div>
+            
+            <div class="summary-card red">
+                <div class="card-title">TOTAL RICE EQV'T (DDO)</div>
+                <div class="card-value">29,673</div>
+            </div>
+            
+            <div class="summary-card green">
+                <div class="card-title">DAILY CONSUMPTION RATE (DDN)</div>
+                <div class="card-value">8,690 / 3,000</div>
+            </div>
+            
+            <div class="summary-card green">
+                <div class="card-title">DAILY CONSUMPTION RATE 9(DDO)</div>
+                <div class="card-value">7,850</div>
+            </div>
+            
+            <div class="summary-card blue">
+                <div class="card-title">CEREAL PROC'T FUND</div>
+                <div class="card-value">9,969,378.94</div>
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
             </div>
         </div>
     </div>
 
+<<<<<<< HEAD
     <script src="jscript/user-auth.js"></script>
 
     <script>
         
+=======
+    <script>
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         // Toggle sidebar for mobile
         function toggleSidebar() {
             document.getElementById('sidebar-container').classList.toggle('open');
@@ -695,6 +750,7 @@
         // Search functionality
         document.querySelector('.search-bar input').addEventListener('input', function(e) {
             console.log('Searching for:', e.target.value);
+<<<<<<< HEAD
         });
 
         // Initialize Charts
@@ -823,6 +879,9 @@
                     }
                 }
             });
+=======
+            // Add your search logic here
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         });
 
         // Add animation on scroll
@@ -835,6 +894,7 @@
             });
         }, { threshold: 0.1 });
 
+<<<<<<< HEAD
         document.querySelectorAll('.summary-card, .stat-item, .chart-card, .comparison-section').forEach((element) => {
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
@@ -861,6 +921,13 @@
                     }, 100);
                 });
             }, 500);
+=======
+        document.querySelectorAll('.summary-card').forEach((card) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease-out';
+            observer.observe(card);
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
         });
     </script>
 </body>

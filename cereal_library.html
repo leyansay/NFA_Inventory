@@ -290,6 +290,7 @@
                     <td>${data.cerealCode || '-'}</td>
                     <td>${data.description || '-'}</td>
                     <td>${data.computeTAFor || '-'}</td>
+<<<<<<< HEAD
 
                     <td class="actions-cell">
                         <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
@@ -300,6 +301,13 @@
                             <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
                                 <span>🗑️</span> Delete
                             </button>
+=======
+                    <td class="actions-cell">
+                        <button class="action-btn" data-doc-id="${docId}">⋮</button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">Edit</button>
+                            <button class="dropdown-item" data-action="delete" data-doc-id="${docId}">Delete</button>
+>>>>>>> 058c9c9837a519a645a50093e48c5003c31d0e87
                         </div>
                     </td>
                 `;
