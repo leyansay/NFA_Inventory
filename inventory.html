@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Inventory</title>
     <link rel="stylesheet" href="css/inventory.css" />
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- Load Sidebar from separate file -->
@@ -58,9 +62,9 @@
                             <th>NET KG.</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="gid1-rice-body">
                         <tr>
-                            <td colspan="5" class="no-data">No rice data in GID 1</td>
+                            <td colspan="5" class="no-data">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -80,9 +84,9 @@
                             <th>NET KG.</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="gid2-rice-body">
                         <tr>
-                            <td colspan="5" class="no-data">No rice data in GID 2</td>
+                            <td colspan="5" class="no-data">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -103,9 +107,9 @@
                             <th>NET KG.</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="gid1-palay-body">
                         <tr>
-                            <td colspan="5" class="no-data">No palay data in GID 1</td>
+                            <td colspan="5" class="no-data">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -125,9 +129,9 @@
                             <th>NET KG.</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="gid2-palay-body">
                         <tr>
-                            <td colspan="5" class="no-data">No palay data in GID 2</td>
+                            <td colspan="5" class="no-data">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -136,7 +140,166 @@
     </div>
 
     <script>
-        let currentFilter = 'all'; // Track current filter state
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        let currentFilter = 'all';
+        let allInventoryData = {
+            'gid1-rice': [],
+            'gid2-rice': [],
+            'gid1-palay': [],
+            'gid2-palay': []
+        };
+
+        // Load inventory data from Firebase
+        function loadInventoryData() {
+            database.ref('transactions').on('value', (snapshot) => {
+                // Reset data
+                allInventoryData = {
+                    'gid1-rice': [],
+                    'gid2-rice': [],
+                    'gid1-palay': [],
+                    'gid2-palay': []
+                };
+
+                if (!snapshot.exists()) {
+                    renderAllTables();
+                    return;
+                }
+
+                // Group transactions by warehouse and cereal type
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    
+                    // Skip cancelled transactions
+                    if (data.cancelled) return;
+
+                    // Get variety info to determine cereal type
+                    const varietyCode = data.varietyCode || '';
+                    
+                    // Determine warehouse (GID 1 or GID 2)
+                    const warehouseId = data.warehouseId || '';
+                    
+                    // Create inventory item
+                    const inventoryItem = {
+                        pileNo: data.pileNo || '-',
+                        age: data.age || '-',
+                        variety: varietyCode,
+                        numberOfBags: parseFloat(data.numberOfBags) || 0,
+                        netWeight: parseFloat(data.netWeight) || 0
+                    };
+
+                    // You'll need to check variety cereal type from varieties table
+                    // For now, we'll add to all categories and filter later
+                    checkVarietyAndAddToInventory(varietyCode, warehouseId, inventoryItem);
+                });
+
+                renderAllTables();
+            });
+        }
+
+        // Check variety cereal type and add to appropriate inventory
+        function checkVarietyAndAddToInventory(varietyCode, warehouseId, inventoryItem) {
+            database.ref('varieties').once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const varietyData = child.val();
+                        if (varietyData.varietyCode === varietyCode) {
+                            const cerealType = (varietyData.cerealType || '').toLowerCase();
+                            const warehouse = warehouseId.toLowerCase();
+                            
+                            let key = '';
+                            if (warehouse.includes('gid 1') || warehouse === 'gid1') {
+                                if (cerealType === 'rice') key = 'gid1-rice';
+                                else if (cerealType === 'palay') key = 'gid1-palay';
+                            } else if (warehouse.includes('gid 2') || warehouse === 'gid2') {
+                                if (cerealType === 'rice') key = 'gid2-rice';
+                                else if (cerealType === 'palay') key = 'gid2-palay';
+                            }
+                            
+                            if (key) {
+                                allInventoryData[key].push(inventoryItem);
+                                renderTable(key);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Render a specific table
+        function renderTable(tableKey) {
+            const tbody = document.getElementById(`${tableKey}-body`);
+            const data = allInventoryData[tableKey];
+
+            // Group by pile number and variety
+            const grouped = {};
+            data.forEach(item => {
+                const key = `${item.pileNo}_${item.variety}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        pileNo: item.pileNo,
+                        age: item.age,
+                        variety: item.variety,
+                        totalBags: 0,
+                        totalNetWeight: 0
+                    };
+                }
+                grouped[key].totalBags += item.numberOfBags;
+                grouped[key].totalNetWeight += item.netWeight;
+            });
+
+            tbody.innerHTML = '';
+
+            if (Object.keys(grouped).length === 0) {
+                const type = tableKey.includes('rice') ? 'rice' : 'palay';
+                const gid = tableKey.includes('gid1') ? 'GID 1' : 'GID 2';
+                tbody.innerHTML = `<tr><td colspan="5" class="no-data">No ${type} data in ${gid}</td></tr>`;
+                return;
+            }
+
+            // Sort by pile number
+            const sortedData = Object.values(grouped).sort((a, b) => {
+                const pileA = parseInt(a.pileNo) || 0;
+                const pileB = parseInt(b.pileNo) || 0;
+                return pileA - pileB;
+            });
+
+            sortedData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.pileNo}</td>
+                    <td>${item.age}</td>
+                    <td>${item.variety}</td>
+                    <td>${item.totalBags.toFixed(0)}</td>
+                    <td>${item.totalNetWeight.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render all tables
+        function renderAllTables() {
+            Object.keys(allInventoryData).forEach(key => {
+                renderTable(key);
+            });
+        }
 
         // Filter by type (Rice or Palay)
         function filterByType(type) {
@@ -145,23 +308,18 @@
             const riceSections = document.querySelectorAll('.rice-section');
             const palaySections = document.querySelectorAll('.palay-section');
 
-            // Toggle filter
             if (currentFilter === type) {
-                // If clicking the same button, show all
                 currentFilter = 'all';
                 riceBtn.classList.remove('active');
                 palayBtn.classList.remove('active');
                 riceSections.forEach(section => section.classList.remove('hidden'));
                 palaySections.forEach(section => section.classList.remove('hidden'));
             } else {
-                // Filter by selected type
                 currentFilter = type;
                 
-                // Update button states
                 riceBtn.classList.toggle('active', type === 'rice');
                 palayBtn.classList.toggle('active', type === 'palay');
 
-                // Show/hide sections based on filter
                 if (type === 'rice') {
                     riceSections.forEach(section => section.classList.remove('hidden'));
                     palaySections.forEach(section => section.classList.add('hidden'));
@@ -178,7 +336,6 @@
             const sections = document.querySelectorAll('.warehouse-section');
             
             sections.forEach(section => {
-                // Skip hidden sections from filter
                 if (section.classList.contains('hidden')) return;
                 
                 const rows = section.querySelectorAll('tbody tr');
@@ -193,7 +350,6 @@
                     }
                 });
                 
-                // Show/hide entire section if no matches
                 section.style.display = hasVisibleRow || searchTerm === '' ? '' : 'none';
             });
         });
@@ -202,6 +358,11 @@
         function previewInventory() {
             alert('Preview functionality - Show inventory preview/report');
         }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadInventoryData();
+        });
     </script>
 </body>
 </html>
