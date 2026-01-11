@@ -83,7 +83,7 @@ function loadDropdownOptions() {
                     provinceName: data.provinceName || '-'
                 });
             });
-            locationsData.sort((a, b) => a.name.localeCompare(b.name));
+            locationsData.sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
         }
     });
 
@@ -229,7 +229,7 @@ function showLocationSelection() {
         ],
         locationsData,
         (selected) => {
-            document.getElementById('recdFromIssdTo').value = selected.name;
+            document.getElementById('recdFromIssdTo').value = selected.abbreviation;
         }
     );
 }

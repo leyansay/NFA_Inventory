@@ -3,12 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFA Inventory - Inventory</title>
+    <title>NFA Inventory - Preview</title>
     <link rel="stylesheet" href="css/inventory.css" />
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #1f2937;
+        }
+        
+        .close {
+            color: #9ca3af;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .print-option {
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .print-option:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .print-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .print-option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .option-icon {
+            font-size: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-cancel {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .btn-print {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-print:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-print:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .preview-btn {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .preview-btn:hover {
+            background-color: #7c3aed;
+        }
+    </style>
 </head>
 <body>
     <!-- Load Sidebar from separate file -->
@@ -20,7 +180,7 @@
     <div class="main-content">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">Inventory</h1>
+            <h1 class="page-title">Inventory Preview</h1>
             <div class="user-info">
                 <div class="user-details">
                     <div class="user-name">Hi, nfa_admin</div>
@@ -36,108 +196,259 @@
                 <input type="text" placeholder="Search inventory..." id="searchInput">
             </div>
             <div class="filter-buttons">
-                <button class="filter-btn preview-btn" onclick="previewInventory()">
-                    👁️ Preview
+                <button class="filter-btn rice-btn" id="riceBtn" onclick="showDetails('rice')">
+                    🌾 Rice
                 </button>
-                <button class="filter-btn rice-btn" id="riceBtn" onclick="filterByType('rice')">
-                    Rice
+                <button class="filter-btn palay-btn" id="palayBtn" onclick="showDetails('palay')">
+                    🌱 Palay
                 </button>
-                <button class="filter-btn palay-btn" id="palayBtn" onclick="filterByType('palay')">
-                    Palay
+                <button class="filter-btn back-btn" id="backBtn" onclick="showSummary()" style="display: none;">
+                    ← Back
+                </button>
+                <button class="filter-btn preview-btn" id="previewBtn" onclick="openPrintModal()">
+                    🖨️ Print Preview
                 </button>
             </div>
         </div>
 
-        <!-- Rice Warehouse Sections -->
-        <div class="warehouse-section rice-section" data-type="rice">
-            <h2 class="warehouse-title">GID 1 - Rice</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PILE NO.</th>
-                            <th>AGE(MONTH)</th>
-                            <th>VARIETY</th>
-                            <th>NO. OF BAGS</th>
-                            <th>NET KG.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gid1-rice-body">
-                        <tr>
-                            <td colspan="5" class="no-data">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Summary Section (Shown by default) -->
+        <div id="summarySection" class="summary-section">
+            <h2 class="section-title">Inventory Summary</h2>
+            
+            <!-- Summary Cards Grid -->
+            <div class="summary-grid">
+                <!-- GID 1 - Rice Summary -->
+                <div class="summary-card rice-card">
+                    <div class="summary-header">
+                        <div class="summary-icon">🌾</div>
+                        <div class="summary-label">
+                            <div class="summary-warehouse">GID 1 - Rice</div>
+                            <div class="summary-type">WD1</div>
+                        </div>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid1-rice-bags">0</div>
+                            <div class="stat-label">Total Bags</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid1-rice-weight">0.00</div>
+                            <div class="stat-label">Net KG</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GID 2 - Rice Summary -->
+                <div class="summary-card rice-card">
+                    <div class="summary-header">
+                        <div class="summary-icon">🌾</div>
+                        <div class="summary-label">
+                            <div class="summary-warehouse">GID 2 - Rice</div>
+                            <div class="summary-type">WD1</div>
+                        </div>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid2-rice-bags">0</div>
+                            <div class="stat-label">Total Bags</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid2-rice-weight">0.00</div>
+                            <div class="stat-label">Net KG</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GID 1 - Palay Summary -->
+                <div class="summary-card palay-card">
+                    <div class="summary-header">
+                        <div class="summary-icon">🌱</div>
+                        <div class="summary-label">
+                            <div class="summary-warehouse">GID 1 - Palay</div>
+                            <div class="summary-type">PD</div>
+                        </div>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid1-palay-bags">0</div>
+                            <div class="stat-label">Total Bags</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid1-palay-weight">0.00</div>
+                            <div class="stat-label">Net KG</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GID 2 - Palay Summary -->
+                <div class="summary-card palay-card">
+                    <div class="summary-header">
+                        <div class="summary-icon">🌱</div>
+                        <div class="summary-label">
+                            <div class="summary-warehouse">GID 2 - Palay</div>
+                            <div class="summary-type">PD</div>
+                        </div>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid2-palay-bags">0</div>
+                            <div class="stat-label">Total Bags</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="gid2-palay-weight">0.00</div>
+                            <div class="stat-label">Net KG</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="warehouse-section rice-section" data-type="rice">
-            <h2 class="warehouse-title">GID 2 - Rice</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PILE NO.</th>
-                            <th>AGE(MONTH)</th>
-                            <th>VARIETY</th>
-                            <th>NO. OF BAGS</th>
-                            <th>NET KG.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gid2-rice-body">
-                        <tr>
-                            <td colspan="5" class="no-data">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Details Section (Hidden by default) -->
+        <div id="detailsSection" class="details-section" style="display: none;">
+            <!-- Rice Warehouse Sections -->
+            <div class="warehouse-section rice-section" data-type="rice">
+                <h2 class="warehouse-title">GID 1 - Rice (WD1)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PILE NO.</th>
+                                <th>AGE(MONTH)</th>
+                                <th>VARIETY</th>
+                                <th>NO. OF BAGS</th>
+                                <th>NET KG.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gid1-rice-body">
+                            <tr>
+                                <td colspan="5" class="no-data">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- Palay Warehouse Sections -->
-        <div class="warehouse-section palay-section" data-type="palay">
-            <h2 class="warehouse-title">GID 1 - Palay</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PILE NO.</th>
-                            <th>AGE(MONTH)</th>
-                            <th>VARIETY</th>
-                            <th>NO. OF BAGS</th>
-                            <th>NET KG.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gid1-palay-body">
-                        <tr>
-                            <td colspan="5" class="no-data">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="warehouse-section rice-section" data-type="rice">
+                <h2 class="warehouse-title">GID 2 - Rice (WD1)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PILE NO.</th>
+                                <th>AGE(MONTH)</th>
+                                <th>VARIETY</th>
+                                <th>NO. OF BAGS</th>
+                                <th>NET KG.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gid2-rice-body">
+                            <tr>
+                                <td colspan="5" class="no-data">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div class="warehouse-section palay-section" data-type="palay">
-            <h2 class="warehouse-title">GID 2 - Palay</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PILE NO.</th>
-                            <th>AGE(MONTH)</th>
-                            <th>VARIETY</th>
-                            <th>NO. OF BAGS</th>
-                            <th>NET KG.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gid2-palay-body">
-                        <tr>
-                            <td colspan="5" class="no-data">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Palay Warehouse Sections -->
+            <div class="warehouse-section palay-section" data-type="palay">
+                <h2 class="warehouse-title">GID 1 - Palay (PD)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PILE NO.</th>
+                                <th>AGE(MONTH)</th>
+                                <th>VARIETY</th>
+                                <th>NO. OF BAGS</th>
+                                <th>NET KG.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gid1-palay-body">
+                            <tr>
+                                <td colspan="5" class="no-data">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="warehouse-section palay-section" data-type="palay">
+                <h2 class="warehouse-title">GID 2 - Palay (PD)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PILE NO.</th>
+                                <th>AGE(MONTH)</th>
+                                <th>VARIETY</th>
+                                <th>NO. OF BAGS</th>
+                                <th>NET KG.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gid2-palay-body">
+                            <tr>
+                                <td colspan="5" class="no-data">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Print Selection Modal -->
+    <div id="printModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select Tables to Print</h2>
+                <span class="close" onclick="closePrintModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="print-option" onclick="toggleCheckbox('printGid1Rice')">
+                    <input type="checkbox" id="printGid1Rice" onclick="event.stopPropagation()">
+                    <label for="printGid1Rice">
+                        <span class="option-icon">🌾</span>
+                        <span>GID 1 - Rice (WD1)</span>
+                    </label>
+                </div>
+                
+                <div class="print-option" onclick="toggleCheckbox('printGid2Rice')">
+                    <input type="checkbox" id="printGid2Rice" onclick="event.stopPropagation()">
+                    <label for="printGid2Rice">
+                        <span class="option-icon">🌾</span>
+                        <span>GID 2 - Rice (WD1)</span>
+                    </label>
+                </div>
+                
+                <div class="print-option" onclick="toggleCheckbox('printGid1Palay')">
+                    <input type="checkbox" id="printGid1Palay" onclick="event.stopPropagation()">
+                    <label for="printGid1Palay">
+                        <span class="option-icon">🌱</span>
+                        <span>GID 1 - Palay (PD)</span>
+                    </label>
+                </div>
+                
+                <div class="print-option" onclick="toggleCheckbox('printGid2Palay')">
+                    <input type="checkbox" id="printGid2Palay" onclick="event.stopPropagation()">
+                    <label for="printGid2Palay">
+                        <span class="option-icon">🌱</span>
+                        <span>GID 2 - Palay (PD)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closePrintModal()">Cancel</button>
+                <button class="btn btn-print" id="generatePrintBtn" onclick="generatePrintPreview()">Generate Print Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/back-prevention.js"></script>
 
     <script>
         // Firebase Configuration
@@ -159,7 +470,7 @@
         const database = firebase.database();
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        let currentFilter = 'all';
+        let currentView = 'summary'; // 'summary', 'rice', or 'palay'
         let allInventoryData = {
             'gid1-rice': [],
             'gid2-rice': [],
@@ -167,79 +478,219 @@
             'gid2-palay': []
         };
 
-        // Load inventory data from Firebase
-        function loadInventoryData() {
-            database.ref('transactions').on('value', (snapshot) => {
-                // Reset data
-                allInventoryData = {
-                    'gid1-rice': [],
-                    'gid2-rice': [],
-                    'gid1-palay': [],
-                    'gid2-palay': []
-                };
+        // Cache for varieties data
+        let varietiesCache = {};
 
-                if (!snapshot.exists()) {
-                    renderAllTables();
-                    return;
-                }
-
-                // Group transactions by warehouse and cereal type
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    
-                    // Skip cancelled transactions
-                    if (data.cancelled) return;
-
-                    // Get variety info to determine cereal type
-                    const varietyCode = data.varietyCode || '';
-                    
-                    // Determine warehouse (GID 1 or GID 2)
-                    const warehouseId = data.warehouseId || '';
-                    
-                    // Create inventory item
-                    const inventoryItem = {
-                        pileNo: data.pileNo || '-',
-                        age: data.age || '-',
-                        variety: varietyCode,
-                        numberOfBags: parseFloat(data.numberOfBags) || 0,
-                        netWeight: parseFloat(data.netWeight) || 0
-                    };
-
-                    // You'll need to check variety cereal type from varieties table
-                    // For now, we'll add to all categories and filter later
-                    checkVarietyAndAddToInventory(varietyCode, warehouseId, inventoryItem);
-                });
-
-                renderAllTables();
-            });
+        // Modal Functions
+        function openPrintModal() {
+            document.getElementById('printModal').style.display = 'block';
         }
 
-        // Check variety cereal type and add to appropriate inventory
-        function checkVarietyAndAddToInventory(varietyCode, warehouseId, inventoryItem) {
-            database.ref('varieties').once('value').then((snapshot) => {
+        function closePrintModal() {
+            document.getElementById('printModal').style.display = 'none';
+        }
+
+        function toggleCheckbox(checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            checkbox.checked = !checkbox.checked;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('printModal');
+            if (event.target === modal) {
+                closePrintModal();
+            }
+        }
+
+        function generatePrintPreview() {
+            const selections = {
+                gid1Rice: document.getElementById('printGid1Rice').checked,
+                gid2Rice: document.getElementById('printGid2Rice').checked,
+                gid1Palay: document.getElementById('printGid1Palay').checked,
+                gid2Palay: document.getElementById('printGid2Palay').checked
+            };
+
+            // Check if at least one option is selected
+            if (!Object.values(selections).some(v => v)) {
+                alert('Please select at least one table to print.');
+                return;
+            }
+
+            // Store selections in sessionStorage
+            sessionStorage.setItem('printSelections', JSON.stringify(selections));
+            sessionStorage.setItem('inventoryData', JSON.stringify(allInventoryData));
+
+            // Open print preview in new window
+            window.open('inventory-preview.html', '_blank');
+            closePrintModal();
+        }
+
+        // Load varieties data first
+        function loadVarietiesData() {
+            return database.ref('varieties').once('value').then((snapshot) => {
+                varietiesCache = {};
                 if (snapshot.exists()) {
                     snapshot.forEach((child) => {
                         const varietyData = child.val();
-                        if (varietyData.varietyCode === varietyCode) {
-                            const cerealType = (varietyData.cerealType || '').toLowerCase();
-                            const warehouse = warehouseId.toLowerCase();
-                            
-                            let key = '';
-                            if (warehouse.includes('gid 1') || warehouse === 'gid1') {
-                                if (cerealType === 'rice') key = 'gid1-rice';
-                                else if (cerealType === 'palay') key = 'gid1-palay';
-                            } else if (warehouse.includes('gid 2') || warehouse === 'gid2') {
-                                if (cerealType === 'rice') key = 'gid2-rice';
-                                else if (cerealType === 'palay') key = 'gid2-palay';
-                            }
-                            
-                            if (key) {
-                                allInventoryData[key].push(inventoryItem);
-                                renderTable(key);
-                            }
+                        if (varietyData.varietyCode) {
+                            varietiesCache[varietyData.varietyCode] = {
+                                cerealType: (varietyData.cerealType || '').toLowerCase(),
+                                description: varietyData.description || varietyData.varietyDescription || '-'
+                            };
                         }
                     });
                 }
+                console.log('Varieties loaded:', varietiesCache);
+            });
+        }
+
+        // Extract GID number from warehouse name or ID
+        function extractGID(warehouseName, warehouseId) {
+            const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
+            
+            if (combined.includes('GID 1') || combined.includes('GID1')) {
+                return 'gid1';
+            }
+            if (combined.includes('GID 2') || combined.includes('GID2')) {
+                return 'gid2';
+            }
+            
+            return null;
+        }
+
+        // Determine cereal type from variety code
+        function getCerealType(varietyCode) {
+            if (!varietyCode) return null;
+            
+            const code = varietyCode.toUpperCase();
+            
+            if (code.startsWith('PD')) {
+                return 'palay';
+            }
+            if (code.startsWith('WD1')) {
+                return 'rice';
+            }
+            
+            return null;
+        }
+
+        // Update summary cards
+        function updateSummary() {
+            const summaries = {
+                'gid1-rice': { bags: 0, weight: 0 },
+                'gid2-rice': { bags: 0, weight: 0 },
+                'gid1-palay': { bags: 0, weight: 0 },
+                'gid2-palay': { bags: 0, weight: 0 }
+            };
+
+            Object.keys(allInventoryData).forEach(key => {
+                const data = allInventoryData[key];
+                data.forEach(item => {
+                    summaries[key].bags += item.numberOfBags;
+                    summaries[key].weight += item.netWeight;
+                });
+            });
+
+            Object.keys(summaries).forEach(key => {
+                const bags = summaries[key].bags;
+                const weight = summaries[key].weight;
+                
+                document.getElementById(`${key}-bags`).textContent = bags.toLocaleString('en-US', { maximumFractionDigits: 0 });
+                document.getElementById(`${key}-weight`).textContent = weight.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            });
+        }
+
+        // Show details view (rice or palay)
+        function showDetails(type) {
+            currentView = type;
+            
+            // Hide summary, show details
+            document.getElementById('summarySection').style.display = 'none';
+            document.getElementById('detailsSection').style.display = 'block';
+            
+            // Update buttons
+            const riceBtn = document.getElementById('riceBtn');
+            const palayBtn = document.getElementById('palayBtn');
+            const backBtn = document.getElementById('backBtn');
+            
+            riceBtn.classList.toggle('active', type === 'rice');
+            palayBtn.classList.toggle('active', type === 'palay');
+            backBtn.style.display = 'flex';
+            
+            // Show/hide appropriate sections
+            const riceSections = document.querySelectorAll('.rice-section');
+            const palaySections = document.querySelectorAll('.palay-section');
+            
+            if (type === 'rice') {
+                riceSections.forEach(section => section.style.display = 'block');
+                palaySections.forEach(section => section.style.display = 'none');
+            } else {
+                riceSections.forEach(section => section.style.display = 'none');
+                palaySections.forEach(section => section.style.display = 'block');
+            }
+        }
+
+        // Show summary view
+        function showSummary() {
+            currentView = 'summary';
+            
+            // Show summary, hide details
+            document.getElementById('summarySection').style.display = 'block';
+            document.getElementById('detailsSection').style.display = 'none';
+            
+            // Update buttons
+            document.getElementById('riceBtn').classList.remove('active');
+            document.getElementById('palayBtn').classList.remove('active');
+            document.getElementById('backBtn').style.display = 'none';
+        }
+
+        // Load inventory data from Firebase
+        function loadInventoryData() {
+            loadVarietiesData().then(() => {
+                database.ref('transactions').on('value', (snapshot) => {
+                    allInventoryData = {
+                        'gid1-rice': [],
+                        'gid2-rice': [],
+                        'gid1-palay': [],
+                        'gid2-palay': []
+                    };
+
+                    if (!snapshot.exists()) {
+                        updateSummary();
+                        renderAllTables();
+                        return;
+                    }
+
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        
+                        if (data.cancelled) return;
+
+                        const gid = extractGID(data.warehouseName || '', data.warehouseId || '');
+                        if (!gid) return;
+
+                        const cerealType = getCerealType(data.varietyCode);
+                        if (!cerealType) return;
+
+                        const inventoryItem = {
+                            pileNo: data.pileNo || '-',
+                            age: data.age || '-',
+                            variety: data.varietyCode || '-',
+                            numberOfBags: parseFloat(data.numberOfBags) || 0,
+                            netWeight: parseFloat(data.netWeight) || 0
+                        };
+
+                        const key = `${gid}-${cerealType}`;
+                        if (allInventoryData[key]) {
+                            allInventoryData[key].push(inventoryItem);
+                        }
+                    });
+
+                    console.log('Inventory data loaded:', allInventoryData);
+                    updateSummary();
+                    renderAllTables();
+                });
             });
         }
 
@@ -248,7 +699,6 @@
             const tbody = document.getElementById(`${tableKey}-body`);
             const data = allInventoryData[tableKey];
 
-            // Group by pile number and variety
             const grouped = {};
             data.forEach(item => {
                 const key = `${item.pileNo}_${item.variety}`;
@@ -268,13 +718,12 @@
             tbody.innerHTML = '';
 
             if (Object.keys(grouped).length === 0) {
-                const type = tableKey.includes('rice') ? 'rice' : 'palay';
+                const type = tableKey.includes('rice') ? 'Rice (WD1)' : 'Palay (PD)';
                 const gid = tableKey.includes('gid1') ? 'GID 1' : 'GID 2';
                 tbody.innerHTML = `<tr><td colspan="5" class="no-data">No ${type} data in ${gid}</td></tr>`;
                 return;
             }
 
-            // Sort by pile number
             const sortedData = Object.values(grouped).sort((a, b) => {
                 const pileA = parseInt(a.pileNo) || 0;
                 const pileB = parseInt(b.pileNo) || 0;
@@ -301,63 +750,39 @@
             });
         }
 
-        // Filter by type (Rice or Palay)
-        function filterByType(type) {
-            const riceBtn = document.getElementById('riceBtn');
-            const palayBtn = document.getElementById('palayBtn');
-            const riceSections = document.querySelectorAll('.rice-section');
-            const palaySections = document.querySelectorAll('.palay-section');
-
-            if (currentFilter === type) {
-                currentFilter = 'all';
-                riceBtn.classList.remove('active');
-                palayBtn.classList.remove('active');
-                riceSections.forEach(section => section.classList.remove('hidden'));
-                palaySections.forEach(section => section.classList.remove('hidden'));
-            } else {
-                currentFilter = type;
-                
-                riceBtn.classList.toggle('active', type === 'rice');
-                palayBtn.classList.toggle('active', type === 'palay');
-
-                if (type === 'rice') {
-                    riceSections.forEach(section => section.classList.remove('hidden'));
-                    palaySections.forEach(section => section.classList.add('hidden'));
-                } else if (type === 'palay') {
-                    riceSections.forEach(section => section.classList.add('hidden'));
-                    palaySections.forEach(section => section.classList.remove('hidden'));
-                }
-            }
-        }
-
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
-            const sections = document.querySelectorAll('.warehouse-section');
             
-            sections.forEach(section => {
-                if (section.classList.contains('hidden')) return;
-                
-                const rows = section.querySelectorAll('tbody tr');
-                let hasVisibleRow = false;
-                
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const shouldShow = text.includes(searchTerm);
-                    row.style.display = shouldShow ? '' : 'none';
-                    if (shouldShow && !row.querySelector('.no-data')) {
-                        hasVisibleRow = true;
-                    }
+            if (currentView === 'summary') {
+                // Search in summary cards
+                const cards = document.querySelectorAll('.summary-card');
+                cards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? '' : 'none';
                 });
-                
-                section.style.display = hasVisibleRow || searchTerm === '' ? '' : 'none';
-            });
+            } else {
+                // Search in table rows
+                const sections = document.querySelectorAll('.warehouse-section');
+                sections.forEach(section => {
+                    if (section.style.display === 'none') return;
+                    
+                    const rows = section.querySelectorAll('tbody tr');
+                    let hasVisibleRow = false;
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        const shouldShow = text.includes(searchTerm);
+                        row.style.display = shouldShow ? '' : 'none';
+                        if (shouldShow && !row.querySelector('.no-data')) {
+                            hasVisibleRow = true;
+                        }
+                    });
+                    
+                    section.style.display = hasVisibleRow || searchTerm === '' ? 'block' : 'none';
+                });
+            }
         });
-
-        // Preview function
-        function previewInventory() {
-            alert('Preview functionality - Show inventory preview/report');
-        }
 
         // Load data on page load
         window.addEventListener('DOMContentLoaded', () => {

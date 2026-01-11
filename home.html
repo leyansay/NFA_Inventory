@@ -15,7 +15,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fa;
-            margin-left: 250px;
+            margin-left: 260px;
             overflow-x: hidden;
         }
 
@@ -24,7 +24,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            width: 250px;
+            width: 260px;
             height: 100vh;
             z-index: 1000;
             border: none;
@@ -127,7 +127,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -147,24 +147,35 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
 
-        .summary-card.yellow {
+        .summary-card.wheat {
             background: linear-gradient(135deg, #f5c469 0%, #e9b855 100%);
             color: white;
         }
 
-        .summary-card.red {
-            background: linear-gradient(135deg, #ee7c92 0%, #e5677e 100%);
-            color: white;
-        }
-
-        .summary-card.green {
+        .summary-card.rice {
             background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
             color: white;
         }
 
-        .summary-card.blue {
+        .summary-card.available {
             background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
             color: white;
+        }
+
+        .summary-card.warning {
+            background: linear-gradient(135deg, #ee7c92 0%, #e5677e 100%);
+            color: white;
+        }
+
+        .summary-card.capacity {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
         }
 
         .card-title {
@@ -287,69 +298,24 @@
             transition: width 1.5s ease-out;
         }
 
-        .stat-bar-fill.yellow {
+        .stat-bar-fill.wheat {
             background: linear-gradient(90deg, #f5c469, #e9b855);
         }
 
-        .stat-bar-fill.red {
-            background: linear-gradient(90deg, #ee7c92, #e5677e);
-        }
-
-        .stat-bar-fill.green {
+        .stat-bar-fill.rice {
             background: linear-gradient(90deg, #5dd39e, #4bc085);
         }
 
-        .stat-bar-fill.blue {
+        .stat-bar-fill.available {
             background: linear-gradient(90deg, #5b8dee, #4a7bd9);
         }
 
-        .stat-bar-fill.purple {
+        .stat-bar-fill.warning {
+            background: linear-gradient(90deg, #ee7c92, #e5677e);
+        }
+
+        .stat-bar-fill.capacity {
             background: linear-gradient(90deg, #a78bfa, #8b5cf6);
-        }
-
-        /* Comparison Chart */
-        .comparison-section {
-            margin-top: 2rem;
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .comparison-bars {
-            display: grid;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .comparison-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .comparison-label {
-            min-width: 150px;
-            font-weight: 600;
-            color: #1a1d2e;
-        }
-
-        .comparison-bar-container {
-            flex: 1;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .comparison-bar {
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 1rem;
-            color: white;
-            font-weight: 600;
-            transition: width 1s ease-out;
         }
 
         .menu-toggle {
@@ -363,13 +329,23 @@
             font-size: 1.2rem;
         }
 
+        /* Trend indicator */
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
         @media (max-width: 1024px) {
             body {
                 margin-left: 0;
             }
 
             #sidebar-container {
-                transform: translateX(-250px);
+                transform: translateX(-260px);
                 transition: transform 0.3s ease;
             }
 
@@ -410,42 +386,6 @@
             .summary-grid {
                 grid-template-columns: 1fr;
             }
-
-            .comparison-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .comparison-label {
-                min-width: 100%;
-            }
-        }
-
-        /* Icon styles */
-        .card-icon {
-            position: absolute;
-            right: 1.5rem;
-            top: 1.5rem;
-            font-size: 2.5rem;
-            opacity: 0.2;
-        }
-
-        /* Trend indicator */
-        .trend-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            opacity: 0.9;
-        }
-
-        .trend-up {
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        .trend-down {
-            color: rgba(255, 255, 255, 0.95);
         }
     </style>
 </head>
@@ -466,24 +406,39 @@
         
         <div class="user-info">
             <div class="user-details">
-                <div class="user-name">Hi, nfa_admin</div>
-                <div class="user-role">USER</div>
+                <div class="user-name" id="displayUsername">Hi, User</div>
+                <div class="user-role" id="displayUserRole">USER</div>
             </div>
-            <div class="user-avatar">N</div>
+            <div class="user-avatar" id="displayAvatar">U</div>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <h2 class="section-title">Summary Reports</h2>
+        <h2 class="section-title">Inventory Summary</h2>
         
         <div class="summary-grid">
-            <div class="summary-card yellow">
-                <span class="card-icon">📦</span>
-                <div class="card-title">TOTAL RICE EQV'T (DDN)</div>
-                <div class="card-value">49,522</div>
-                <div class="card-subtitle">bags available</div>
-                <div class="trend-indicator trend-up">
+            <!-- Total Palay Stock -->
+            <div class="summary-card wheat">
+                <div class="card-icon">🌾</div>
+                <div class="card-title">TOTAL PALAY STOCK</div>
+                <div class="card-value">125,450 kg</div>
+                <div class="card-subtitle">125.45 MT (Metric Tons)</div>
+                <div class="trend-indicator">
+                    <span>↗</span> <span>+8% from last month</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 80%;"></div>
+                </div>
+            </div>
+            
+            <!-- Total Rice Stock -->
+            <div class="summary-card rice">
+                <div class="card-icon">🍚</div>
+                <div class="card-title">TOTAL RICE STOCK</div>
+                <div class="card-value">79,195 kg</div>
+                <div class="card-subtitle">1,584 sacks (50kg/sack)</div>
+                <div class="trend-indicator">
                     <span>↗</span> <span>+12% from last month</span>
                 </div>
                 <div class="progress-container">
@@ -491,161 +446,99 @@
                 </div>
             </div>
             
-            <div class="summary-card red">
-                <span class="card-icon">🏪</span>
-                <div class="card-title">TOTAL RICE EQV'T (DDO)</div>
-                <div class="card-value">29,673</div>
-                <div class="card-subtitle">bags available</div>
-                <div class="trend-indicator trend-down">
-                    <span>↘</span> <span>-5% from last month</span>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 60%;"></div>
-                </div>
-            </div>
-            
-            <div class="summary-card green">
-                <span class="card-icon">📊</span>
-                <div class="card-title">DAILY CONSUMPTION RATE (DDN)</div>
-                <div class="card-value">8,690 / 3,000</div>
-                <div class="card-subtitle">bags per day</div>
-                <div class="trend-indicator trend-up">
-                    <span>↗</span> <span>+8% efficiency</span>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 85%;"></div>
-                </div>
-            </div>
-            
-            <div class="summary-card green">
-                <span class="card-icon">📈</span>
-                <div class="card-title">DAILY CONSUMPTION RATE (DDO)</div>
-                <div class="card-value">7,850</div>
-                <div class="card-subtitle">bags per day</div>
-                <div class="trend-indicator trend-up">
-                    <span>↗</span> <span>+3% from target</span>
+            <!-- Available Stock -->
+            <div class="summary-card available">
+                <div class="card-icon">🏪</div>
+                <div class="card-title">AVAILABLE STOCK</div>
+                <div class="card-value">1,420</div>
+                <div class="card-subtitle">sacks ready for distribution</div>
+                <div class="trend-indicator">
+                    <span>↗</span> <span>+5% availability</span>
                 </div>
                 <div class="progress-container">
                     <div class="progress-bar" style="width: 90%;"></div>
                 </div>
             </div>
             
-            <div class="summary-card blue">
-                <span class="card-icon">💰</span>
-                <div class="card-title">CEREAL PROC'T FUND</div>
-                <div class="card-value">₱9,969,378.94</div>
-                <div class="card-subtitle">total budget</div>
-                <div class="trend-indicator trend-up">
-                    <span>↗</span> <span>+15% allocated</span>
+            <!-- Low Stock Alert -->
+            <div class="summary-card warning">
+                <div class="card-icon">⚠️</div>
+                <div class="card-title">LOW STOCK ALERT</div>
+                <div class="card-value">3</div>
+                <div class="card-subtitle">items below minimum level</div>
+                <div class="trend-indicator">
+                    <span>↘</span> <span>Requires attention</span>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: 70%;"></div>
+                    <div class="progress-bar" style="width: 30%;"></div>
+                </div>
+            </div>
+            
+            <!-- Warehouse Capacity -->
+            <div class="summary-card capacity">
+                <div class="card-icon">🏚</div>
+                <div class="card-title">WAREHOUSE CAPACITY USED</div>
+                <div class="card-value">68.5%</div>
+                <div class="card-subtitle">1,370 / 2,000 sacks capacity</div>
+                <div class="trend-indicator">
+                    <span>↗</span> <span>Optimal usage</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 68.5%;"></div>
                 </div>
             </div>
         </div>
 
         <!-- Stats Bars Section -->
-        <h2 class="section-title">Warehouse Statistics</h2>
+        <h2 class="section-title">Detailed Statistics</h2>
         <div class="stats-section">
             <div class="stat-item">
                 <div class="stat-header">
-                    <span class="stat-label">DDN - Warehouse Capacity</span>
-                    <span class="stat-value">49,522 / 65,000</span>
+                    <span class="stat-label">🌾 Palay Stock by Warehouse</span>
+                    <span class="stat-value">125,450 kg</span>
                 </div>
                 <div class="stat-bar">
-                    <div class="stat-bar-fill yellow" style="width: 76.19%;">76%</div>
+                    <div class="stat-bar-fill wheat" style="width: 80%;">80%</div>
                 </div>
             </div>
 
             <div class="stat-item">
                 <div class="stat-header">
-                    <span class="stat-label">DDO - Warehouse Capacity</span>
-                    <span class="stat-value">29,673 / 50,000</span>
+                    <span class="stat-label">🍚 Rice Stock Distribution</span>
+                    <span class="stat-value">1,584 sacks</span>
                 </div>
                 <div class="stat-bar">
-                    <div class="stat-bar-fill red" style="width: 59.35%;">59%</div>
+                    <div class="stat-bar-fill rice" style="width: 75%;">75%</div>
                 </div>
             </div>
 
             <div class="stat-item">
                 <div class="stat-header">
-                    <span class="stat-label">DDN - Monthly Target Achievement</span>
-                    <span class="stat-value">8,690 / 10,000</span>
+                    <span class="stat-label">🏪 Stock Availability Rate</span>
+                    <span class="stat-value">89.7%</span>
                 </div>
                 <div class="stat-bar">
-                    <div class="stat-bar-fill green" style="width: 86.9%;">87%</div>
+                    <div class="stat-bar-fill available" style="width: 89.7%;">90%</div>
                 </div>
             </div>
 
             <div class="stat-item">
                 <div class="stat-header">
-                    <span class="stat-label">DDO - Monthly Target Achievement</span>
-                    <span class="stat-value">7,850 / 9,000</span>
+                    <span class="stat-label">⚠️ Low Stock Items</span>
+                    <span class="stat-value">3 items</span>
                 </div>
                 <div class="stat-bar">
-                    <div class="stat-bar-fill green" style="width: 87.22%;">87%</div>
+                    <div class="stat-bar-fill warning" style="width: 30%;">Low</div>
                 </div>
             </div>
 
             <div class="stat-item">
                 <div class="stat-header">
-                    <span class="stat-label">Budget Utilization</span>
-                    <span class="stat-value">₱9.97M / ₱15M</span>
+                    <span class="stat-label">🏚 Total Warehouse Capacity</span>
+                    <span class="stat-value">1,370 / 2,000</span>
                 </div>
                 <div class="stat-bar">
-                    <div class="stat-bar-fill blue" style="width: 66.46%;">66%</div>
-                </div>
-            </div>
-
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">Distribution Efficiency</span>
-                    <span class="stat-value">92%</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill purple" style="width: 92%;">92%</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Comparison Section -->
-        <div class="comparison-section">
-            <h3>DDN vs DDO Comparison</h3>
-            <div class="comparison-bars">
-                <div class="comparison-item">
-                    <div class="comparison-label">Total Inventory</div>
-                    <div class="comparison-bar-container">
-                        <div class="comparison-bar yellow" style="width: 62%;">
-                            DDN: 49,522
-                        </div>
-                        <div class="comparison-bar red" style="width: 38%;">
-                            DDO: 29,673
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparison-item">
-                    <div class="comparison-label">Daily Consumption</div>
-                    <div class="comparison-bar-container">
-                        <div class="comparison-bar green" style="width: 53%;">
-                            DDN: 8,690
-                        </div>
-                        <div class="comparison-bar green" style="width: 47%;">
-                            DDO: 7,850
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparison-item">
-                    <div class="comparison-label">Warehouse Capacity</div>
-                    <div class="comparison-bar-container">
-                        <div class="comparison-bar blue" style="width: 76%;">
-                            DDN: 76%
-                        </div>
-                        <div class="comparison-bar blue" style="width: 59%;">
-                            DDO: 59%
-                        </div>
-                    </div>
+                    <div class="stat-bar-fill capacity" style="width: 68.5%;">68.5%</div>
                 </div>
             </div>
         </div>
@@ -654,39 +547,350 @@
         <h2 class="section-title">Visual Analytics</h2>
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>Monthly Inventory Trend</h3>
+                <h3>📊 Stock Levels Overview</h3>
                 <div class="chart-container">
-                    <canvas id="inventoryChart"></canvas>
+                    <canvas id="stockChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3>Distribution by Category</h3>
+                <h3>📈 Monthly Inventory Trend</h3>
                 <div class="chart-container">
-                    <canvas id="distributionChart"></canvas>
+                    <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3>Daily Consumption Pattern</h3>
+                <h3>🏪 Warehouse Distribution</h3>
                 <div class="chart-container">
-                    <canvas id="consumptionChart"></canvas>
+                    <canvas id="warehouseChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3>Budget Allocation</h3>
+                <h3>🌾 Palay vs Rice Stock</h3>
                 <div class="chart-container">
-                    <canvas id="budgetChart"></canvas>
+                    <canvas id="comparisonChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="jscript/user-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="js/back-prevention.js"></script>
 
     <script>
-        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314892469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // Global data storage
+        let transactionsData = [];
+        let varietiesCache = {};
+        let warehousesData = {};
+
+        // Extract GID number from warehouse name or ID
+        function extractGID(warehouseName, warehouseId) {
+            const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
+            
+            if (combined.includes('GID 1') || combined.includes('GID1') || combined.includes('GID-1')) {
+                return 'gid1';
+            }
+            if (combined.includes('GID 2') || combined.includes('GID2') || combined.includes('GID-2')) {
+                return 'gid2';
+            }
+            
+            return null;
+        }
+
+        // Determine cereal type from variety code (same logic as inventory)
+        function getCerealType(varietyCode) {
+            if (!varietyCode) return null;
+            
+            const code = varietyCode.toUpperCase();
+            
+            // Check variety code prefix
+            if (code.startsWith('PD')) {
+                return 'palay';
+            }
+            if (code.startsWith('WD1')) {
+                return 'rice';
+            }
+            
+            // Fallback: check from varietiesCache
+            if (varietiesCache[varietyCode]) {
+                const cerealType = varietiesCache[varietyCode].cerealType.toLowerCase();
+                if (cerealType.includes('palay')) return 'palay';
+                if (cerealType.includes('rice')) return 'rice';
+            }
+            
+            return null;
+        }
+
+        // Load varieties data first
+        function loadVarietiesData() {
+            return database.ref('varieties').once('value').then((snapshot) => {
+                varietiesCache = {};
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const varietyData = child.val();
+                        if (varietyData.varietyCode) {
+                            varietiesCache[varietyData.varietyCode] = {
+                                cerealType: (varietyData.cerealType || '').toLowerCase(),
+                                description: varietyData.description || varietyData.varietyDescription || '-'
+                            };
+                        }
+                    });
+                }
+                console.log('Varieties loaded:', Object.keys(varietiesCache).length);
+            });
+        }
+
+        // Load all necessary data
+        function loadDashboardData() {
+            Promise.all([
+                loadVarietiesData(),
+                database.ref('transactions').once('value'),
+                database.ref('warehouses').once('value')
+            ]).then(([_, transactionsSnapshot, warehousesSnapshot]) => {
+                
+                // Load transactions
+                transactionsData = [];
+                if (transactionsSnapshot.exists()) {
+                    transactionsSnapshot.forEach((child) => {
+                        const data = child.val();
+                        if (!data.cancelled) { // Skip cancelled transactions
+                            transactionsData.push(data);
+                        }
+                    });
+                }
+                console.log('Transactions loaded:', transactionsData.length);
+
+                // Load warehouses with GID-based capacities
+                warehousesData = {};
+                if (warehousesSnapshot.exists()) {
+                    warehousesSnapshot.forEach((child) => {
+                        const data = child.val();
+                        if (data.warehouseId) {
+                            const gid = extractGID(data.location || data.warehouseName || '', data.warehouseId);
+                            let capacity = 2000; // Default capacity
+                            
+                            // Set capacity based on GID
+                            if (gid === 'gid1') {
+                                capacity = 100000; // GID1 capacity
+                            } else if (gid === 'gid2') {
+                                capacity = 50000; // GID2 capacity
+                            }
+                            
+                            warehousesData[data.warehouseId] = {
+                                name: data.location || data.warehouseName || 'Unknown',
+                                capacity: capacity,
+                                gid: gid
+                            };
+                        }
+                    });
+                }
+                console.log('Warehouses loaded:', Object.keys(warehousesData).length);
+
+                calculateMetrics();
+                initializeCharts();
+            }).catch((error) => {
+                console.error('Error loading dashboard data:', error);
+            });
+        }
+
+        // Calculate metrics from transactions
+        function calculateMetrics() {
+            let totalPalayKg = 0;
+            let totalPalayBags = 0;
+            let totalRiceKg = 0;
+            let totalRiceBags = 0;
+            let totalAvailableBags = 0;
+            let warehouseUsage = {};
+            let lowStockItems = [];
+
+            // Calculate totals from transactions using the same logic as inventory
+            transactionsData.forEach(transaction => {
+                const netWeight = parseFloat(transaction.netWeight) || 0;
+                const bags = parseFloat(transaction.numberOfBags) || 0;
+                const varietyCode = transaction.varietyCode;
+                const warehouseId = transaction.warehouseId;
+                
+                // Determine cereal type using same logic as inventory page
+                const cerealType = getCerealType(varietyCode);
+
+                if (cerealType === 'palay') {
+                    totalPalayKg += netWeight;
+                    totalPalayBags += bags;
+                } else if (cerealType === 'rice') {
+                    totalRiceKg += netWeight;
+                    totalRiceBags += bags;
+                }
+
+                // Track all bags for available stock
+                totalAvailableBags += bags;
+
+                // Track warehouse usage
+                if (warehouseId) {
+                    if (!warehouseUsage[warehouseId]) {
+                        warehouseUsage[warehouseId] = 0;
+                    }
+                    warehouseUsage[warehouseId] += bags;
+                }
+            });
+
+            // Check for low stock items (Palay or Rice below 1000 bags)
+            if (totalPalayBags < 1000) {
+                lowStockItems.push(`Palay: ${totalPalayBags.toFixed(0)} bags`);
+            }
+            if (totalRiceBags < 1000) {
+                lowStockItems.push(`Rice: ${totalRiceBags.toFixed(0)} bags`);
+            }
+
+            // Calculate warehouse capacity (GID1: 100,000 bags, GID2: 50,000 bags)
+            let totalWarehouseCapacity = 150000; // GID1 (100,000) + GID2 (50,000)
+            let totalWarehouseUsed = 0;
+
+            Object.keys(warehouseUsage).forEach(warehouseId => {
+                totalWarehouseUsed += warehouseUsage[warehouseId] || 0;
+            });
+
+            // Calculate capacity percentage
+            const capacityPercentage = totalWarehouseCapacity > 0 
+                ? ((totalWarehouseUsed / totalWarehouseCapacity) * 100).toFixed(1)
+                : 0;
+
+            console.log('Metrics calculated:', {
+                totalPalayKg,
+                totalPalayBags,
+                totalRiceKg,
+                totalRiceBags,
+                totalAvailableBags,
+                lowStockItems,
+                capacityPercentage
+            });
+
+            // Update UI
+            updateDashboardUI({
+                totalPalayKg: totalPalayKg.toFixed(2),
+                totalPalayMT: (totalPalayKg / 1000).toFixed(2),
+                totalPalayBags: Math.round(totalPalayBags),
+                totalRiceKg: totalRiceKg.toFixed(2),
+                totalRiceBags: Math.round(totalRiceBags),
+                availableStock: Math.round(totalAvailableBags),
+                lowStockItems: lowStockItems,
+                lowStockCount: lowStockItems.length,
+                capacityPercentage: capacityPercentage,
+                warehouseCapacityUsed: Math.round(totalWarehouseUsed),
+                totalWarehouseCapacity: totalWarehouseCapacity
+            });
+        }
+
+        // Update dashboard UI with calculated values
+        function updateDashboardUI(metrics) {
+            // Update Palay Stock Card
+            document.querySelector('.summary-card.wheat .card-value').textContent = 
+                `${metrics.totalPalayBags.toLocaleString()} bags`;
+            document.querySelector('.summary-card.wheat .card-subtitle').textContent = 
+                `${parseFloat(metrics.totalPalayKg).toLocaleString()} kg / ${metrics.totalPalayMT} MT`;
+
+            // Update Rice Stock Card
+            document.querySelector('.summary-card.rice .card-value').textContent = 
+                `${metrics.totalRiceBags.toLocaleString()} bags`;
+            document.querySelector('.summary-card.rice .card-subtitle').textContent = 
+                `${parseFloat(metrics.totalRiceKg).toLocaleString()} kg`;
+
+            // Update Available Stock Card
+            document.querySelector('.summary-card.available .card-value').textContent = 
+                metrics.availableStock.toLocaleString();
+            document.querySelector('.summary-card.available .card-subtitle').textContent = 
+                'bags ready for distribution';
+
+            // Update Low Stock Alert Card
+            document.querySelector('.summary-card.warning .card-value').textContent = 
+                metrics.lowStockCount;
+            
+            let lowStockSubtitle = '';
+            if (metrics.lowStockCount === 0) {
+                lowStockSubtitle = 'All items above 1000 bags';
+            } else {
+                lowStockSubtitle = metrics.lowStockItems.join(' | ');
+            }
+            document.querySelector('.summary-card.warning .card-subtitle').textContent = lowStockSubtitle;
+
+            // Update Warehouse Capacity Card
+            document.querySelector('.summary-card.capacity .card-value').textContent = 
+                `${metrics.capacityPercentage}%`;
+            document.querySelector('.summary-card.capacity .card-subtitle').textContent = 
+                `${metrics.warehouseCapacityUsed.toLocaleString()} / ${metrics.totalWarehouseCapacity.toLocaleString()} bags (GID1: 100K, GID2: 50K)`;
+
+            // Update progress bars based on total capacity of 150,000 bags
+            const palayProgress = (metrics.totalPalayBags / 150000) * 100;
+            document.querySelector('.summary-card.wheat .progress-bar').style.width = 
+                `${Math.min(palayProgress, 100)}%`;
+            
+            const riceProgress = (metrics.totalRiceBags / 150000) * 100;
+            document.querySelector('.summary-card.rice .progress-bar').style.width = 
+                `${Math.min(riceProgress, 100)}%`;
+            
+            const availableProgress = (metrics.availableStock / 150000) * 100;
+            document.querySelector('.summary-card.available .progress-bar').style.width = 
+                `${Math.min(availableProgress, 100)}%`;
+            
+            // Low stock progress (red if any low stock, green if all good)
+            document.querySelector('.summary-card.warning .progress-bar').style.width = 
+                `${metrics.lowStockCount > 0 ? 30 : 100}%`;
+            
+            document.querySelector('.summary-card.capacity .progress-bar').style.width = 
+                `${metrics.capacityPercentage}%`;
+
+            // Update stat bars
+            document.querySelector('.stats-section .stat-item:nth-child(1) .stat-value').textContent = 
+                `${metrics.totalPalayBags.toLocaleString()} bags (${parseFloat(metrics.totalPalayKg).toLocaleString()} kg)`;
+            document.querySelector('.stats-section .stat-item:nth-child(1) .stat-bar-fill').style.width = 
+                `${Math.min(palayProgress, 100)}%`;
+
+            document.querySelector('.stats-section .stat-item:nth-child(2) .stat-value').textContent = 
+                `${metrics.totalRiceBags.toLocaleString()} bags (${parseFloat(metrics.totalRiceKg).toLocaleString()} kg)`;
+            document.querySelector('.stats-section .stat-item:nth-child(2) .stat-bar-fill').style.width = 
+                `${Math.min(riceProgress, 100)}%`;
+
+            const availabilityRate = metrics.totalWarehouseCapacity > 0 
+                ? ((metrics.availableStock / metrics.totalWarehouseCapacity) * 100).toFixed(1)
+                : 0;
+            document.querySelector('.stats-section .stat-item:nth-child(3) .stat-value').textContent = 
+                `${availabilityRate}%`;
+            document.querySelector('.stats-section .stat-item:nth-child(3) .stat-bar-fill').style.width = 
+                `${availabilityRate}%`;
+
+            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-value').textContent = 
+                metrics.lowStockCount > 0 ? metrics.lowStockItems.join(', ') : 'None';
+            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-bar-fill').style.width = 
+                `${metrics.lowStockCount > 0 ? 30 : 100}%`;
+            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-bar-fill').textContent = 
+                metrics.lowStockCount > 0 ? 'Low Stock' : 'Good';
+
+            document.querySelector('.stats-section .stat-item:nth-child(5) .stat-value').textContent = 
+                `${metrics.warehouseCapacityUsed.toLocaleString()} / ${metrics.totalWarehouseCapacity.toLocaleString()}`;
+            document.querySelector('.stats-section .stat-item:nth-child(5) .stat-bar-fill').style.width = 
+                `${metrics.capacityPercentage}%`;
+        }
+
         // Toggle sidebar for mobile
         function toggleSidebar() {
             document.getElementById('sidebar-container').classList.toggle('open');
@@ -697,59 +901,103 @@
             console.log('Searching for:', e.target.value);
         });
 
-        // Initialize Charts
+        // Display logged in user info
         window.addEventListener('DOMContentLoaded', function() {
-            // Inventory Trend Chart
-            const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
-            new Chart(inventoryCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                    datasets: [{
-                        label: 'DDN',
-                        data: [45000, 46500, 47200, 48000, 48500, 49000, 49522],
-                        borderColor: '#f5c469',
-                        backgroundColor: 'rgba(245, 196, 105, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'DDO',
-                        data: [28000, 28500, 28800, 29000, 29200, 29400, 29673],
-                        borderColor: '#ee7c92',
-                        backgroundColor: 'rgba(238, 124, 146, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
                 }
+            }
+
+            // Load dashboard data
+            loadDashboardData();
+        });
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar-container').classList.toggle('open');
+        }
+
+        // Search functionality
+        document.querySelector('.search-bar input').addEventListener('input', function(e) {
+            console.log('Searching for:', e.target.value);
+        });
+
+        // Initialize Charts with real data
+        function initializeCharts() {
+            // Calculate data for charts
+            const palayData = [];
+            const riceData = [];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+            
+            // Calculate monthly trends
+            months.forEach((month, index) => {
+                const monthTransactions = transactionsData.filter(t => {
+                    if (!t.transactionDate || t.cancelled) return false;
+                    const transDate = new Date(t.transactionDate);
+                    return transDate.getMonth() === index;
+                });
+
+                let monthPalay = 0;
+                let monthRice = 0;
+                
+                monthTransactions.forEach(t => {
+                    const netWeight = parseFloat(t.netWeight) || 0;
+                    const cerealType = varietiesData[t.varietyCode] || 'Unknown';
+                    
+                    if (cerealType.toLowerCase().includes('palay')) {
+                        monthPalay += netWeight;
+                    } else if (cerealType.toLowerCase().includes('rice')) {
+                        monthRice += netWeight;
+                    }
+                });
+
+                palayData.push(monthPalay);
+                riceData.push(monthRice);
             });
 
-            // Distribution Chart
-            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-            new Chart(distributionCtx, {
-                type: 'doughnut',
+            // Calculate warehouse distribution
+            const warehouseDistribution = {};
+            transactionsData.forEach(t => {
+                if (t.cancelled) return;
+                const warehouseId = t.warehouseId;
+                if (!warehouseDistribution[warehouseId]) {
+                    warehouseDistribution[warehouseId] = 0;
+                }
+                warehouseDistribution[warehouseId] += parseFloat(t.numberOfBags) || 0;
+            });
+
+            const warehouseLabels = Object.keys(warehouseDistribution).map(id => 
+                warehousesData[id]?.name || `Warehouse ${id}`
+            );
+            const warehouseValues = Object.values(warehouseDistribution);
+
+            // Stock Levels Chart
+            const totalPalay = palayData.reduce((a, b) => a + b, 0);
+            const totalRice = riceData.reduce((a, b) => a + b, 0);
+            const totalAvailable = transactionsData
+                .filter(t => !t.cancelled)
+                .reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0);
+
+            const stockCtx = document.getElementById('stockChart').getContext('2d');
+            new Chart(stockCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['DDN Rice', 'DDO Rice', 'In Transit', 'Reserved'],
+                    labels: ['Palay Stock (kg)', 'Rice Stock (kg)', 'Available (sacks)', 'Capacity Used (%)'],
                     datasets: [{
-                        data: [49522, 29673, 5000, 3500],
+                        label: 'Inventory Metrics',
+                        data: [totalPalay, totalRice, totalAvailable, 68.5],
                         backgroundColor: [
                             '#f5c469',
-                            '#ee7c92',
                             '#5dd39e',
-                            '#5b8dee'
+                            '#5b8dee',
+                            '#a78bfa'
                         ]
                     }]
                 },
@@ -758,26 +1006,37 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
                 }
             });
 
-            // Consumption Pattern Chart
-            const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
-            new Chart(consumptionCtx, {
-                type: 'bar',
+            // Monthly Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: months,
                     datasets: [{
-                        label: 'DDN',
-                        data: [8500, 8700, 8600, 8900, 8690, 7500, 6000],
-                        backgroundColor: '#5dd39e',
+                        label: 'Palay (kg)',
+                        data: palayData,
+                        borderColor: '#f5c469',
+                        backgroundColor: 'rgba(245, 196, 105, 0.1)',
+                        tension: 0.4,
+                        fill: true
                     }, {
-                        label: 'DDO',
-                        data: [7800, 7900, 7850, 8000, 7850, 7200, 5500],
-                        backgroundColor: '#5b8dee',
+                        label: 'Rice (kg)',
+                        data: riceData,
+                        borderColor: '#5dd39e',
+                        backgroundColor: 'rgba(93, 211, 158, 0.1)',
+                        tension: 0.4,
+                        fill: true
                     }]
                 },
                 options: {
@@ -796,14 +1055,14 @@
                 }
             });
 
-            // Budget Chart
-            const budgetCtx = document.getElementById('budgetChart').getContext('2d');
-            new Chart(budgetCtx, {
-                type: 'pie',
+            // Warehouse Distribution Chart
+            const warehouseCtx = document.getElementById('warehouseChart').getContext('2d');
+            new Chart(warehouseCtx, {
+                type: 'doughnut',
                 data: {
-                    labels: ['Operations', 'Procurement', 'Distribution', 'Maintenance', 'Other'],
+                    labels: warehouseLabels.length > 0 ? warehouseLabels : ['No Data'],
                     datasets: [{
-                        data: [3500000, 2500000, 2000000, 1500000, 469378.94],
+                        data: warehouseValues.length > 0 ? warehouseValues : [1],
                         backgroundColor: [
                             '#5b8dee',
                             '#5dd39e',
@@ -823,7 +1082,39 @@
                     }
                 }
             });
-        });
+
+            // Comparison Chart
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(comparisonCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Palay Stock', 'Rice Stock', 'Available Stock', 'Reserved'],
+                    datasets: [{
+                        data: [
+                            totalPalay,
+                            totalRice,
+                            totalAvailable,
+                            totalAvailable * 0.1
+                        ],
+                        backgroundColor: [
+                            '#f5c469',
+                            '#5dd39e',
+                            '#5b8dee',
+                            '#a78bfa'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
 
         // Add animation on scroll
         const observer = new IntersectionObserver((entries) => {
@@ -835,7 +1126,7 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.summary-card, .stat-item, .chart-card, .comparison-section').forEach((element) => {
+        document.querySelectorAll('.summary-card, .stat-item, .chart-card').forEach((element) => {
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
             element.style.transition = 'all 0.5s ease-out';
@@ -846,14 +1137,6 @@
         window.addEventListener('load', function() {
             setTimeout(() => {
                 document.querySelectorAll('.stat-bar-fill').forEach(bar => {
-                    const width = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(() => {
-                        bar.style.width = width;
-                    }, 100);
-                });
-
-                document.querySelectorAll('.comparison-bar').forEach(bar => {
                     const width = bar.style.width;
                     bar.style.width = '0%';
                     setTimeout(() => {

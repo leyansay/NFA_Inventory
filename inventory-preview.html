@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Inventory - Print Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .print-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .print-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c3e50;
+        }
+
+        .print-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .print-header .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .print-header .date-time {
+            color: #95a5a6;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .warehouse-table {
+            margin-bottom: 50px;
+            page-break-inside: avoid;
+        }
+
+        .warehouse-table:last-child {
+            margin-bottom: 0;
+        }
+
+        .warehouse-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warehouse-title.rice {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .warehouse-title.palay {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #34495e;
+            color: white;
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:last-child {
+            border-bottom: 2px solid #34495e;
+        }
+
+        td {
+            padding: 12px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .summary-row {
+            background-color: #ecf0f1;
+            font-weight: bold;
+        }
+
+        .summary-row td {
+            padding: 15px 12px;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-close {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-close:hover {
+            background-color: #4b5563;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 2px solid #2c3e50;
+            margin: 60px 20px 10px 20px;
+        }
+
+        .signature-label {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .print-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .print-controls {
+                display: none;
+            }
+
+            .warehouse-table {
+                page-break-inside: avoid;
+            }
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            @page {
+                margin: 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls">
+        <button class="btn btn-print" onclick="window.print()">
+            🖨️ Print
+        </button>
+        <button class="btn btn-close" onclick="window.close()">
+            ✕ Close
+        </button>
+    </div>
+
+    <div class="print-container">
+        <div class="print-header">
+            <img src="images/nfa.png" alt="NFA Logo" class="logo">
+            <h1>NFA INVENTORY REPORT</h1>
+            <div class="subtitle">National Food Authority - Warehouse Inventory</div>
+            <div class="date-time" id="reportDateTime"></div>
+        </div>
+
+        <div id="tablesContainer">
+            <!-- Tables will be dynamically inserted here -->
+        </div>
+
+        <div class="footer">
+            <div>National Food Authority © 2026</div>
+            <div id="pageInfo">Printed: <span id="printDate"></span></div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date and time
+        function setDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const dateTimeStr = now.toLocaleDateString('en-US', options);
+            document.getElementById('reportDateTime').textContent = `Report Generated: ${dateTimeStr}`;
+            
+            const printDateOptions = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', printDateOptions);
+        }
+
+        // Generate table HTML
+        function generateTableHTML(title, data, type) {
+            const typeClass = type.includes('rice') ? 'rice' : 'palay';
+            const icon = type.includes('rice') ? '🌾' : '🌱';
+            
+            // Group data by pile number and variety
+            const grouped = {};
+            data.forEach(item => {
+                const key = `${item.pileNo}_${item.variety}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        pileNo: item.pileNo,
+                        age: item.age,
+                        variety: item.variety,
+                        totalBags: 0,
+                        totalNetWeight: 0
+                    };
+                }
+                grouped[key].totalBags += item.numberOfBags;
+                grouped[key].totalNetWeight += item.netWeight;
+            });
+
+            // Sort by pile number
+            const sortedData = Object.values(grouped).sort((a, b) => {
+                const pileA = parseInt(a.pileNo) || 0;
+                const pileB = parseInt(b.pileNo) || 0;
+                return pileA - pileB;
+            });
+
+            let tableHTML = `
+                <div class="warehouse-table">
+                    <div class="warehouse-title ${typeClass}">
+                        <span>${icon}</span>
+                        <span>${title}</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PILE NO.</th>
+                                <th>AGE (MONTH)</th>
+                                <th>VARIETY</th>
+                                <th>NO. OF BAGS</th>
+                                <th>NET KG.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (sortedData.length === 0) {
+                tableHTML += `
+                    <tr>
+                        <td colspan="5" class="no-data">No data available for this warehouse</td>
+                    </tr>
+                `;
+            } else {
+                let totalBags = 0;
+                let totalWeight = 0;
+
+                sortedData.forEach(item => {
+                    totalBags += item.totalBags;
+                    totalWeight += item.totalNetWeight;
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${item.pileNo}</td>
+                            <td>${item.age}</td>
+                            <td>${item.variety}</td>
+                            <td>${item.totalBags.toFixed(0)}</td>
+                            <td>${item.totalNetWeight.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                // Add summary row
+                tableHTML += `
+                    <tr class="summary-row">
+                        <td colspan="3"><strong>TOTAL</strong></td>
+                        <td><strong>${totalBags.toFixed(0)}</strong></td>
+                        <td><strong>${totalWeight.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            }
+
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            return tableHTML;
+        }
+
+        // Load and display selected tables
+        function loadTables() {
+            const selections = JSON.parse(sessionStorage.getItem('printSelections') || '{}');
+            const inventoryData = JSON.parse(sessionStorage.getItem('inventoryData') || '{}');
+            
+            const container = document.getElementById('tablesContainer');
+            let html = '';
+
+            if (selections.gid1Rice) {
+                html += generateTableHTML('GID 1 - Rice (WD1)', inventoryData['gid1-rice'] || [], 'rice');
+            }
+
+            if (selections.gid2Rice) {
+                html += generateTableHTML('GID 2 - Rice (WD1)', inventoryData['gid2-rice'] || [], 'rice');
+            }
+
+            if (selections.gid1Palay) {
+                html += generateTableHTML('GID 1 - Palay (PD)', inventoryData['gid1-palay'] || [], 'palay');
+            }
+
+            if (selections.gid2Palay) {
+                html += generateTableHTML('GID 2 - Palay (PD)', inventoryData['gid2-palay'] || [], 'palay');
+            }
+
+            if (html === '') {
+                html = '<div class="no-data">No tables selected for printing.</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            setDateTime();
+            loadTables();
+        });
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+P or Cmd+P to print
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+            // Escape to close
+            if (e.key === 'Escape') {
+                window.close();
+            }
+        });
+    </script>
+</body>
+</html>
