@@ -168,20 +168,38 @@
 
         .signature-section {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
             margin-top: 30px;
+            page-break-inside: avoid;
         }
 
         .signature-box {
             text-align: center;
-            padding-top: 40px;
+            padding-top: 30px;
             border-top: 2px solid #000;
         }
 
         .signature-label {
             font-weight: bold;
-            font-size: 10px;
+            font-size: 9px;
+            margin-bottom: 3px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 8px;
+            margin-top: 3px;
+            text-transform: uppercase;
+            min-height: 12px;
+        }
+
+        .signature-designation {
+            font-size: 7px;
+            color: #666;
+            margin-top: 2px;
+            font-style: italic;
+            min-height: 10px;
         }
 
         @media print {
@@ -218,6 +236,22 @@
             .logo {
                 width: 50px;
                 height: 50px;
+            }
+
+            .signature-section {
+                gap: 10px;
+            }
+
+            .signature-label {
+                font-size: 8px;
+            }
+
+            .signature-name {
+                font-size: 7px;
+            }
+
+            .signature-designation {
+                font-size: 6px;
             }
 
             @page {
@@ -295,12 +329,28 @@
         <div class="signature-section">
             <div class="signature-box">
                 <div class="signature-label">Prepared By</div>
+                <div class="signature-name" id="preparedByName">-</div>
+                <div class="signature-designation" id="preparedByDesignation">-</div>
             </div>
             <div class="signature-box">
                 <div class="signature-label">Verified By</div>
+                <div class="signature-name" id="verifiedByName">-</div>
+                <div class="signature-designation" id="verifiedByDesignation">-</div>
             </div>
             <div class="signature-box">
-                <div class="signature-label">Approved By</div>
+                <div class="signature-label">Noted By</div>
+                <div class="signature-name" id="notedByName">-</div>
+                <div class="signature-designation" id="notedByDesignation">-</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-label">Audited By</div>
+                <div class="signature-name" id="auditedByName">-</div>
+                <div class="signature-designation" id="auditedByDesignation">-</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-label">Cert. Correct</div>
+                <div class="signature-name" style="visibility: hidden;">-</div>
+                <div class="signature-designation" id="certCorrectDesignation">-</div>
             </div>
         </div>
     </div>
@@ -353,8 +403,55 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
 
+        // Load signatory data from Firebase
+        function loadSignatoryData() {
+            database.ref('signatories').once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    
+                    // Update Prepared By
+                    if (data.prepared) {
+                        document.getElementById('preparedByName').textContent = data.prepared.name || '-';
+                        document.getElementById('preparedByDesignation').textContent = data.prepared.designation || '-';
+                    }
+                    
+                    // Update Verified By
+                    if (data.verified) {
+                        document.getElementById('verifiedByName').textContent = data.verified.name || '-';
+                        document.getElementById('verifiedByDesignation').textContent = data.verified.designation || '-';
+                    }
+                    
+                    // Update Noted By
+                    if (data.noted) {
+                        document.getElementById('notedByName').textContent = data.noted.name || '-';
+                        document.getElementById('notedByDesignation').textContent = data.noted.designation || '-';
+                    }
+                    
+                    // Update Audited By
+                    if (data.audited) {
+                        document.getElementById('auditedByName').textContent = data.audited.name || '-';
+                        document.getElementById('auditedByDesignation').textContent = data.audited.designation || '-';
+                    }
+                    
+                    // Update Cert. Correct
+                    if (data.certCorrect) {
+                        document.getElementById('certCorrectDesignation').textContent = data.certCorrect.designation || '-';
+                    }
+                    
+                    console.log('Signatory data loaded successfully');
+                } else {
+                    console.log('No signatory data found');
+                }
+            }).catch((error) => {
+                console.error('Error loading signatory data:', error);
+            });
+        }
+
         function loadTransactionsForPreview() {
             const tbody = document.getElementById('previewBody');
+            
+            // Load signatory data
+            loadSignatoryData();
             
             // Update header information
             if (officerName) {

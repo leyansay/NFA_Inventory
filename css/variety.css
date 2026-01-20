@@ -430,7 +430,7 @@ tbody td:first-child {
     animation: fadeIn 0.3s;
 }
 
-.modal-overlay.active {
+.modal-overlay.show {
     display: flex;
     align-items: center;
     justify-content: center;

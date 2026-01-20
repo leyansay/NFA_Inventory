@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signatories - NFA Inventory</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-navy: #0f172a;
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #2563eb;
+            --accent-blue: #60a5fa;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2.5rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            background: var(--bg-primary);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-left h1::before {
+            content: '';
+            width: 6px;
+            height: 32px;
+            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            border-radius: 3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+            margin-right: 1rem;
+        }
+
+        .user-greeting {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .form-container {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .signatory-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .signatory-section:last-child {
+            margin-bottom: 2rem;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            border-radius: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .form-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            outline: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        .field-error-message {
+            color: var(--danger);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 4px;
+            grid-column: 2;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+
+        .btn-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-save:hover::before {
+            opacity: 1;
+        }
+
+        .btn-save:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .header-left h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .form-label {
+                text-align: left;
+            }
+
+            .field-error-message {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Document Signatories</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="signatoryForm">
+                <!-- Prepared By -->
+                <div class="signatory-section">
+                    <div class="section-title">Prepared by:</div>
+                    <div class="form-row">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="preparedName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="preparedDesignation" placeholder="Enter designation" required>
+                    </div>
+                </div>
+
+                <!-- Verified By -->
+                <div class="signatory-section">
+                    <div class="section-title">Verified by:</div>
+                    <div class="form-row">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="verifiedName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="verifiedDesignation" placeholder="Enter designation" required>
+                    </div>
+                </div>
+
+                <!-- Noted By -->
+                <div class="signatory-section">
+                    <div class="section-title">Noted by:</div>
+                    <div class="form-row">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="notedName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="notedDesignation" placeholder="Enter designation" required>
+                    </div>
+                </div>
+
+                <!-- Audited By -->
+                <div class="signatory-section">
+                    <div class="section-title">Audited by:</div>
+                    <div class="form-row">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="auditedName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="auditedDesignation" placeholder="Enter designation" required>
+                    </div>
+                </div>
+
+                <!-- Cert. Correct -->
+                <div class="signatory-section">
+                    <div class="section-title">Cert. Correct:</div>
+                    <div class="form-row">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="certCorrectDesignation" placeholder="Enter designation" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save">
+                    <span>💾</span>
+                    <span>Save Signatories</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // ===================== FIREBASE CONFIGURATION =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        console.log("Firebase initialized:", firebase.apps.length > 0);
+
+        // ===================== LOAD EXISTING SIGNATORY DATA =====================
+        function loadSignatoryData() {
+            const signatoryRef = database.ref('signatories');
+            
+            signatoryRef.once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        
+                        // Populate form with existing data
+                        if (data.prepared) {
+                            document.getElementById('preparedName').value = data.prepared.name || '';
+                            document.getElementById('preparedDesignation').value = data.prepared.designation || '';
+                        }
+                        if (data.verified) {
+                            document.getElementById('verifiedName').value = data.verified.name || '';
+                            document.getElementById('verifiedDesignation').value = data.verified.designation || '';
+                        }
+                        if (data.noted) {
+                            document.getElementById('notedName').value = data.noted.name || '';
+                            document.getElementById('notedDesignation').value = data.noted.designation || '';
+                        }
+                        if (data.audited) {
+                            document.getElementById('auditedName').value = data.audited.name || '';
+                            document.getElementById('auditedDesignation').value = data.audited.designation || '';
+                        }
+                        if (data.certCorrect) {
+                            document.getElementById('certCorrectDesignation').value = data.certCorrect.designation || '';
+                        }
+                        
+                        console.log('Signatory data loaded successfully');
+                    } else {
+                        console.log('No existing signatory data found');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading signatory data:', error);
+                });
+        }
+
+        // ===================== SAVE SIGNATORY DATA =====================
+        const signatoryForm = document.getElementById('signatoryForm');
+        
+        signatoryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Clear previous errors
+            document.querySelectorAll('input').forEach(field => {
+                field.style.border = '';
+            });
+            document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
+
+            // Get form values
+            const preparedName = document.getElementById('preparedName').value.trim();
+            const preparedDesignation = document.getElementById('preparedDesignation').value.trim();
+            const verifiedName = document.getElementById('verifiedName').value.trim();
+            const verifiedDesignation = document.getElementById('verifiedDesignation').value.trim();
+            const notedName = document.getElementById('notedName').value.trim();
+            const notedDesignation = document.getElementById('notedDesignation').value.trim();
+            const auditedName = document.getElementById('auditedName').value.trim();
+            const auditedDesignation = document.getElementById('auditedDesignation').value.trim();
+            const certCorrectDesignation = document.getElementById('certCorrectDesignation').value.trim();
+
+            // Validate required fields
+            let hasEmptyFields = false;
+            const requiredFields = [
+                { id: 'preparedName', value: preparedName },
+                { id: 'preparedDesignation', value: preparedDesignation },
+                { id: 'verifiedName', value: verifiedName },
+                { id: 'verifiedDesignation', value: verifiedDesignation },
+                { id: 'notedName', value: notedName },
+                { id: 'notedDesignation', value: notedDesignation },
+                { id: 'auditedName', value: auditedName },
+                { id: 'auditedDesignation', value: auditedDesignation },
+                { id: 'certCorrectDesignation', value: certCorrectDesignation }
+            ];
+
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    const element = document.getElementById(field.id);
+                    element.style.border = '2px solid #ff6b6b';
+                    hasEmptyFields = true;
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'field-error-message';
+                    errorMsg.textContent = 'This field is required';
+                    element.parentElement.appendChild(errorMsg);
+                }
+            });
+
+            if (hasEmptyFields) {
+                const firstEmptyField = document.querySelector('[style*="border: 2px solid"]');
+                if (firstEmptyField) {
+                    firstEmptyField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstEmptyField.focus();
+                }
+                return;
+            }
+
+            // Prepare signatory data
+            const signatoryData = {
+                prepared: {
+                    name: preparedName,
+                    designation: preparedDesignation
+                },
+                verified: {
+                    name: verifiedName,
+                    designation: verifiedDesignation
+                },
+                noted: {
+                    name: notedName,
+                    designation: notedDesignation
+                },
+                audited: {
+                    name: auditedName,
+                    designation: auditedDesignation
+                },
+                certCorrect: {
+                    designation: certCorrectDesignation
+                },
+                updatedAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            // Save to Firebase
+            database.ref('signatories').set(signatoryData)
+                .then(() => {
+                    alert('Signatories saved successfully!');
+                    console.log('Signatories saved:', signatoryData);
+                })
+                .catch((error) => {
+                    console.error('Error saving signatories:', error);
+                    alert('Error saving signatories: ' + error.message);
+                });
+        });
+
+        // ===================== INIT =====================
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Signatories page loaded');
+            loadSignatoryData();
+        });
+    </script>
+</body>
+</html>

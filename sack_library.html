@@ -139,25 +139,25 @@
         addSackBtn.addEventListener('click', () => {
             sackForm.reset();
             sackForm.removeAttribute('data-edit-id');
-            modalOverlay.classList.add('show');
+            modalOverlay.classList.add('active');
         });
 
         // Close modal
         closeModalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('show');
+            modalOverlay.classList.remove('active');
         });
 
         // Close modal when clicking outside
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('show');
+                modalOverlay.classList.remove('active');
             }
         });
 
         // Close modal with ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                modalOverlay.classList.remove('show');
+                modalOverlay.classList.remove('active');
             }
         });
 
@@ -292,6 +292,7 @@
         }
 
         // ===================== RENDER SACKS =====================
+// ===================== RENDER SACKS =====================
 function renderSacks() {
     const tbody = document.getElementById('sackTableBody');
     tbody.innerHTML = '';
@@ -306,13 +307,19 @@ function renderSacks() {
 
     allSacks.forEach(item => {
         const d = item.data;
-        const docId = item.id; // ✓ Define docId here
+        const docId = item.id;
         const tr = document.createElement('tr');
+        
+        // Format numbers to 3 decimal places
+        const formatWeight = (value) => {
+            return value !== undefined && value !== null ? parseFloat(value).toFixed(3) : '-';
+        };
+        
         tr.innerHTML = `
             <td>${d.sackCode || '-'}</td>
-            <td>${d.brandNew !== undefined ? d.brandNew : '-'}</td>
-            <td>${d.secondHand !== undefined ? d.secondHand : '-'}</td>
-            <td>${d.mendable !== undefined ? d.mendable : '-'}</td>
+            <td>${formatWeight(d.brandNew)}</td>
+            <td>${formatWeight(d.secondHand)}</td>
+            <td>${formatWeight(d.mendable)}</td>
             <td class="actions-cell">
                 <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
                 <div class="dropdown-menu">
