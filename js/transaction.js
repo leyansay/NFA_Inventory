@@ -22,7 +22,6 @@ let currentSortOrder = 'newest';
 // Store all data for table modals
 let activitiesData = [];
 let sacksData = [];
-let locationsData = [];
 let varietiesData = [];
 
 function closeAllDropdowns() {
@@ -67,23 +66,6 @@ function loadDropdownOptions() {
                 }
             });
             sacksData.sort((a, b) => a.code.localeCompare(b.code));
-        }
-    });
-
-    // Load locations
-    database.ref('locations').once('value').then((snapshot) => {
-        locationsData = [];
-        if (snapshot.exists()) {
-            snapshot.forEach((child) => {
-                const data = child.val();
-                const displayName = data.abbreviation || data.provinceName || data.locationCode || data.name || data.location || child.key;
-                locationsData.push({
-                    abbreviation: displayName,
-                    locationCode: data.locationCode || '-',
-                    provinceName: data.provinceName || '-'
-                });
-            });
-            locationsData.sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
         }
     });
 
@@ -187,9 +169,6 @@ function showActivitySelection() {
             { label: 'Abbreviation', key: 'abbreviation' },
             { label: 'Include In TA', key: 'includeTA' },
             { label: 'In-Whse. Act.', key: 'inWhse' }
-            
-
-            
         ],
         activitiesData,
         (selected) => {
@@ -214,22 +193,6 @@ function showSackSelection() {
             document.getElementById('sackCondition').disabled = false;
             document.getElementById('sackCondition').value = '';
             document.getElementById('sackWeight').value = '';
-        }
-    );
-}
-
-/* SHOW LOCATION SELECTION */
-function showLocationSelection() {
-    createSelectionModal(
-        'Select Location',
-        [
-            { label: 'Location Code', key: 'locationCode'},
-            { label: 'Province Name', key: 'provinceName' },
-            { label: 'Abbreviation', key: 'abbreviation' }
-        ],
-        locationsData,
-        (selected) => {
-            document.getElementById('recdFromIssdTo').value = selected.abbreviation;
         }
     );
 }
@@ -469,17 +432,17 @@ function setupFieldClickHandlers() {
     sackInput.readOnly = true;
     sackInput.onclick = () => showSackSelection();
 
-    // Location
-    const locationInput = document.getElementById('recdFromIssdTo');
-    locationInput.style.cursor = 'pointer';
-    locationInput.readOnly = true;
-    locationInput.onclick = () => showLocationSelection();
-
     // Variety Code
     const varietyInput = document.getElementById('varietyCode');
     varietyInput.style.cursor = 'pointer';
     varietyInput.readOnly = true;
     varietyInput.onclick = () => showVarietySelection();
+    
+    // Recd From / Issd To - Make it a regular text input
+    const locationInput = document.getElementById('recdFromIssdTo');
+    locationInput.style.cursor = 'text';
+    locationInput.readOnly = false;
+    locationInput.onclick = null;
 }
 
 /* SACK INTERACTION */
@@ -631,6 +594,19 @@ function renderTransactions() {
         
         const tr = document.createElement("tr");
         tr.innerHTML = `
+                    <td class="action-cell">
+                <div class="dropdown">
+                    <span class="dot-menu">&#8942;</span>
+                    <div class="dropdown-content">
+                        <button class="edit-btn" data-doc-id="${docId}">
+                            <span style="color: #2196F3;">✏️</span> Edit
+                        </button>
+                        <button class="delete-btn" data-doc-id="${docId}">
+                            <span style="color: #f44336;">🗑️</span> Delete
+                        </button>
+                    </div>
+                </div>
+            </td>
             <td>${data.officerId || "-"}</td>
             <td>${data.officerName || "-"}</td>
             <td>${data.warehouseId || "-"}</td>
@@ -656,19 +632,6 @@ function renderTransactions() {
             <td>${data.moistureContent || "-"}</td>
             <td>${data.netWeight || "-"}</td>
             <td>${data.cancelled ? "Yes" : "No"}</td>
-            <td class="action-cell">
-                <div class="dropdown">
-                    <span class="dot-menu">&#8942;</span>
-                    <div class="dropdown-content">
-                        <button class="edit-btn" data-doc-id="${docId}">
-                            <span style="color: #2196F3;">✏️</span> Edit
-                        </button>
-                        <button class="delete-btn" data-doc-id="${docId}">
-                            <span style="color: #f44336;">🗑️</span> Delete
-                        </button>
-                    </div>
-                </div>
-            </td>
         `;
         tbody.appendChild(tr);
     });

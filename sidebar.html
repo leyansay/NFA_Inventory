@@ -151,7 +151,6 @@
             overflow-y: auto;
         }
 
-        /* Custom scrollbar styling */
         .dropdown-menu::-webkit-scrollbar {
             width: 6px;
         }
@@ -169,7 +168,6 @@
             background: rgba(91, 141, 238, 0.7);
         }
 
-        /* Firefox scrollbar styling */
         .dropdown-menu {
             scrollbar-width: thin;
             scrollbar-color: rgba(91, 141, 238, 0.5) rgba(0, 0, 0, 0.2);
@@ -181,8 +179,8 @@
             transition: all 0.3s ease;
             color: #000000;
             font-size: 0.9rem;
-            
         }
+        
         .dropdown-menu-last{
             margin-bottom: 20px;
         }
@@ -199,7 +197,6 @@
             border-left: 3px solid #5b8dee;
         }
 
-        /* Logout section */
         .logout-section {
             padding: 1rem 1.5rem;
             border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -239,7 +236,6 @@
             font-size: 1.2rem;
         }
 
-        /* Modal styles for logout confirmation */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -349,7 +345,6 @@
             }
         }
 
-        /* Custom scrollbar for menu */
         .menu::-webkit-scrollbar {
             width: 6px;
         }
@@ -404,6 +399,10 @@
                 <span class="menu-icon">📋</span>
                 <span>Report</span>
             </li>
+            <li class="menu-item" data-page="backup">
+                <span class="menu-icon">💾</span>
+                <span>Backup Data</span>
+            </li>
             
             <li class="menu-item dropdown-item" onclick="toggleDropdown()">
                 <div class="dropdown-toggle">
@@ -426,8 +425,6 @@
                 <li class="dropdown-menu-item" data-page="client">Client</li>
                 <li class="dropdown-menu-last" data-page="client"></li>
             </ul>
-            </ul>
-            
         </ul>
 
         <div class="logout-section">
@@ -437,7 +434,6 @@
         </div>
     </nav>
 
-    <!-- Logout Confirmation Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -455,13 +451,13 @@
     </div>
 
     <script>
-        // Page navigation mapping
         const pageLinks = {
             'home': 'home.html',
             'accountable': 'accountable.html',
             'transaction': 'transaction.html',
             'inventory': 'inventory.html',
             'report': 'report.html',
+            'backup': 'backup.html',
             'activity': 'activity_library.html',
             'cereal': 'cereal_library.html',
             'location': 'location_library.html',
@@ -479,7 +475,6 @@
             'settings': '#settings'
         };
 
-        // Toggle dropdown menu
         function toggleDropdown() {
             const dropdown = document.getElementById('libraryDropdown');
             const arrow = document.getElementById('dropdownArrow');
@@ -487,19 +482,14 @@
             arrow.classList.toggle('open');
         }
 
-        // Handle logout
         function handleLogout() {
-            // Show custom logout modal instead of browser confirm
             const modal = document.getElementById('logoutModal');
             
-            // If in iframe, append modal to parent body for full screen centering
             if (window.parent !== window && window.parent.document.body) {
-                // Clone modal to parent document
                 const parentModal = modal.cloneNode(true);
                 parentModal.id = 'logoutModalParent';
                 window.parent.document.body.appendChild(parentModal);
                 
-                // Add styles to parent document if not exists
                 if (!window.parent.document.getElementById('logoutModalStyles')) {
                     const styleElement = document.createElement('style');
                     styleElement.id = 'logoutModalStyles';
@@ -507,10 +497,8 @@
                     window.parent.document.head.appendChild(styleElement);
                 }
                 
-                // Show parent modal
                 parentModal.classList.add('active');
                 
-                // Add event listeners to parent modal
                 const cancelBtn = parentModal.querySelector('.modal-btn-cancel');
                 const confirmBtn = parentModal.querySelector('.modal-btn-confirm');
                 
@@ -525,7 +513,6 @@
                     setTimeout(() => parentModal.remove(), 300);
                 };
                 
-                // Close when clicking outside
                 parentModal.onclick = function(event) {
                     if (event.target === parentModal) {
                         parentModal.classList.remove('active');
@@ -533,17 +520,14 @@
                     }
                 };
             } else {
-                // Not in iframe, use regular modal
                 modal.classList.add('active');
             }
         }
 
-        // Close logout modal
         function closeLogoutModal() {
             const modal = document.getElementById('logoutModal');
             modal.classList.remove('active');
             
-            // Also remove parent modal if exists
             const parentModal = window.parent.document.getElementById('logoutModalParent');
             if (parentModal) {
                 parentModal.classList.remove('active');
@@ -551,23 +535,16 @@
             }
         }
 
-        // Confirm logout action
         function confirmLogout() {
-            // Close the modal first
             closeLogoutModal();
             
-            // Clear all session storage
             sessionStorage.clear();
-            
-            // Clear all local storage
             localStorage.clear();
             
-            // Clear any cookies (optional - adjust domain as needed)
             document.cookie.split(";").forEach(function(c) { 
                 document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
             });
             
-            // Create overlay background
             const overlay = document.createElement('div');
             overlay.style.cssText = `
                 position: fixed;
@@ -582,7 +559,6 @@
                 justify-content: center;
             `;
             
-            // Show logout message
             const logoutMessage = document.createElement('div');
             logoutMessage.style.cssText = `
                 background: linear-gradient(135deg, #4b86fc 0%, #5b8dee 100%);
@@ -599,14 +575,12 @@
             
             overlay.appendChild(logoutMessage);
             
-            // Append to parent body if in iframe, otherwise to current body
             if (window.parent !== window) {
                 window.parent.document.body.appendChild(overlay);
             } else {
                 document.body.appendChild(overlay);
             }
             
-            // Add animation keyframes
             if (!document.getElementById('logoutAnimation')) {
                 const style = document.createElement('style');
                 style.id = 'logoutAnimation';
@@ -625,14 +599,11 @@
                 document.head.appendChild(style);
             }
             
-            // Redirect to login page after a short delay
             setTimeout(function() {
                 window.parent.location.href = 'index.html';
-                // Alternative if you're not using iframe: window.location.href = 'login.html';
             }, 1500);
         }
 
-        // Close modal when clicking outside
         document.addEventListener('click', function(event) {
             const modal = document.getElementById('logoutModal');
             if (event.target === modal) {
@@ -640,7 +611,6 @@
             }
         });
 
-        // Get current page from URL
         function getCurrentPage() {
             const path = window.parent.location.pathname;
             const filename = path.split('/').pop();
@@ -650,8 +620,9 @@
             if (filename === 'transaction.html') return 'transaction';
             if (filename === 'inventory.html') return 'inventory';
             if (filename === 'report.html') return 'report';
+            if (filename === 'backup.html') return 'backup';
             if (filename === 'activity_library.html') return 'activity';
-            if (filename === 'signatories.html') return 'activity';
+            if (filename === 'signatories.html') return 'signatories';
             if (filename === 'cereal_library.html') return 'cereal';
             if (filename === 'location_library.html') return 'location';
             if (filename === 'sack_library.html') return 'sack';
@@ -661,14 +632,12 @@
             return null;
         }
 
-        // Check if current page is in library dropdown
         function isLibraryPage() {
             const currentPage = getCurrentPage();
             const libraryPages = ['activity', 'cereal', 'location', 'sack', 'warehouse-lib', 'variety', 'examination', 'signatories', 'client'];
             return libraryPages.includes(currentPage);
         }
 
-        // Set active menu item based on current page
         function setActiveMenuItem() {
             const currentPage = getCurrentPage();
             if (currentPage) {
@@ -680,7 +649,6 @@
                     }
                 });
 
-                // Highlight dropdown menu items
                 const dropdownItems = document.querySelectorAll('.dropdown-menu-item');
                 dropdownItems.forEach(item => {
                     item.classList.remove('active');
@@ -689,7 +657,6 @@
                     }
                 });
 
-                // Keep dropdown open if on a library page
                 if (isLibraryPage()) {
                     const dropdown = document.getElementById('libraryDropdown');
                     const arrow = document.getElementById('dropdownArrow');
@@ -699,23 +666,19 @@
             }
         }
 
-        // Add click handlers to menu items
         document.querySelectorAll('.menu-item:not(.dropdown-item)').forEach(item => {
             item.addEventListener('click', function() {
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
                 
                 if (link && link.startsWith('#')) {
-                    // For pages not yet created, show alert
                     alert('Page "' + this.textContent.trim() + '" - Coming soon!');
                 } else if (link) {
-                    // Navigate to the page in parent window
                     window.parent.location.href = link;
                 }
             });
         });
 
-        // Add click handlers to dropdown menu items
         document.querySelectorAll('.dropdown-menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -730,10 +693,8 @@
             });
         });
 
-        // Set active menu item on load
         setActiveMenuItem();
         
-        // Update active state when page changes (for iframe usage)
         window.addEventListener('message', function(event) {
             if (event.data.type === 'pageChange') {
                 setActiveMenuItem();

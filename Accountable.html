@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Accountable Officer</title>
     <link rel="stylesheet" href="css/accountable.css" />
+
 </head>
 <body>
-    <!-- Load Sidebar from separate file -->
-    <div id="sidebar-container">
-        <iframe id="sidebar-frame" src="sidebar.html"></iframe>
-    </div>
-
-   <div class="main-content">
-        <!-- Page Header -->
+    <div id="sidebar-container"><iframe id="sidebar-frame" src="sidebar.html"></iframe></div>
+    <div class="main-content">
         <div class="page-header">
             <h1 class="page-title">Accountable Officer</h1>
             <div class="user-info">
@@ -24,42 +20,17 @@
                 <div class="user-avatar">N</div>
             </div>
         </div>
-
-        <!-- Controls Section -->
         <div class="controls-section">
-            <div class="search-box">
-                <input type="text" placeholder="Search inventory..." id="searchInput">
-            </div>
-            <button class="add-btn" id="openModal">
-                + Add Accountable Officer
-            </button>
+            <div class="search-box"><input type="text" placeholder="Search inventory..." id="searchInput"></div>
+            <button class="add-btn" id="openModal">+ Add Accountable Officer</button>
         </div>
-
-        <!-- Table -->
         <div class="table-container">
             <table class="inventory-table">
-                <thead>
-                    <tr>
-                        <th>OFFICER ID</th>
-                        <th>LAST NAME</th>
-                        <th>FIRST NAME</th>
-                        <th>MIDDLE NAME</th>
-                        <th>WAREHOUSE CODE</th>
-                        <th>WAREHOUSE NAME</th>
-                        <th>PERIOD OF ACCOUNTABILITY</th>
-                        <th>ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="8" class="loading">Loading data...</td>
-                    </tr>
-                </tbody>
+                <thead><tr><th>OFFICER ID</th><th>LAST NAME</th><th>FIRST NAME</th><th>MIDDLE NAME</th><th>WAREHOUSE CODE</th><th>WAREHOUSE NAME</th><th>PERIOD OF ACCOUNTABILITY</th><th>ACTIONS</th></tr></thead>
+                <tbody><tr><td colspan="8" class="loading">Loading data...</td></tr></tbody>
             </table>
         </div>
     </div>
-
-    <!-- Modal 1: Add Accountable Officer -->
     <div id="accountableModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -68,31 +39,15 @@
             </div>
             <div class="modal-body">
                 <form id="accountableForm">
-                    <div class="form-group">
-                        <label for="officerId">Officer ID</label>
-                        <input type="text" id="officerId" name="officerId" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" name="firstName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="middleName">Middle Name</label>
-                        <input type="text" id="middleName" name="middleName">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn-submit">Add Officer</button>
-                    </div>
+                    <div class="form-group"><label for="officerId">Officer ID</label><input type="text" id="officerId" required></div>
+                    <div class="form-group"><label for="firstName">First Name</label><input type="text" id="firstName" required></div>
+                    <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName" required></div>
+                    <div class="form-group"><label for="middleName">Middle Name</label><input type="text" id="middleName"></div>
+                    <div class="modal-footer"><button type="submit" class="btn-submit">Add Officer</button></div>
                 </form>
             </div>
         </div>
     </div>
-
-    <!-- Modal 2: Add/Edit Masterfile -->
     <div id="masterfileModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -101,42 +56,39 @@
             </div>
             <div class="modal-body">
                 <form id="masterfileForm">
+                    <div class="form-group"><label>Officer ID</label><input type="text" id="officerMaster" readonly></div>
+                    <div class="form-group"><label>Officer Name</label><input type="text" id="officerName" readonly></div>
                     <div class="form-group">
-                        <label for="officerMaster">Officer ID</label>
-                        <input type="text" id="officerMaster" name="officerMaster" readonly>
+                        <label>Select Warehouse</label>
+                        <div class="warehouse-dropdown-container">
+                            <button type="button" class="warehouse-dropdown-trigger placeholder" id="warehouseDropdownTrigger">Select a warehouse...</button>
+                            <div class="warehouse-dropdown-menu" id="warehouseDropdownMenu">
+                                <div class="warehouse-search-box">
+                                    <input type="text" class="warehouse-search-input" id="warehouseSearchInput" placeholder="🔍 Search warehouses...">
+                                </div>
+                                <div class="warehouse-dropdown-table-wrapper">
+                                    <table class="warehouse-dropdown-table">
+                                        <thead><tr><th>Code</th><th>Warehouse Name</th><th>Location</th></tr></thead>
+                                        <tbody id="warehouseDropdownTableBody">
+                                            <tr><td colspan="3" class="no-warehouses-found">Loading warehouses...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="warehouse-info-display" id="warehouseInfoDisplay">
+                            <span class="warehouse-info-label">Selected Warehouse</span>
+                            <div><span class="warehouse-info-code" id="selectedWarehouseCode">-</span><span class="warehouse-info-value" id="selectedWarehouseDetails">-</span></div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="officerName">Officer Name</label>
-                        <input type="text" id="officerName" name="officerName" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="warehouse">Warehouse Code</label>
-                        <input type="text" id="warehouse" name="warehouse" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="warehouse_name">Warehouse Name</label>
-                        <input type="text" id="warehouse_name" name="warehouse_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="fromDate">From Date</label>
-                        <input type="date" id="fromDate" name="fromDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="toDate">To Date</label>
-                        <input type="date" id="toDate" name="toDate" required>
-                    </div>
+                    <input type="hidden" id="warehouse"><input type="hidden" id="warehouse_name">
+                    <div class="form-group"><label for="fromDate">From Date</label><input type="date" id="fromDate" required></div>
+                    <div class="form-group"><label for="toDate">To Date</label><input type="date" id="toDate" required></div>
                     <div class="form-group">
                         <label for="statusExam">Status</label>
-                        <select id="statusExam" name="statusExam" required>
-                            <option value="">Select Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
+                        <select id="statusExam" required><option value="">Select Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
                     </div>
-                    <div class="form-group">
-                        <label for="note">Note</label>
-                        <textarea id="note" name="note" rows="3"></textarea>
-                    </div>
+                    <div class="form-group"><label for="note">Note</label><textarea id="note" rows="3"></textarea></div>
                     <div class="modal-footer">
                         <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
                         <button type="submit" class="btn-submit">Save Masterfile</button>
@@ -145,389 +97,31 @@
             </div>
         </div>
     </div>
-
-    <!-- Firebase SDK v8 (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/back-prevention.js"></script>
-
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
-            authDomain: "nfa-main.firebaseapp.com",
-            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "nfa-main",
-            storageBucket: "nfa-main.firebasestorage.app",
-            messagingSenderId: "314192469082",
-            appId: "1:314192469082:web:2f301895179a22dbe68c63",
-            measurementId: "G-ZEJP0S67SY"
-        };
-
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const database = firebase.database();
-
-        // Test connection
-        console.log("Firebase initialized:", firebase.apps.length > 0);
-
-        // Store current officer ID for masterfile editing
-        let currentOfficerDocId = null;
-
-        // Helper function to close all dropdowns
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
-        }
-
-        // Initialize modal functionality
-        function initializeModals() {
-            // ----- ACCOUNTABLE OFFICER MODAL -----
-            const accountableModal = document.getElementById("accountableModal");
-            const openAccountableBtn = document.getElementById("openModal");
-            const closeAccountableBtn = document.getElementById("closeAccountable");
-
-            if (openAccountableBtn) {
-                openAccountableBtn.addEventListener("click", () => {
-                    closeAllDropdowns();
-                    accountableModal.style.display = "flex";
-                });
-            }
-
-            if (closeAccountableBtn) {
-                closeAccountableBtn.addEventListener("click", () => {
-                    accountableModal.style.display = "none";
-                });
-            }
-
-            // ----- MASTERFILE MODAL -----
-            document.getElementById('closeMasterfile')?.addEventListener('click', () => {
-                document.getElementById('masterfileModal').style.display = 'none';
-                currentOfficerDocId = null;
-            });
-
-            document.getElementById('cancelBtn')?.addEventListener('click', () => {
-                document.getElementById('masterfileModal').style.display = 'none';
-                currentOfficerDocId = null;
-            });
-
-            // Close modals when clicking outside
-            window.addEventListener("click", (e) => {
-                if (e.target === accountableModal) {
-                    accountableModal.style.display = "none";
-                }
-                const masterfileModal = document.getElementById('masterfileModal');
-                if (e.target === masterfileModal) {
-                    masterfileModal.style.display = "none";
-                    currentOfficerDocId = null;
-                }
-            });
-        }
-
-        // ----- REALTIME DATABASE: Load Officers -----
-        function loadOfficersFromFirebase() {
-            console.log("Loading officers from Firebase...");
-            const officersRef = database.ref('accountableOfficers');
-            
-            officersRef.once('value')
-                .then((snapshot) => {
-                    console.log("Data received:", snapshot.exists());
-                    const tbody = document.querySelector(".inventory-table tbody");
-                    tbody.innerHTML = "";
-
-                    if (!snapshot.exists()) {
-                        console.log("No data in database");
-                        const tr = document.createElement("tr");
-                        tr.innerHTML = '<td colspan="8" style="text-align: center;">No officers added yet</td>';
-                        tbody.appendChild(tr);
-                        return;
-                    }
-
-                    snapshot.forEach((childSnapshot) => {
-                        const docId = childSnapshot.key;
-                        const data = childSnapshot.val();
-                        console.log("Officer:", docId, data);
-                        addRowToTable(docId, data);
-                    });
-
-                    // Reattach dropdown listeners after loading
-                    attachDropdownListeners();
-                })
-                .catch((error) => {
-                    console.error("Error loading officers:", error);
-                    alert("Error loading data: " + error.message);
-                });
-        }
-
-        // ----- Add row to table -----
-        function addRowToTable(docId, data) {
-            const tbody = document.querySelector(".inventory-table tbody");
-            const tr = document.createElement("tr");
-            tr.dataset.docId = docId;
-
-            // Format period display
-            let periodDisplay = "-";
-            if (data.fromDate && data.toDate) {
-                periodDisplay = `${data.fromDate} to ${data.toDate}`;
-            }
-
-            tr.innerHTML = `
-                <td>${data.officerId || "-"}</td>
-                <td>${data.lastName || "-"}</td>
-                <td>${data.firstName || "-"}</td>
-                <td>${data.middleName || "-"}</td>
-                <td>${data.warehouse || "-"}</td>
-                <td>${data.warehouseName || "-"}</td>
-                <td>${periodDisplay}</td>
-                <td class="action-cell">
-                    <div class="dropdown">
-                        <span class="dot-menu">&#8942;</span>
-                        <div class="dropdown-content">
-                            <button class="masterfile-btn" data-doc-id="${docId}">
-                                <span style="color: #2196F3;">📝</span> Add/Edit Masterfile
-                            </button>
-                            <button class="delete-btn" data-doc-id="${docId}">
-                                <span style="color: #f44336;">🗑️</span> Delete
-                            </button>
-                        </div>
-                    </div>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        }
-
-        // ----- Handle Accountable Officer form submission -----
-        document.getElementById("accountableForm").addEventListener("submit", (e) => {
-            e.preventDefault();
-            console.log("Form submitted");
-
-            const formData = {
-                officerId: document.getElementById("officerId").value,
-                firstName: document.getElementById("firstName").value,
-                lastName: document.getElementById("lastName").value,
-                middleName: document.getElementById("middleName").value,
-                warehouse: "",
-                warehouseName: "",
-                fromDate: "",
-                toDate: "",
-                statusExam: "",
-                note: "",
-                createdAt: new Date().toISOString()
-            };
-
-            console.log("Saving accountable officer data:", formData);
-
-            // Save to Realtime Database
-            const newOfficerRef = database.ref('accountableOfficers').push();
-            
-            newOfficerRef.set(formData)
-                .then(() => {
-                    console.log("Officer added successfully to Firebase!");
-                    alert("Officer added successfully! Now add their warehouse details in the Masterfile.");
-                    const accountableModal = document.getElementById("accountableModal");
-                    accountableModal.style.display = "none";
-                    e.target.reset();
-                    loadOfficersFromFirebase();
-                })
-                .catch((error) => {
-                    console.error("Error adding officer:", error);
-                    alert("Failed to add officer: " + error.message);
-                });
-        });
-
-        // ----- Handle Masterfile form submission -----
-        document.getElementById("masterfileForm").addEventListener("submit", (e) => {
-            e.preventDefault();
-            console.log("Masterfile form submitted");
-
-            if (!currentOfficerDocId) {
-                alert("No officer selected. Please try again.");
-                return;
-            }
-
-            const warehouseCode = document.getElementById("warehouse").value;
-            const warehouseName = document.getElementById("warehouse_name").value;
-            const fromDate = document.getElementById("fromDate").value;
-            const toDate = document.getElementById("toDate").value;
-            const statusExam = document.getElementById("statusExam").value;
-            const note = document.getElementById("note").value;
-
-            const masterfileData = {
-                warehouse: warehouseCode,
-                warehouseName: warehouseName,
-                fromDate: fromDate,
-                toDate: toDate,
-                statusExam: statusExam,
-                note: note,
-                updatedAt: new Date().toISOString()
-            };
-
-            console.log("Saving masterfile data:", masterfileData);
-
-            // Update the officer record with masterfile data
-            database.ref('accountableOfficers/' + currentOfficerDocId).update(masterfileData)
-                .then(() => {
-                    console.log("Masterfile data saved successfully!");
-                    alert("Masterfile data saved successfully!");
-                    const masterfileModal = document.getElementById('masterfileModal');
-                    masterfileModal.style.display = "none";
-                    e.target.reset();
-                    currentOfficerDocId = null;
-                    loadOfficersFromFirebase();
-                })
-                .catch((error) => {
-                    console.error("Error saving masterfile:", error);
-                    alert("Failed to save masterfile: " + error.message);
-                });
-        });
-
-        // ----- Handle dot-menu dropdowns -----
-        function attachDropdownListeners() {
-            document.querySelectorAll('.dot-menu').forEach(dot => {
-                dot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    // Close all other dropdowns
-                    document.querySelectorAll('.dropdown-content').forEach(d => {
-                        if (d !== dot.nextElementSibling) d.style.display = 'none';
-                    });
-                    
-                    const dropdown = dot.nextElementSibling;
-                    
-                    // Toggle dropdown
-                    if (dropdown.style.display === 'block') {
-                        dropdown.style.display = 'none';
-                    } else {
-                        dropdown.style.display = 'block';
-                    }
-                });
-            });
-
-            // Masterfile button handler
-            document.querySelectorAll('.masterfile-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = btn.dataset.docId;
-                    currentOfficerDocId = docId;
-                    
-                    console.log("Opening masterfile for officer:", docId);
-                    
-                    // Close all dropdowns before opening modal
-                    closeAllDropdowns();
-                    
-                    // Load existing data if available
-                    database.ref('accountableOfficers/' + docId).once('value')
-                        .then((snapshot) => {
-                            const data = snapshot.val();
-                            console.log("Officer data loaded:", data);
-                            
-                            if (data) {
-                                // Pre-fill the Officer ID
-                                const officerMasterField = document.getElementById("officerMaster");
-                                if (officerMasterField) {
-                                    officerMasterField.value = data.officerId || "";
-                                }
-                                
-                                // Pre-fill the Officer Name
-                                const officerNameField = document.getElementById("officerName");
-                                if (officerNameField) {
-                                    const lastName = data.lastName || "";
-                                    const firstName = data.firstName || "";
-                                    const middleName = data.middleName || "";
-                                    const fullName = `${lastName}, ${firstName} ${middleName}`.trim();
-                                    officerNameField.value = fullName;
-                                }
-                                
-                                // Pre-fill warehouse code
-                                document.getElementById("warehouse").value = data.warehouse || "";
-                                
-                                // Pre-fill warehouse name
-                                const warehouseNameField = document.getElementById("warehouse_name");
-                                if (warehouseNameField) {
-                                    warehouseNameField.value = data.warehouseName || "";
-                                }
-                                
-                                // Pre-fill dates
-                                document.getElementById("fromDate").value = data.fromDate || "";
-                                document.getElementById("toDate").value = data.toDate || "";
-                                
-                                // Pre-fill status
-                                document.getElementById("statusExam").value = data.statusExam || "";
-                                
-                                // Pre-fill note
-                                const noteInput = document.getElementById("note");
-                                if (noteInput) {
-                                    noteInput.value = data.note || "";
-                                }
-                            }
-                            
-                            const masterfileModal = document.getElementById('masterfileModal');
-                            masterfileModal.style.display = "flex";
-                        })
-                        .catch((error) => {
-                            console.error("Error loading officer data:", error);
-                            const masterfileModal = document.getElementById('masterfileModal');
-                            masterfileModal.style.display = "flex";
-                        });
-                });
-            });
-
-            // Delete button handler
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = btn.dataset.docId;
-                    
-                    // Close dropdown before showing confirm dialog
-                    closeAllDropdowns();
-                    
-                    if (confirm("Are you sure you want to delete this officer?")) {
-                        database.ref('accountableOfficers/' + docId).remove()
-                            .then(() => {
-                                console.log("Officer deleted");
-                                alert("Officer deleted successfully!");
-                                loadOfficersFromFirebase();
-                            })
-                            .catch((error) => {
-                                console.error("Error deleting officer:", error);
-                                alert("Failed to delete: " + error.message);
-                            });
-                    }
-                });
-            });
-        }
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('.inventory-table tbody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown')) {
-                closeAllDropdowns();
-            }
-        });
-
-        // Close dropdowns when scrolling
-        window.addEventListener('scroll', () => {
-            closeAllDropdowns();
-        }, true);
-
-        // Load officers when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log("Page loaded, initializing...");
-            initializeModals();
-            loadOfficersFromFirebase();
-        });
+const firebaseConfig={apiKey:"AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",authDomain:"nfa-main.firebaseapp.com",databaseURL:"https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"nfa-main",storageBucket:"nfa-main.firebasestorage.app",messagingSenderId:"314192469082",appId:"1:314192469082:web:2f301895179a22dbe68c63",measurementId:"G-ZEJP0S67SY"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+let curOfficer=null,allWarehouses=[],selWarehouse=null;
+function closeDrops(){document.querySelectorAll('.dropdown-content').forEach(d=>d.style.display='none')}
+function closeWH(){const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger');d.classList.remove('show');t.classList.remove('active')}
+function toggleWH(){const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger'),o=d.classList.contains('show');if(o)closeWH();else{d.classList.add('show');t.classList.add('active');setTimeout(()=>document.getElementById('warehouseSearchInput').focus(),100)}}
+function loadWH(){const tb=document.getElementById('warehouseDropdownTableBody'),ref=db.ref('warehouses');ref.on('value',snap=>{allWarehouses=[];tb.innerHTML='';if(!snap.exists()){tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found">No warehouses available</td></tr>';return}snap.forEach(c=>{const d=c.val(),id=c.key;allWarehouses.push({id:id,code:d.warehouseCode||'',name:d.warehouseName||'',location:d.location||''})});renderWH(allWarehouses)},e=>{console.error('Error:',e);tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found" style="color:#ef4444">Error</td></tr>'})}
+function renderWH(whs){const tb=document.getElementById('warehouseDropdownTableBody');tb.innerHTML='';if(whs.length===0){tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found">No match</td></tr>';return}whs.forEach(w=>{const tr=document.createElement('tr');tr.dataset.warehouseId=w.id;tr.dataset.code=w.code;tr.dataset.name=w.name;tr.dataset.location=w.location;tr.innerHTML=`<td>${w.code}</td><td>${w.name}</td><td>${w.location}</td>`;tr.addEventListener('click',function(){document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r=>r.classList.remove('selected'));this.classList.add('selected');selWarehouse={id:this.dataset.warehouseId,code:this.dataset.code,name:this.dataset.name,location:this.dataset.location};document.getElementById('warehouse').value=selWarehouse.code;document.getElementById('warehouse_name').value=selWarehouse.name;const t=document.getElementById('warehouseDropdownTrigger');t.textContent=`${selWarehouse.code} - ${selWarehouse.name}`;t.classList.remove('placeholder');document.getElementById('selectedWarehouseCode').textContent=selWarehouse.code;document.getElementById('selectedWarehouseDetails').textContent=`${selWarehouse.name} - ${selWarehouse.location}`;document.getElementById('warehouseInfoDisplay').classList.add('show');closeWH()});tb.appendChild(tr)})}
+function initModals(){const am=document.getElementById("accountableModal"),oa=document.getElementById("openModal"),ca=document.getElementById("closeAccountable");if(oa)oa.addEventListener("click",()=>{closeDrops();am.style.display="flex"});if(ca)ca.addEventListener("click",()=>am.style.display="none");document.getElementById('closeMasterfile')?.addEventListener('click',()=>{document.getElementById('masterfileModal').style.display='none';curOfficer=null;resetWH()});document.getElementById('cancelBtn')?.addEventListener('click',()=>{document.getElementById('masterfileModal').style.display='none';curOfficer=null;resetWH()});window.addEventListener("click",e=>{if(e.target===am)am.style.display="none";const mm=document.getElementById('masterfileModal');if(e.target===mm){mm.style.display="none";curOfficer=null;resetWH()}})}
+function resetWH(){selWarehouse=null;document.getElementById('warehouse').value='';document.getElementById('warehouse_name').value='';document.getElementById('warehouseSearchInput').value='';document.getElementById('warehouseInfoDisplay').classList.remove('show');const t=document.getElementById('warehouseDropdownTrigger');t.textContent='Select a warehouse...';t.classList.add('placeholder');document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r=>r.classList.remove('selected'));closeWH();renderWH(allWarehouses)}
+function loadOfficers(){const ref=db.ref('accountableOfficers');ref.once('value').then(snap=>{const tb=document.querySelector(".inventory-table tbody");tb.innerHTML="";if(!snap.exists()){tb.innerHTML='<tr><td colspan="8" style="text-align:center">No officers</td></tr>';return}snap.forEach(c=>{addRow(c.key,c.val())});attachDrops()}).catch(e=>{console.error(e);alert("Error: "+e.message)})}
+function addRow(id,d){const tb=document.querySelector(".inventory-table tbody"),tr=document.createElement("tr");tr.dataset.docId=id;let per="-";if(d.fromDate&&d.toDate)per=`${d.fromDate} to ${d.toDate}`;tr.innerHTML=`<td>${d.officerId||"-"}</td><td>${d.lastName||"-"}</td><td>${d.firstName||"-"}</td><td>${d.middleName||"-"}</td><td>${d.warehouse||"-"}</td><td>${d.warehouseName||"-"}</td><td>${per}</td><td class="action-cell"><div class="dropdown"><span class="dot-menu">&#8942;</span><div class="dropdown-content"><button class="masterfile-btn" data-doc-id="${id}"><span style="color:#2196F3">📝</span> Add/Edit Masterfile</button><button class="delete-btn" data-doc-id="${id}"><span style="color:#f44336">🗑️</span> Delete</button></div></div></td>`;tb.appendChild(tr)}
+document.getElementById("accountableForm").addEventListener("submit",e=>{e.preventDefault();const fd={officerId:document.getElementById("officerId").value,firstName:document.getElementById("firstName").value,lastName:document.getElementById("lastName").value,middleName:document.getElementById("middleName").value,warehouse:"",warehouseName:"",fromDate:"",toDate:"",statusExam:"",note:"",createdAt:new Date().toISOString()};db.ref('accountableOfficers').push().set(fd).then(()=>{alert("Officer added!");document.getElementById("accountableModal").style.display="none";e.target.reset();loadOfficers()}).catch(e=>{console.error(e);alert("Error: "+e.message)})});
+document.getElementById("masterfileForm").addEventListener("submit",e=>{e.preventDefault();if(!curOfficer){alert("No officer selected");return}if(!selWarehouse){alert("Select a warehouse");return}const md={warehouse:document.getElementById("warehouse").value,warehouseName:document.getElementById("warehouse_name").value,fromDate:document.getElementById("fromDate").value,toDate:document.getElementById("toDate").value,statusExam:document.getElementById("statusExam").value,note:document.getElementById("note").value,updatedAt:new Date().toISOString()};db.ref('accountableOfficers/'+curOfficer).update(md).then(()=>{alert("Saved!");document.getElementById('masterfileModal').style.display="none";e.target.reset();curOfficer=null;resetWH();loadOfficers()}).catch(e=>{console.error(e);alert("Error: "+e.message)})});
+function attachDrops(){document.querySelectorAll('.dot-menu').forEach(d=>d.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.dropdown-content').forEach(dd=>{if(dd!==d.nextElementSibling)dd.style.display='none'});const dr=d.nextElementSibling;dr.style.display=dr.style.display==='block'?'none':'block'}));document.querySelectorAll('.masterfile-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.docId;curOfficer=id;closeDrops();resetWH();db.ref('accountableOfficers/'+id).once('value').then(s=>{const d=s.val();if(d){document.getElementById("officerMaster").value=d.officerId||"";const fn=`${d.lastName||""}, ${d.firstName||""} ${d.middleName||""}`.trim();document.getElementById("officerName").value=fn;if(d.warehouse&&d.warehouseName){const wr=document.querySelector(`tr[data-code="${d.warehouse}"]`);if(wr)wr.click()}document.getElementById("fromDate").value=d.fromDate||"";document.getElementById("toDate").value=d.toDate||"";document.getElementById("statusExam").value=d.statusExam||"";document.getElementById("note").value=d.note||""}document.getElementById('masterfileModal').style.display="flex"}).catch(e=>{console.error(e);document.getElementById('masterfileModal').style.display="flex"})}));document.querySelectorAll('.delete-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.docId;closeDrops();if(confirm("Delete officer?")){db.ref('accountableOfficers/'+id).remove().then(()=>{alert("Deleted!");loadOfficers()}).catch(e=>{console.error(e);alert("Error: "+e.message)})}}))}
+document.addEventListener('DOMContentLoaded',()=>{const si=document.getElementById('warehouseSearchInput'),dt=document.getElementById('warehouseDropdownTrigger');if(dt)dt.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleWH()});if(si){si.addEventListener('input',e=>{const st=e.target.value.toLowerCase(),fw=allWarehouses.filter(w=>w.code.toLowerCase().includes(st)||w.name.toLowerCase().includes(st)||w.location.toLowerCase().includes(st));renderWH(fw)});si.addEventListener('click',e=>e.stopPropagation())}document.addEventListener('click',e=>{const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger');if(!d.contains(e.target)&&e.target!==t)closeWH()})});
+document.getElementById('searchInput').addEventListener('input',e=>{const st=e.target.value.toLowerCase(),rows=document.querySelectorAll('.inventory-table tbody tr');rows.forEach(r=>{const t=r.textContent.toLowerCase();r.style.display=t.includes(st)?'':'none'})});
+window.addEventListener('click',e=>{if(!e.target.closest('.dropdown'))closeDrops()});
+window.addEventListener('scroll',()=>closeDrops(),true);
+window.addEventListener('DOMContentLoaded',()=>{initModals();loadOfficers();loadWH()});
     </script>
 </body>
 </html>

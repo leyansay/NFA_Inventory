@@ -387,7 +387,7 @@ td:first-child {
     font-family: 'JetBrains Mono', monospace;
 }
 
-td:last-child {
+/* td:last-child {
     color: var(--primary-blue);
     font-weight: 600;
     position: sticky;
@@ -403,7 +403,7 @@ th:last-child {
     right: 0;
     z-index: 2;
     background: linear-gradient(135deg, var(--primary-navy) 0%, #1e293b 100%);
-}
+} */
 
 /* Dropdown Styles */
 .action-cell {
@@ -607,10 +607,13 @@ th:last-child {
 }
 
 /* Officer Table in Modal */
+/* Officer Table in Modal */
 .officer-table-container {
     overflow-x: auto;
     border-radius: 12px;
     border: 1px solid var(--border-color);
+    max-height: 60vh;
+    overflow-y: auto;
 }
 
 .officer-table {
@@ -622,6 +625,9 @@ th:last-child {
 .officer-table thead {
     background: linear-gradient(135deg, var(--primary-navy) 0%, #1e293b 100%);
     color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .officer-table th {
@@ -632,6 +638,7 @@ th:last-child {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
 }
 
 .officer-table tbody tr {
@@ -648,6 +655,7 @@ th:last-child {
     color: var(--text-secondary);
     font-size: 0.9rem;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .officer-table td:first-child {
@@ -668,6 +676,7 @@ th:last-child {
     transition: all 0.2s ease;
     font-family: 'DM Sans', sans-serif;
     box-shadow: var(--shadow-sm);
+    white-space: nowrap;
 }
 
 .select-officer-btn:hover {

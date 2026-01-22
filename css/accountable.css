@@ -544,6 +544,80 @@ td:first-child {
     letter-spacing: 0.01em;
 }
 
+ .warehouse-dropdown-container { position: relative; margin-bottom: 1rem; }
+        .warehouse-dropdown-trigger {
+            width: 100%; padding: 0.85rem 3rem 0.85rem 1rem; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 0.9rem; background: #f8fafc; color: #0f172a;
+            cursor: pointer; transition: all 0.3s ease; text-align: left;
+            font-family: 'DM Sans', sans-serif; font-weight: 500; position: relative;
+        }
+        .warehouse-dropdown-trigger:hover { border-color: #cbd5e1; background: white; }
+        .warehouse-dropdown-trigger:focus, .warehouse-dropdown-trigger.active {
+            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); background: white;
+        }
+        .warehouse-dropdown-trigger::after {
+            content: ''; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+            width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
+            border-top: 6px solid #64748b; transition: transform 0.3s ease;
+        }
+        .warehouse-dropdown-trigger.active::after { transform: translateY(-50%) rotate(180deg); }
+        .warehouse-dropdown-trigger.placeholder { color: #94a3b8; }
+        .warehouse-dropdown-menu {
+            position: absolute; top: calc(100% + 0.5rem); left: 0; right: 0; background: white;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: none; max-height: 320px; overflow: hidden; z-index: 1000;
+            animation: dropdownSlide 0.3s ease;
+        }
+        @keyframes dropdownSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .warehouse-dropdown-menu.show { display: flex; flex-direction: column; }
+        .warehouse-search-box { padding: 0.75rem; border-bottom: 2px solid #e2e8f0; background: #f8fafc; }
+        .warehouse-search-input {
+            width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;
+            font-size: 0.85rem; background: white; transition: all 0.3s ease;
+        }
+        .warehouse-search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .warehouse-dropdown-table-wrapper { overflow-y: auto; max-height: 250px; }
+        .warehouse-dropdown-table { width: 100%; border-collapse: collapse; }
+        .warehouse-dropdown-table thead { position: sticky; top: 0; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); z-index: 10; }
+        .warehouse-dropdown-table thead th {
+            padding: 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: white;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .warehouse-dropdown-table tbody tr {
+            cursor: pointer; transition: all 0.2s ease; background: white; border-bottom: 1px solid #f1f5f9;
+        }
+        .warehouse-dropdown-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.15) 100%);
+        }
+        .warehouse-dropdown-table tbody tr.selected {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.3) 100%); font-weight: 600;
+        }
+        .warehouse-dropdown-table tbody td { padding: 0.75rem; font-size: 0.85rem; color: #64748b; }
+        .warehouse-dropdown-table tbody tr.selected td { color: #0f172a; }
+        .warehouse-dropdown-table tbody tr.selected td:first-child { color: #2563eb; font-weight: 700; }
+        .no-warehouses-found { text-align: center; padding: 2rem; color: #94a3b8; font-style: italic; font-size: 0.9rem; }
+        .warehouse-dropdown-table-wrapper::-webkit-scrollbar { width: 8px; }
+        .warehouse-dropdown-table-wrapper::-webkit-scrollbar-track { background: #f1f5f9; }
+        .warehouse-dropdown-table-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .warehouse-dropdown-table-wrapper::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .warehouse-info-display {
+            margin-top: 0.5rem; padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #bfdbfe; border-radius: 10px; font-size: 0.85rem; display: none;
+        }
+        .warehouse-info-display.show { display: block; animation: fadeInUp 0.3s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .warehouse-info-label {
+            font-weight: 600; color: #1e40af; display: block; margin-bottom: 0.25rem;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .warehouse-info-value { color: #1e3a8a; font-weight: 500; }
+        .warehouse-info-code {
+            display: inline-block; background: #3b82f6; color: white; padding: 0.25rem 0.75rem;
+            border-radius: 6px; font-weight: 700; font-size: 0.85rem; margin-right: 0.5rem;
+        }
+
 .form-group input,
 .form-group select,
 .form-group textarea {

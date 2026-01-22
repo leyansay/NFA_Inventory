@@ -129,25 +129,25 @@
         addWarehouseBtn.addEventListener('click', () => {
             warehouseForm.reset();
             warehouseForm.removeAttribute('data-edit-id');
-            modalOverlay.classList.add('show');
+            modalOverlay.classList.add('active');
         });
 
         // Close modal
         closeModalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('show');
+            modalOverlay.classList.remove('active');
         });
 
         // Close modal when clicking outside
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('show');
+                modalOverlay.classList.remove('active');
             }
         });
 
         // Close modal with ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                modalOverlay.classList.remove('show');
+                modalOverlay.classList.remove('active');
             }
         });
 
@@ -387,7 +387,7 @@
                     document.getElementById('location').value = data.location || '';
                     
                     warehouseForm.setAttribute('data-edit-id', id);
-                    modalOverlay.classList.add('show');
+                    modalOverlay.classList.add('active');
                 })
                 .catch((error) => {
                     console.error('Error loading warehouse:', error);

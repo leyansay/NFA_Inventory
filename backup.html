@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup & Restore - NFA Inventory</title>
+    <link rel="stylesheet" href="css/backup.css" />
+    <style>
+        .date-selector {
+            display: none;
+            margin-top: 0.5rem;
+            margin-left: 1.5rem;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .date-selector.show {
+            display: block;
+        }
+
+        .date-selector label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .date-selector select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .date-selector select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        .backup-option {
+            margin-bottom: 0.75rem;
+        }
+
+        .loading-dates {
+            color: #999;
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>
+                    <span>💾</span>
+                    Backup & Restore
+                </h1>
+                <p>Manage your NFA Inventory Firebase database backups</p>
+            </div>
+            <div class="header-right">
+                <span id="connectionStatus" class="connection-status status-disconnected">⚠️ Not Connected</span>
+                <div class="user-info">
+                    <div class="user-greeting">Hi, nfa_admin</div>
+                    <div class="user-role">User</div>
+                </div>
+                <div class="user-avatar">N</div>
+            </div>
+        </div>
+
+        <div class="alert alert-info" id="setupAlert">
+            <strong>⚠️ Setup Required:</strong> Configure your Firebase credentials in the script below.
+        </div>
+
+        <div class="backup-grid">
+            <!-- Create Backup Card -->
+            <div class="backup-card">
+                <div class="card-header">
+                    <span class="card-icon">📤</span>
+                    <h2 class="card-title">Create Backup</h2>
+                </div>
+                <p class="card-description">
+                    Select the collections you want to backup from Firebase Realtime Database. The backup will be saved as a JSON file.
+                </p>
+                
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="accountableOfficers" data-collection="accountableOfficers">
+                        <span>Accountable Officers</span>
+                    </label>
+                    <div class="date-selector" id="date-accountableOfficers">
+                        <label>Select Date/Year:</label>
+                        <select id="select-accountableOfficers">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="transactions" data-collection="transactions">
+                        <span>Transactions</span>
+                    </label>
+                    <div class="date-selector" id="date-transactions">
+                        <label>Select Date/Year:</label>
+                        <select id="select-transactions">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="inventory" data-collection="inventory">
+                        <span>Inventory</span>
+                    </label>
+                    <div class="date-selector" id="date-inventory">
+                        <label>Select Date/Year:</label>
+                        <select id="select-inventory">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="activities" data-collection="activities">
+                        <span>Activities</span>
+                    </label>
+                    <div class="date-selector" id="date-activities">
+                        <label>Select Date/Year:</label>
+                        <select id="select-activities">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="cereals" data-collection="cereals">
+                        <span>Cereals</span>
+                    </label>
+                    <div class="date-selector" id="date-cereals">
+                        <label>Select Date/Year:</label>
+                        <select id="select-cereals">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="locations" data-collection="locations">
+                        <span>Locations</span>
+                    </label>
+                    <div class="date-selector" id="date-locations">
+                        <label>Select Date/Year:</label>
+                        <select id="select-locations">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="warehouses" data-collection="warehouses">
+                        <span>Warehouses</span>
+                    </label>
+                    <div class="date-selector" id="date-warehouses">
+                        <label>Select Date/Year:</label>
+                        <select id="select-warehouses">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="clients" data-collection="clients">
+                        <span>Clients</span>
+                    </label>
+                    <div class="date-selector" id="date-clients">
+                        <label>Select Date/Year:</label>
+                        <select id="select-clients">
+                            <option value="">Loading dates...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="error-message" id="backupError"></div>
+                <div class="success-message" id="backupSuccess"></div>
+
+                <button class="btn-save" onclick="createBackup()" id="createBackupBtn">
+                    <span>📥</span>
+                    <span>Create Backup</span>
+                </button>
+            </div>
+
+            <!-- Restore Backup Card -->
+            <div class="backup-card">
+                <div class="card-header">
+                    <span class="card-icon">📥</span>
+                    <h2 class="card-title">Restore Backup</h2>
+                </div>
+                <p class="card-description">
+                    Upload a backup JSON file to restore your Firebase database. This will add/update data in Firebase.
+                </p>
+
+                <div class="file-input-wrapper">
+                    <input type="file" id="restoreFile" class="file-input" accept=".json" onchange="handleFileSelect(event)">
+                    <label for="restoreFile" class="file-input-label">
+                        <span>📁 Click to select JSON file</span>
+                        <div class="file-name" id="fileName"></div>
+                    </label>
+                </div>
+
+                <div class="error-message" id="restoreError"></div>
+                <div class="success-message" id="restoreSuccess"></div>
+
+                <button class="btn-save" onclick="restoreBackup()" id="restoreBackupBtn">
+                    <span>♻️</span>
+                    <span>Restore to Firebase</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Backup History -->
+        <div class="backup-history">
+            <div class="history-header">
+                <h2 class="history-title">Backup History</h2>
+                <button class="btn-refresh" onclick="loadBackupHistory()">🔄 Refresh</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>File Name</th>
+                            <th>Collections</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">
+                                No backup history yet. Create your first backup!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">⏳</div>
+            <h2 class="modal-title" id="modalTitle">Processing...</h2>
+            <p class="modal-message" id="modalMessage">Please wait while we process your request</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        // Initialize Firebase
+        let database;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            database = firebase.database();
+            
+            console.log("Firebase initialized:", firebase.apps.length > 0);
+            
+            // Update connection status
+            document.getElementById('connectionStatus').textContent = '✅ Connected';
+            document.getElementById('connectionStatus').className = 'connection-status status-connected';
+            document.getElementById('setupAlert').style.display = 'none';
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            showAlert('setupAlert', '❌ Firebase connection failed. Please check your configuration.', 'alert-warning');
+        }
+
+        // Global variables
+        let selectedFile = null;
+        let backupHistory = [];
+        let collectionDatesCache = {};
+
+        // Handle checkbox changes to show/hide date selectors and load dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.table-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', async function() {
+                    const collection = this.dataset.collection;
+                    const dateSelector = document.getElementById('date-' + collection);
+                    
+                    if (this.checked) {
+                        dateSelector.classList.add('show');
+                        // Load available dates for this collection
+                        await loadAvailableDates(collection);
+                    } else {
+                        dateSelector.classList.remove('show');
+                        // Clear selection when unchecked
+                        document.getElementById('select-' + collection).value = '';
+                    }
+                });
+            });
+            
+            loadBackupHistory();
+        });
+
+        // Load available dates from Firebase for a collection
+        async function loadAvailableDates(collection) {
+            const selectElement = document.getElementById('select-' + collection);
+            
+            // Check cache first
+            if (collectionDatesCache[collection]) {
+                populateDateDropdown(selectElement, collectionDatesCache[collection]);
+                return;
+            }
+
+            selectElement.innerHTML = '<option value="">Loading dates from database...</option>';
+
+            try {
+                console.log(`Fetching dates from collection: ${collection}`);
+                const snapshot = await database.ref(collection).once('value');
+                
+                if (!snapshot.exists()) {
+                    console.log(`No data found in collection: ${collection}`);
+                    selectElement.innerHTML = '<option value="all">All Data (No records found in database)</option>';
+                    return;
+                }
+
+                const data = snapshot.val();
+                console.log(`Collection ${collection} has ${Object.keys(data).length} records`);
+                
+                const yearsSet = new Set();
+                const monthsSet = new Set();
+                const datesSet = new Set();
+                
+                let recordsWithDates = 0;
+                let recordsWithoutDates = 0;
+                
+                // Extract dates from records - check ALL possible date fields
+                Object.entries(data).forEach(([key, record]) => {
+                    if (!record) {
+                        recordsWithoutDates++;
+                        return;
+                    }
+                    
+                    // Check common date fields - check ALL date fields, not just the first one found
+                    const dateFields = [
+                        'createdAt', 'date', 'timestamp', 'created_at', 'dateCreated', 
+                        'Date', 'createdDate', 'updated_at', 'updatedAt',
+                        'fromDate', 'toDate', 'startDate', 'endDate'
+                    ];
+                    let foundDate = false;
+                    
+                    // Check all date fields (some records might have multiple date fields)
+                    for (const field of dateFields) {
+                        if (record[field]) {
+                            const date = new Date(record[field]);
+                            if (!isNaN(date.getTime())) {
+                                foundDate = true;
+                                
+                                // Extract year
+                                const year = date.getFullYear();
+                                yearsSet.add(year);
+                                
+                                // Extract month-year
+                                const monthYear = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                                const monthDisplay = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+                                monthsSet.add(JSON.stringify({ value: monthYear, display: monthDisplay }));
+                                
+                                // Extract full date
+                                const dateStr = date.toISOString().split('T')[0];
+                                const dateDisplay = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                });
+                                datesSet.add(JSON.stringify({ value: dateStr, display: dateDisplay }));
+                            }
+                        }
+                    }
+                    
+                    if (foundDate) {
+                        recordsWithDates++;
+                    } else {
+                        recordsWithoutDates++;
+                    }
+                });
+
+                console.log(`Collection ${collection}: ${recordsWithDates} records with dates, ${recordsWithoutDates} without dates`);
+                console.log(`Found ${yearsSet.size} unique years, ${monthsSet.size} unique months, ${datesSet.size} unique dates`);
+
+                // Build date options array
+                const dateOptions = [];
+                
+                // Add years
+                Array.from(yearsSet).sort((a, b) => b - a).forEach(year => {
+                    dateOptions.push({ type: 'year', value: year.toString(), display: year.toString() });
+                });
+                
+                // Add months
+                Array.from(monthsSet).map(item => JSON.parse(item))
+                    .sort((a, b) => b.value.localeCompare(a.value))
+                    .forEach(month => {
+                        dateOptions.push({ type: 'month', value: month.value, display: month.display });
+                    });
+                
+                // Add specific dates
+                Array.from(datesSet).map(item => JSON.parse(item))
+                    .sort((a, b) => b.value.localeCompare(a.value))
+                    .forEach(date => {
+                        dateOptions.push({ type: 'date', value: date.value, display: date.display });
+                    });
+
+                if (dateOptions.length === 0) {
+                    console.log(`No valid dates found in collection: ${collection}`);
+                    selectElement.innerHTML = '<option value="all">All Data (No date fields found)</option>';
+                    return;
+                }
+
+                // Cache the results
+                collectionDatesCache[collection] = dateOptions;
+                
+                populateDateDropdown(selectElement, dateOptions);
+                console.log(`Successfully loaded ${dateOptions.length} date options for ${collection}`);
+
+            } catch (error) {
+                console.error('Error loading dates:', error);
+                selectElement.innerHTML = `<option value="all">All Data (Error: ${error.message})</option>`;
+            }
+        }
+
+        function populateDateDropdown(selectElement, dateOptions) {
+            if (dateOptions.length === 0) {
+                selectElement.innerHTML = '<option value="all">All Data (No dates found)</option>';
+                return;
+            }
+
+            let html = '<option value="all">All Data</option>';
+            html += '<optgroup label="─────────────────">';
+            
+            let currentType = null;
+            dateOptions.forEach(option => {
+                if (currentType !== option.type) {
+                    if (currentType !== null) {
+                        html += '</optgroup>';
+                    }
+                    const label = option.type === 'year' ? 'Years' : 
+                                 option.type === 'month' ? 'Months' : 'Specific Dates';
+                    html += `<optgroup label="${label}">`;
+                    currentType = option.type;
+                }
+                html += `<option value="${option.type}:${option.value}">${option.display}</option>`;
+            });
+            
+            html += '</optgroup>';
+            selectElement.innerHTML = html;
+        }
+
+        function filterDataBySelection(data, selection, collection) {
+            if (!selection || selection === 'all') {
+                return data; // Return all data
+            }
+
+            const [type, value] = selection.split(':');
+            const filtered = {};
+
+            for (const [key, record] of Object.entries(data)) {
+                if (!record) continue;
+
+                // Find date in record - check ALL possible date fields
+                const dateFields = [
+                    'createdAt', 'date', 'timestamp', 'created_at', 'dateCreated',
+                    'Date', 'createdDate', 'updated_at', 'updatedAt',
+                    'fromDate', 'toDate', 'startDate', 'endDate'
+                ];
+                let recordDates = [];
+
+                // Collect all valid dates from the record
+                for (const field of dateFields) {
+                    if (record[field]) {
+                        const recordDate = new Date(record[field]);
+                        if (!isNaN(recordDate.getTime())) {
+                            recordDates.push(recordDate);
+                        }
+                    }
+                }
+
+                // If no dates found, include the record
+                if (recordDates.length === 0) {
+                    filtered[key] = record;
+                    continue;
+                }
+
+                // Check if ANY of the dates in the record match the selection
+                let matches = false;
+                
+                for (const recordDate of recordDates) {
+                    if (type === 'year') {
+                        if (recordDate.getFullYear().toString() === value) {
+                            matches = true;
+                            break;
+                        }
+                    } else if (type === 'month') {
+                        const recordMonthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+                        if (recordMonthYear === value) {
+                            matches = true;
+                            break;
+                        }
+                    } else if (type === 'date') {
+                        const recordDateStr = recordDate.toISOString().split('T')[0];
+                        if (recordDateStr === value) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches) {
+                    filtered[key] = record;
+                }
+            }
+
+            return filtered;
+        }
+
+        // Load backup history from localStorage
+        function loadBackupHistory() {
+            const saved = localStorage.getItem('nfa_backup_history');
+            if (saved) {
+                backupHistory = JSON.parse(saved);
+                displayBackupHistory();
+            }
+        }
+
+        function saveBackupHistory() {
+            localStorage.setItem('nfa_backup_history', JSON.stringify(backupHistory));
+        }
+
+        function displayBackupHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            
+            if (backupHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #999;">No backup history yet. Create your first backup!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = backupHistory.map((backup, index) => `
+                <tr>
+                    <td>${backup.datetime}</td>
+                    <td>${backup.filename}</td>
+                    <td>${backup.collections.join(', ')}</td>
+                    <td><span class="status-badge status-success">Success</span></td>
+                    <td class="actions-cell">
+                        <button class="action-btn" data-index="${index}">⋮</button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" data-action="restore" data-index="${index}">
+                                <span>♻️</span> Restore
+                            </button>
+                            <button class="dropdown-item delete-item" data-action="delete" data-index="${index}">
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).reverse().join('');
+            
+            attachDropdownListeners();
+        }
+
+        function attachDropdownListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeAllDropdowns();
+                    const dropdown = btn.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(item.dataset.index);
+                    const action = item.dataset.action;
+                    
+                    closeAllDropdowns();
+                    
+                    if (action === 'restore') {
+                        quickRestore(index);
+                    } else if (action === 'delete') {
+                        deleteBackupRecord(index);
+                    }
+                });
+            });
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
+                closeAllDropdowns();
+            }
+        });
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            if (selectedFile) {
+                document.getElementById('fileName').textContent = selectedFile.name;
+            }
+        }
+
+        function showProgress(title, message, icon = '⏳') {
+            const modal = document.getElementById('progressModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressFill').textContent = '0%';
+            modal.classList.add('active');
+        }
+
+        function updateProgress(percent) {
+            const fill = document.getElementById('progressFill');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+        }
+
+        function hideProgress() {
+            setTimeout(() => {
+                document.getElementById('progressModal').classList.remove('active');
+            }, 1500);
+        }
+
+        function showError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(elementId, message) {
+            const successEl = document.getElementById(elementId);
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function showAlert(elementId, message, className) {
+            const alert = document.getElementById(elementId);
+            alert.innerHTML = message;
+            alert.className = 'alert ' + className + ' show';
+        }
+
+        async function createBackup() {
+            if (!database) {
+                showError('backupError', 'Firebase not connected. Please check your configuration.');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('.table-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showError('backupError', 'Please select at least one collection to backup');
+                return;
+            }
+
+            const collections = Array.from(checkboxes).map(cb => cb.value);
+            
+            showProgress('Creating Backup', 'Fetching data from Firebase...', '📤');
+            document.getElementById('createBackupBtn').disabled = true;
+
+            try {
+                const backupData = {
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        collections: collections,
+                        version: '1.0',
+                        filters: {}
+                    },
+                    data: {}
+                };
+
+                let progress = 0;
+                const increment = 80 / collections.length;
+
+                // Fetch each collection with filtering
+                for (const collection of collections) {
+                    updateProgress(Math.min(progress, 80));
+                    
+                    const selection = document.getElementById('select-' + collection).value;
+                    
+                    // Store filter in metadata
+                    if (selection && selection !== 'all') {
+                        const [type, value] = selection.split(':');
+                        backupData.metadata.filters[collection] = {
+                            type: type,
+                            value: value,
+                            display: document.getElementById('select-' + collection).selectedOptions[0].text
+                        };
+                    }
+                    
+                    const snapshot = await database.ref(collection).once('value');
+                    if (snapshot.exists()) {
+                        const fullData = snapshot.val();
+                        // Apply filtering
+                        const filteredData = filterDataBySelection(fullData, selection, collection);
+                        backupData.data[collection] = filteredData;
+                    } else {
+                        backupData.data[collection] = {};
+                    }
+                    
+                    progress += increment;
+                }
+
+                updateProgress(90);
+
+                // Create and download file
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').substring(0, 19);
+                const filename = `nfa_firebase_backup_${timestamp}.json`;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                updateProgress(100);
+
+                // Save to history
+                backupHistory.push({
+                    datetime: new Date().toLocaleString(),
+                    filename: filename,
+                    collections: collections,
+                    data: backupData
+                });
+                saveBackupHistory();
+                displayBackupHistory();
+
+                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalTitle').textContent = 'Backup Created!';
+                document.getElementById('modalMessage').textContent = 'Your backup file has been downloaded';
+                
+                hideProgress();
+                showSuccess('backupSuccess', '✅ Backup created successfully!');
+
+            } catch (error) {
+                console.error('Backup error:', error);
+                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalTitle').textContent = 'Backup Failed';
+                document.getElementById('modalMessage').textContent = error.message;
+                hideProgress();
+                showError('backupError', 'Backup failed: ' + error.message);
+            } finally {
+                document.getElementById('createBackupBtn').disabled = false;
+            }
+        }
+
+        async function restoreBackup() {
+            if (!database) {
+                showError('restoreError', 'Firebase not connected. Please check your configuration.');
+                return;
+            }
+
+            if (!selectedFile) {
+                showError('restoreError', 'Please select a backup file first');
+                return;
+            }
+
+            if (!confirm('⚠️ WARNING: This will add/update data in your Firebase database!\n\nAre you sure you want to restore this backup?')) {
+                return;
+            }
+
+            showProgress('Restoring Backup', 'Reading backup file...', '♻️');
+            document.getElementById('restoreBackupBtn').disabled = true;
+
+            try {
+                const fileContent = await selectedFile.text();
+                const backupData = JSON.parse(fileContent);
+
+                if (!backupData.metadata || !backupData.data) {
+                    throw new Error('Invalid backup file format');
+                }
+
+                updateProgress(10);
+
+                const collections = Object.keys(backupData.data);
+                let progress = 10;
+                const increment = 80 / collections.length;
+
+                // Restore each collection
+                for (const collection of collections) {
+                    document.getElementById('modalMessage').textContent = `Restoring ${collection}...`;
+                    updateProgress(Math.min(progress, 90));
+
+                    const collectionData = backupData.data[collection];
+                    
+                    if (collectionData && Object.keys(collectionData).length > 0) {
+                        await database.ref(collection).set(collectionData);
+                    }
+
+                    progress += increment;
+                }
+
+                updateProgress(100);
+
+                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalTitle').textContent = 'Restore Complete!';
+                document.getElementById('modalMessage').textContent = 'Database has been restored successfully';
+                
+                hideProgress();
+                showSuccess('restoreSuccess', '✅ Data restored to Firebase successfully!');
+
+                // Clear file selection
+                document.getElementById('restoreFile').value = '';
+                document.getElementById('fileName').textContent = '';
+                selectedFile = null;
+
+            } catch (error) {
+                console.error('Restore error:', error);
+                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalTitle').textContent = 'Restore Failed';
+                document.getElementById('modalMessage').textContent = error.message;
+                hideProgress();
+                showError('restoreError', 'Restore failed: ' + error.message);
+            } finally {
+                document.getElementById('restoreBackupBtn').disabled = false;
+            }
+        }
+
+        async function quickRestore(index) {
+            if (!database) {
+                alert('❌ Firebase not connected. Please check your configuration.');
+                return;
+            }
+
+            const backup = backupHistory[index];
+            if (!backup || !backup.data) {
+                alert('❌ Backup data not found');
+                return;
+            }
+
+            if (!confirm(`⚠️ WARNING: This will add/update data in your Firebase database!\n\nRestore from: ${backup.filename}?`)) {
+                return;
+            }
+
+            showProgress('Restoring Backup', 'Restoring from local history...', '♻️');
+
+            try {
+                const collections = Object.keys(backup.data.data);
+                let progress = 10;
+                const increment = 80 / collections.length;
+
+                for (const collection of collections) {
+                    document.getElementById('modalMessage').textContent = `Restoring ${collection}...`;
+                    updateProgress(Math.min(progress, 90));
+
+                    const collectionData = backup.data.data[collection];
+                    
+                    if (collectionData && Object.keys(collectionData).length > 0) {
+                        await database.ref(collection).set(collectionData);
+                    }
+
+                    progress += increment;
+                }
+
+                updateProgress(100);
+
+                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalTitle').textContent = 'Restore Complete!';
+                document.getElementById('modalMessage').textContent = 'Database has been restored successfully';
+                
+                hideProgress();
+
+            } catch (error) {
+                console.error('Restore error:', error);
+                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalTitle').textContent = 'Restore Failed';
+                document.getElementById('modalMessage').textContent = error.message;
+                hideProgress();
+            }
+        }
+
+        function deleteBackupRecord(index) {
+            const backup = backupHistory[index];
+            if (!confirm(`Are you sure you want to delete:\n${backup.filename}?`)) {
+                return;
+            }
+
+            backupHistory.splice(index, 1);
+            saveBackupHistory();
+            displayBackupHistory();
+            alert('✅ Backup record deleted from history');
+        }
+    </script>
+</body>
+</html>
