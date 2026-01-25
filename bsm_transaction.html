@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Reports - BSM Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin-left: 260px;
+            overflow-x: hidden;
+        }
+
+        #sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            z-index: 1000;
+            border: none;
+        }
+
+        #sidebar-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1d2e;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1d2e;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #8b92b0;
+            text-transform: uppercase;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #8b5cf6;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
+            color: white;
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .reports-table-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-header h3 {
+            color: #1a1d2e;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e0e4e9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            min-width: 250px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-refresh {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #e0e4e9;
+            border-radius: 8px;
+        }
+
+        .reports-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .reports-table thead {
+            background: #8b5cf6;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .reports-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .reports-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f2f5;
+            white-space: nowrap;
+        }
+
+        .reports-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .reports-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .reports-table tbody tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+
+        .reports-table tbody tr:nth-child(even):hover {
+            background-color: #f0f2f5;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+
+        .action-btn.view {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .action-btn.view:hover {
+            background: #bbdefb;
+        }
+
+        .action-btn.download {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .action-btn.download:hover {
+            background: #c8e6c9;
+        }
+
+        .action-btn.delete {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .action-btn.delete:hover {
+            background: #ffcdd2;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #8b92b0;
+        }
+
+        .no-data-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #8b5cf6;
+            font-size: 1.1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInModal 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1d2e;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #8b92b0;
+        }
+
+        .modal-close:hover {
+            color: #d32f2f;
+        }
+
+        .modal-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #8b92b0;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #1a1d2e;
+            font-weight: 600;
+        }
+
+        .modal-table-container {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e4e9;
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInModal {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                margin-left: 0;
+            }
+
+            #sidebar-container {
+                transform: translateX(-260px);
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar-container.open {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-filter {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .modal-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar-container">
+        <iframe id="sidebar-frame" src="bsm_sidebar.html"></iframe>
+    </div>
+
+    <div class="top-bar">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title">TRANSACTION REPORTS</h1>
+        
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-name" id="displayUsername">Hi, BSM User</div>
+                <div class="user-role" id="displayUserRole">BRANCH SUPPLY MANAGER</div>
+            </div>
+            <div class="user-avatar" id="displayAvatar">B</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h2 class="section-title">📊 Overview Statistics</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card purple">
+                <div class="stat-label">Total Reports</div>
+                <div class="stat-value" id="totalReports">0</div>
+            </div>
+            
+            <div class="stat-card blue">
+                <div class="stat-label">Reports This Month</div>
+                <div class="stat-value" id="reportsThisMonth">0</div>
+            </div>
+            
+            <div class="stat-card green">
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-value" id="totalTransactions">0</div>
+            </div>
+        </div>
+
+        <div class="reports-table-section">
+            <div class="table-header">
+                <h3>📋 All Transaction Reports</h3>
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by Officer ID or Name...">
+                    <button class="btn btn-refresh" onclick="loadReports()">🔄 Refresh</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="reports-table" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Officer ID</th>
+                            <th>Officer Name</th>
+                            <th>Warehouse</th>
+                            <th>Report Date</th>
+                            <th>Total Transactions</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">Loading reports...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Report Modal -->
+    <div id="viewReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Report Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-info" id="modalInfo"></div>
+            <div class="modal-table-container" id="modalTableContainer"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314892469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        let allReports = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar-container').classList.toggle('open');
+        }
+
+        function loadReports() {
+            const tableBody = document.getElementById('reportsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" class="loading">Loading reports...</td></tr>';
+
+            database.ref('reports').once('value').then((snapshot) => {
+                allReports = [];
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const report = child.val();
+                        allReports.push({
+                            id: child.key,
+                            ...report
+                        });
+                    });
+                    
+                    allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    
+                    displayReports(allReports);
+                    updateStatistics(allReports);
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="no-data">
+                                <div class="no-data-icon">📭</div>
+                                <div>No reports found in the database</div>
+                            </td>
+                        </tr>
+                    `;
+                    updateStatistics([]);
+                }
+            }).catch((error) => {
+                console.error('Error loading reports:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <div class="no-data-icon">❌</div>
+                            <div>Error loading reports: ${error.message}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function displayReports(reports) {
+            const tableBody = document.getElementById('reportsTableBody');
+            
+            if (reports.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <div class="no-data-icon">🔍</div>
+                            <div>No reports match your search criteria</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            
+            reports.forEach(report => {
+                const tr = document.createElement('tr');
+                const createdDate = report.createdAt ? new Date(report.createdAt).toLocaleString() : '-';
+                
+                tr.innerHTML = `
+                    <td>${report.id.substring(0, 8)}...</td>
+                    <td>${report.officerId || '-'}</td>
+                    <td>${report.officerName || '-'}</td>
+                    <td>${report.warehouseName || '-'}</td>
+                    <td>${report.reportDate || '-'}</td>
+                    <td>${report.totalTransactions || 0}</td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewReport('${report.id}')">👁️ View</button>
+                        <button class="action-btn download" onclick="downloadReport('${report.id}')">⬇️ Download</button>
+                        <button class="action-btn delete" onclick="deleteReport('${report.id}')">🗑️ Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function updateStatistics(reports) {
+            document.getElementById('totalReports').textContent = reports.length;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const reportsThisMonth = reports.filter(report => {
+                if (!report.createdAt) return false;
+                const reportDate = new Date(report.createdAt);
+                return reportDate.getMonth() === currentMonth && reportDate.getFullYear() === currentYear;
+            }).length;
+            document.getElementById('reportsThisMonth').textContent = reportsThisMonth;
+            
+            const totalTransactions = reports.reduce((sum, report) => sum + (report.totalTransactions || 0), 0);
+            document.getElementById('totalTransactions').textContent = totalTransactions.toLocaleString();
+        }
+
+        function viewReport(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const modalInfo = document.getElementById('modalInfo');
+            modalInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Report ID</div>
+                    <div class="info-value">${reportId.substring(0, 12)}...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Officer ID</div>
+                    <div class="info-value">${report.officerId || '-'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Officer Name</div>
+                    <div class="info-value">${report.officerName || '-'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Warehouse</div>
+                    <div class="info-value">${report.warehouseName || '-'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Report Date</div>
+                    <div class="info-value">${report.reportDate || '-'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Transactions</div>
+                    <div class="info-value">${report.totalTransactions || 0}</div>
+                </div>
+            `;
+
+            const modalTableContainer = document.getElementById('modalTableContainer');
+            if (report.transactions && report.transactions.length > 0) {
+                let tableHTML = `
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Document No</th>
+                                <th>Transaction Date</th>
+                                <th>Activity Code</th>
+                                <th>Variety Code</th>
+                                <th>No. of Bags</th>
+                                <th>Net Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                report.transactions.forEach(transaction => {
+                    tableHTML += `
+                        <tr>
+                            <td>${transaction.documentNo || '-'}</td>
+                            <td>${transaction.transactionDate || '-'}</td>
+                            <td>${transaction.activityCode || '-'}</td>
+                            <td>${transaction.varietyCode || '-'}</td>
+                            <td>${transaction.numberOfBags || '-'}</td>
+                            <td>${transaction.netWeight || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += '</tbody></table>';
+                modalTableContainer.innerHTML = tableHTML;
+            } else {
+                modalTableContainer.innerHTML = '<p class="no-data">No transaction data available</p>';
+            }
+
+            document.getElementById('viewReportModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('viewReportModal').classList.remove('show');
+        }
+
+        function downloadReport(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            let csv = 'Officer ID,Officer Name,Warehouse,Report Date,Document No,Transaction Date,Activity Code,Variety Code,Sack Code,No. of Bags,Gross Weight,Net Weight\n';
+
+            if (report.transactions) {
+                report.transactions.forEach(t => {
+                    csv += `${report.officerId},${report.officerName},${report.warehouseName},${report.reportDate},${t.documentNo || ''},${t.transactionDate || ''},${t.activityCode || ''},${t.varietyCode || ''},${t.sackCode || ''},${t.numberOfBags || ''},${t.grossWeight || ''},${t.netWeight || ''}\n`;
+                });
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report_${report.officerId}_${report.reportDate}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function deleteReport(reportId) {
+            if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+                database.ref('reports/' + reportId).remove()
+                    .then(() => {
+                        alert('Report deleted successfully');
+                        loadReports();
+                    })
+                    .catch((error) => {
+                        alert('Error deleting report: ' + error.message);
+                    });
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredReports = allReports.filter(report => {
+                return (report.officerId || '').toLowerCase().includes(searchTerm) ||
+                       (report.officerName || '').toLowerCase().includes(searchTerm);
+            });
+            displayReports(filteredReports);
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = 'BRANCH SUPPLY MANAGER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+
+            loadReports();
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('viewReportModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>

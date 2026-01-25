@@ -594,19 +594,7 @@ function renderTransactions() {
         
         const tr = document.createElement("tr");
         tr.innerHTML = `
-                    <td class="action-cell">
-                <div class="dropdown">
-                    <span class="dot-menu">&#8942;</span>
-                    <div class="dropdown-content">
-                        <button class="edit-btn" data-doc-id="${docId}">
-                            <span style="color: #2196F3;">✏️</span> Edit
-                        </button>
-                        <button class="delete-btn" data-doc-id="${docId}">
-                            <span style="color: #f44336;">🗑️</span> Delete
-                        </button>
-                    </div>
-                </div>
-            </td>
+                    
             <td>${data.officerId || "-"}</td>
             <td>${data.officerName || "-"}</td>
             <td>${data.warehouseId || "-"}</td>
@@ -632,6 +620,19 @@ function renderTransactions() {
             <td>${data.moistureContent || "-"}</td>
             <td>${data.netWeight || "-"}</td>
             <td>${data.cancelled ? "Yes" : "No"}</td>
+            <td class="action-cell">
+                <div class="dropdown">
+                    <span class="dot-menu">&#8942;</span>
+                    <div class="dropdown-content">
+                        <button class="edit-btn" data-doc-id="${docId}">
+                            <span style="color: #2196F3;">✏️</span> Edit
+                        </button>
+                        <button class="delete-btn" data-doc-id="${docId}">
+                            <span style="color: #f44336;">🗑️</span> Delete
+                        </button>
+                    </div>
+                </div>
+            </td>
         `;
         tbody.appendChild(tr);
     });

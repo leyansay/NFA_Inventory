@@ -19,7 +19,6 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar iframe container */
         #sidebar-container {
             position: fixed;
             left: 0;
@@ -200,7 +199,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Progress Bar in Cards */
         .progress-container {
             margin-top: 1rem;
             background: rgba(255, 255, 255, 0.2);
@@ -216,7 +214,6 @@
             transition: width 1s ease-out;
         }
 
-        /* Charts Section */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -245,7 +242,6 @@
             height: 300px;
         }
 
-        /* Stats Bars */
         .stats-section {
             margin-top: 2rem;
         }
@@ -329,7 +325,6 @@
             font-size: 1.2rem;
         }
 
-        /* Trend indicator */
         .trend-indicator {
             display: inline-flex;
             align-items: center;
@@ -337,6 +332,96 @@
             font-size: 0.85rem;
             margin-top: 0.5rem;
             opacity: 0.9;
+        }
+
+        /* Recent Transactions Section */
+        .recent-transactions {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .recent-transactions h3 {
+            color: #1a1d2e;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transactions-table thead {
+            background: #f8f9fa;
+        }
+
+        .transactions-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1d2e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .transactions-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .transactions-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .transactions-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .transaction-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .transaction-type.palay {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .transaction-type.rice {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .transaction-type.unknown {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 3rem;
+            color: #8b92b0;
+        }
+
+        .no-transactions-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 1024px) {
@@ -364,6 +449,15 @@
             .charts-grid {
                 grid-template-columns: 1fr;
             }
+
+            .transactions-table {
+                font-size: 0.8rem;
+            }
+
+            .transactions-table th,
+            .transactions-table td {
+                padding: 0.75rem 0.5rem;
+            }
         }
 
         @media (max-width: 768px) {
@@ -386,16 +480,19 @@
             .summary-grid {
                 grid-template-columns: 1fr;
             }
+
+            .transactions-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Load Sidebar from separate file -->
     <div id="sidebar-container">
         <iframe id="sidebar-frame" src="sidebar.html"></iframe>
     </div>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
         <h1 class="page-title">DASHBOARD</h1>
@@ -413,12 +510,10 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <h2 class="section-title">Inventory Summary</h2>
         
         <div class="summary-grid">
-            <!-- Total Palay Stock -->
             <div class="summary-card wheat">
                 <div class="card-icon">🌾</div>
                 <div class="card-title">TOTAL PALAY STOCK</div>
@@ -432,7 +527,6 @@
                 </div>
             </div>
             
-            <!-- Total Rice Stock -->
             <div class="summary-card rice">
                 <div class="card-icon">🍚</div>
                 <div class="card-title">TOTAL RICE STOCK</div>
@@ -446,7 +540,6 @@
                 </div>
             </div>
             
-            <!-- Available Stock -->
             <div class="summary-card available">
                 <div class="card-icon">🏪</div>
                 <div class="card-title">AVAILABLE STOCK</div>
@@ -460,7 +553,6 @@
                 </div>
             </div>
             
-            <!-- Low Stock Alert -->
             <div class="summary-card warning">
                 <div class="card-icon">⚠️</div>
                 <div class="card-title">LOW STOCK ALERT</div>
@@ -474,7 +566,6 @@
                 </div>
             </div>
             
-            <!-- Warehouse Capacity -->
             <div class="summary-card capacity">
                 <div class="card-icon">🏚</div>
                 <div class="card-title">WAREHOUSE CAPACITY USED</div>
@@ -489,7 +580,35 @@
             </div>
         </div>
 
-        <!-- Stats Bars Section -->
+        <!-- Today's Transactions Section -->
+        <div class="recent-transactions">
+            <h3>📋 Today's Transactions</h3>
+            <div id="recentTransactionsContainer">
+                <table class="transactions-table" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Officer</th>
+                            <th>Warehouse</th>
+                            <th>Type</th>
+                            <th>Document No</th>
+                            <th>Variety</th>
+                            <th>Bags</th>
+                            <th>Net Weight (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr>
+                            <td colspan="8" class="no-transactions">
+                                <div class="no-transactions-icon">📦</div>
+                                <div>Loading transactions...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <h2 class="section-title">Detailed Statistics</h2>
         <div class="stats-section">
             <div class="stat-item">
@@ -543,7 +662,6 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
         <h2 class="section-title">Visual Analytics</h2>
         <div class="charts-grid">
             <div class="chart-card">
@@ -581,7 +699,6 @@
     <script src="js/back-prevention.js"></script>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -599,12 +716,10 @@
         const database = firebase.database();
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        // Global data storage
         let transactionsData = [];
         let varietiesCache = {};
         let warehousesData = {};
 
-        // Extract GID number from warehouse name or ID
         function extractGID(warehouseName, warehouseId) {
             const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
             
@@ -618,13 +733,11 @@
             return null;
         }
 
-        // Determine cereal type from variety code (same logic as inventory)
         function getCerealType(varietyCode) {
             if (!varietyCode) return null;
             
             const code = varietyCode.toUpperCase();
             
-            // Check variety code prefix
             if (code.startsWith('PD')) {
                 return 'palay';
             }
@@ -632,7 +745,6 @@
                 return 'rice';
             }
             
-            // Fallback: check from varietiesCache
             if (varietiesCache[varietyCode]) {
                 const cerealType = varietiesCache[varietyCode].cerealType.toLowerCase();
                 if (cerealType.includes('palay')) return 'palay';
@@ -642,7 +754,6 @@
             return null;
         }
 
-        // Load varieties data first
         function loadVarietiesData() {
             return database.ref('varieties').once('value').then((snapshot) => {
                 varietiesCache = {};
@@ -661,7 +772,6 @@
             });
         }
 
-        // Load all necessary data
         function loadDashboardData() {
             Promise.all([
                 loadVarietiesData(),
@@ -669,32 +779,29 @@
                 database.ref('warehouses').once('value')
             ]).then(([_, transactionsSnapshot, warehousesSnapshot]) => {
                 
-                // Load transactions
                 transactionsData = [];
                 if (transactionsSnapshot.exists()) {
                     transactionsSnapshot.forEach((child) => {
                         const data = child.val();
-                        if (!data.cancelled) { // Skip cancelled transactions
+                        if (!data.cancelled) {
                             transactionsData.push(data);
                         }
                     });
                 }
                 console.log('Transactions loaded:', transactionsData.length);
 
-                // Load warehouses with GID-based capacities
                 warehousesData = {};
                 if (warehousesSnapshot.exists()) {
                     warehousesSnapshot.forEach((child) => {
                         const data = child.val();
                         if (data.warehouseId) {
                             const gid = extractGID(data.location || data.warehouseName || '', data.warehouseId);
-                            let capacity = 2000; // Default capacity
+                            let capacity = 2000;
                             
-                            // Set capacity based on GID
                             if (gid === 'gid1') {
-                                capacity = 100000; // GID1 capacity
+                                capacity = 100000;
                             } else if (gid === 'gid2') {
-                                capacity = 50000; // GID2 capacity
+                                capacity = 50000;
                             }
                             
                             warehousesData[data.warehouseId] = {
@@ -708,13 +815,67 @@
                 console.log('Warehouses loaded:', Object.keys(warehousesData).length);
 
                 calculateMetrics();
+                displayRecentTransactions();
                 initializeCharts();
             }).catch((error) => {
                 console.error('Error loading dashboard data:', error);
             });
         }
 
-        // Calculate metrics from transactions
+        function displayRecentTransactions() {
+            const tableBody = document.getElementById('transactionsTableBody');
+            
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            
+            // Filter transactions for today only
+            const todayTransactions = transactionsData.filter(transaction => {
+                return transaction.transactionDate === todayString;
+            });
+            
+            if (todayTransactions.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-transactions">
+                            <div class="no-transactions-icon">📭</div>
+                            <div>No transactions recorded for today (${todayString})</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort by most recent first (if there's a timestamp)
+            const sortedTransactions = [...todayTransactions]
+                .sort((a, b) => {
+                    const timeA = a.timestamp || 0;
+                    const timeB = b.timestamp || 0;
+                    return timeB - timeA;
+                });
+
+            tableBody.innerHTML = '';
+            
+            sortedTransactions.forEach(transaction => {
+                const cerealType = getCerealType(transaction.varietyCode);
+                const typeClass = cerealType || 'unknown';
+                const typeLabel = cerealType ? cerealType.toUpperCase() : 'UNKNOWN';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${transaction.transactionDate || '-'}</td>
+                    <td>${transaction.officerName || '-'}</td>
+                    <td>${transaction.warehouseName || '-'}</td>
+                    <td><span class="transaction-type ${typeClass}">${typeLabel}</span></td>
+                    <td>${transaction.documentNo || '-'}</td>
+                    <td>${transaction.varietyCode || '-'}</td>
+                    <td>${transaction.numberOfBags || '-'}</td>
+                    <td>${parseFloat(transaction.netWeight || 0).toLocaleString()}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
         function calculateMetrics() {
             let totalPalayKg = 0;
             let totalPalayBags = 0;
@@ -724,14 +885,12 @@
             let warehouseUsage = {};
             let lowStockItems = [];
 
-            // Calculate totals from transactions using the same logic as inventory
             transactionsData.forEach(transaction => {
                 const netWeight = parseFloat(transaction.netWeight) || 0;
                 const bags = parseFloat(transaction.numberOfBags) || 0;
                 const varietyCode = transaction.varietyCode;
                 const warehouseId = transaction.warehouseId;
                 
-                // Determine cereal type using same logic as inventory page
                 const cerealType = getCerealType(varietyCode);
 
                 if (cerealType === 'palay') {
@@ -742,10 +901,8 @@
                     totalRiceBags += bags;
                 }
 
-                // Track all bags for available stock
                 totalAvailableBags += bags;
 
-                // Track warehouse usage
                 if (warehouseId) {
                     if (!warehouseUsage[warehouseId]) {
                         warehouseUsage[warehouseId] = 0;
@@ -754,7 +911,6 @@
                 }
             });
 
-            // Check for low stock items (Palay or Rice below 1000 bags)
             if (totalPalayBags < 1000) {
                 lowStockItems.push(`Palay: ${totalPalayBags.toFixed(0)} bags`);
             }
@@ -762,15 +918,13 @@
                 lowStockItems.push(`Rice: ${totalRiceBags.toFixed(0)} bags`);
             }
 
-            // Calculate warehouse capacity (GID1: 100,000 bags, GID2: 50,000 bags)
-            let totalWarehouseCapacity = 150000; // GID1 (100,000) + GID2 (50,000)
+            let totalWarehouseCapacity = 150000;
             let totalWarehouseUsed = 0;
 
             Object.keys(warehouseUsage).forEach(warehouseId => {
                 totalWarehouseUsed += warehouseUsage[warehouseId] || 0;
             });
 
-            // Calculate capacity percentage
             const capacityPercentage = totalWarehouseCapacity > 0 
                 ? ((totalWarehouseUsed / totalWarehouseCapacity) * 100).toFixed(1)
                 : 0;
@@ -785,7 +939,6 @@
                 capacityPercentage
             });
 
-            // Update UI
             updateDashboardUI({
                 totalPalayKg: totalPalayKg.toFixed(2),
                 totalPalayMT: (totalPalayKg / 1000).toFixed(2),
@@ -801,27 +954,22 @@
             });
         }
 
-        // Update dashboard UI with calculated values
         function updateDashboardUI(metrics) {
-            // Update Palay Stock Card
             document.querySelector('.summary-card.wheat .card-value').textContent = 
                 `${metrics.totalPalayBags.toLocaleString()} bags`;
             document.querySelector('.summary-card.wheat .card-subtitle').textContent = 
                 `${parseFloat(metrics.totalPalayKg).toLocaleString()} kg / ${metrics.totalPalayMT} MT`;
 
-            // Update Rice Stock Card
             document.querySelector('.summary-card.rice .card-value').textContent = 
                 `${metrics.totalRiceBags.toLocaleString()} bags`;
             document.querySelector('.summary-card.rice .card-subtitle').textContent = 
                 `${parseFloat(metrics.totalRiceKg).toLocaleString()} kg`;
 
-            // Update Available Stock Card
             document.querySelector('.summary-card.available .card-value').textContent = 
                 metrics.availableStock.toLocaleString();
             document.querySelector('.summary-card.available .card-subtitle').textContent = 
                 'bags ready for distribution';
 
-            // Update Low Stock Alert Card
             document.querySelector('.summary-card.warning .card-value').textContent = 
                 metrics.lowStockCount;
             
@@ -833,13 +981,11 @@
             }
             document.querySelector('.summary-card.warning .card-subtitle').textContent = lowStockSubtitle;
 
-            // Update Warehouse Capacity Card
             document.querySelector('.summary-card.capacity .card-value').textContent = 
                 `${metrics.capacityPercentage}%`;
             document.querySelector('.summary-card.capacity .card-subtitle').textContent = 
                 `${metrics.warehouseCapacityUsed.toLocaleString()} / ${metrics.totalWarehouseCapacity.toLocaleString()} bags (GID1: 100K, GID2: 50K)`;
 
-            // Update progress bars based on total capacity of 150,000 bags
             const palayProgress = (metrics.totalPalayBags / 150000) * 100;
             document.querySelector('.summary-card.wheat .progress-bar').style.width = 
                 `${Math.min(palayProgress, 100)}%`;
@@ -852,14 +998,12 @@
             document.querySelector('.summary-card.available .progress-bar').style.width = 
                 `${Math.min(availableProgress, 100)}%`;
             
-            // Low stock progress (red if any low stock, green if all good)
             document.querySelector('.summary-card.warning .progress-bar').style.width = 
                 `${metrics.lowStockCount > 0 ? 30 : 100}%`;
             
             document.querySelector('.summary-card.capacity .progress-bar').style.width = 
                 `${metrics.capacityPercentage}%`;
 
-            // Update stat bars
             document.querySelector('.stats-section .stat-item:nth-child(1) .stat-value').textContent = 
                 `${metrics.totalPalayBags.toLocaleString()} bags (${parseFloat(metrics.totalPalayKg).toLocaleString()} kg)`;
             document.querySelector('.stats-section .stat-item:nth-child(1) .stat-bar-fill').style.width = 
@@ -891,17 +1035,14 @@
                 `${metrics.capacityPercentage}%`;
         }
 
-        // Toggle sidebar for mobile
         function toggleSidebar() {
             document.getElementById('sidebar-container').classList.toggle('open');
         }
 
-        // Search functionality
         document.querySelector('.search-bar input').addEventListener('input', function(e) {
             console.log('Searching for:', e.target.value);
         });
 
-        // Display logged in user info
         window.addEventListener('DOMContentLoaded', function() {
             const currentUser = sessionStorage.getItem('currentUser');
             if (currentUser) {
@@ -915,28 +1056,14 @@
                 }
             }
 
-            // Load dashboard data
             loadDashboardData();
         });
 
-        // Toggle sidebar for mobile
-        function toggleSidebar() {
-            document.getElementById('sidebar-container').classList.toggle('open');
-        }
-
-        // Search functionality
-        document.querySelector('.search-bar input').addEventListener('input', function(e) {
-            console.log('Searching for:', e.target.value);
-        });
-
-        // Initialize Charts with real data
         function initializeCharts() {
-            // Calculate data for charts
             const palayData = [];
             const riceData = [];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
             
-            // Calculate monthly trends
             months.forEach((month, index) => {
                 const monthTransactions = transactionsData.filter(t => {
                     if (!t.transactionDate || t.cancelled) return false;
@@ -949,11 +1076,11 @@
                 
                 monthTransactions.forEach(t => {
                     const netWeight = parseFloat(t.netWeight) || 0;
-                    const cerealType = varietiesData[t.varietyCode] || 'Unknown';
+                    const cerealType = getCerealType(t.varietyCode);
                     
-                    if (cerealType.toLowerCase().includes('palay')) {
+                    if (cerealType === 'palay') {
                         monthPalay += netWeight;
-                    } else if (cerealType.toLowerCase().includes('rice')) {
+                    } else if (cerealType === 'rice') {
                         monthRice += netWeight;
                     }
                 });
@@ -962,7 +1089,6 @@
                 riceData.push(monthRice);
             });
 
-            // Calculate warehouse distribution
             const warehouseDistribution = {};
             transactionsData.forEach(t => {
                 if (t.cancelled) return;
@@ -978,7 +1104,6 @@
             );
             const warehouseValues = Object.values(warehouseDistribution);
 
-            // Stock Levels Chart
             const totalPalay = palayData.reduce((a, b) => a + b, 0);
             const totalRice = riceData.reduce((a, b) => a + b, 0);
             const totalAvailable = transactionsData
@@ -1017,7 +1142,6 @@
                 }
             });
 
-            // Monthly Trend Chart
             const trendCtx = document.getElementById('trendChart').getContext('2d');
             new Chart(trendCtx, {
                 type: 'line',
@@ -1055,7 +1179,6 @@
                 }
             });
 
-            // Warehouse Distribution Chart
             const warehouseCtx = document.getElementById('warehouseChart').getContext('2d');
             new Chart(warehouseCtx, {
                 type: 'doughnut',
@@ -1083,7 +1206,6 @@
                 }
             });
 
-            // Comparison Chart
             const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
             new Chart(comparisonCtx, {
                 type: 'pie',
@@ -1116,7 +1238,6 @@
             });
         }
 
-        // Add animation on scroll
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1126,14 +1247,13 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.summary-card, .stat-item, .chart-card').forEach((element) => {
+        document.querySelectorAll('.summary-card, .stat-item, .chart-card, .recent-transactions').forEach((element) => {
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
             element.style.transition = 'all 0.5s ease-out';
             observer.observe(element);
         });
 
-        // Animate bars on load
         window.addEventListener('load', function() {
             setTimeout(() => {
                 document.querySelectorAll('.stat-bar-fill').forEach(bar => {

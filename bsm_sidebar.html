@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSM Sidebar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1d2e;
+            color: white;
+        }
+
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            padding: 1.8rem 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo-image {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .logo p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 0.25rem;
+        }
+
+        .role-badge {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 0.75rem 1.5rem;
+            margin: 0 1.5rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .role-badge-title {
+            font-size: 0.7rem;
+            color: #6b7299;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+        }
+
+        .role-badge-name {
+            font-size: 0.95rem;
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+
+        .menu {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .menu-section-title {
+            padding: 1rem 1.5rem 0.75rem;
+            color: #8b5cf6;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            margin: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #2c3e50;
+            font-size: 1rem;
+            text-decoration: none;
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border-left: 3px solid #8b5cf6;
+            color: #8b5cf6;
+            transform: translateX(2px);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%);
+            border-left: 3px solid #8b5cf6;
+            color: #8b5cf6;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+        }
+
+        .menu-icon {
+            font-size: 1.4rem;
+            width: 28px;
+            text-align: center;
+        }
+
+        .info-section {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .info-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: #6b7299;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+
+        .logout-section {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+            text-align: center;
+        }
+
+        .modal-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-icon {
+            font-size: 3.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .modal-message {
+            color: #5a6c7d;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.85rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 130px;
+        }
+
+        .modal-btn-cancel {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #dee2e6;
+        }
+
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-btn-confirm:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .menu::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 3px;
+        }
+
+        .menu::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-container">
+                <img src="images/nfa.png" 
+                     alt="NFA Logo" 
+                     class="logo-image">
+                <div>
+                    <h1>NFA BSM</h1>
+                    <p>Reports System</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-badge">
+            <div class="role-badge-title">Access Level</div>
+            <div class="role-badge-name">Branch Supply Manager</div>
+        </div>
+
+        <ul class="menu">
+            <li class="menu-section-title">
+                <span>📊</span> MENU
+            </li>
+            
+            <li class="menu-item active" data-page="transaction-reports">
+                <span class="menu-icon">💳</span>
+                <span>Transaction Reports</span>
+            </li>
+        </ul>
+
+        <div class="info-section">
+            <div class="info-card">
+                <div class="info-label">Reports This Month</div>
+                <div class="info-value">47</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Total Transactions</div>
+                <div class="info-value">1,234</div>
+            </div>
+        </div>
+
+        <div class="logout-section">
+            <button class="logout-btn" onclick="handleLogout()">
+                <span>Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-icon">⚠️</span>
+                <h2 class="modal-title">Confirm Logout</h2>
+            </div>
+            <p class="modal-message">
+                Are you sure you want to logout from BSM Reports System?
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmLogout()">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pageLinks = {
+            'transaction-reports': 'bsm_transaction.html'
+        };
+
+        function handleLogout() {
+            const modal = document.getElementById('logoutModal');
+            
+            if (window.parent !== window && window.parent.document.body) {
+                const parentModal = modal.cloneNode(true);
+                parentModal.id = 'logoutModalParent';
+                window.parent.document.body.appendChild(parentModal);
+                
+                if (!window.parent.document.getElementById('logoutModalStyles')) {
+                    const styleElement = document.createElement('style');
+                    styleElement.id = 'logoutModalStyles';
+                    styleElement.textContent = document.querySelector('style').textContent;
+                    window.parent.document.head.appendChild(styleElement);
+                }
+                
+                parentModal.classList.add('active');
+                
+                const cancelBtn = parentModal.querySelector('.modal-btn-cancel');
+                const confirmBtn = parentModal.querySelector('.modal-btn-confirm');
+                
+                cancelBtn.onclick = function() {
+                    parentModal.classList.remove('active');
+                    setTimeout(() => parentModal.remove(), 300);
+                };
+                
+                confirmBtn.onclick = function() {
+                    confirmLogout();
+                    parentModal.classList.remove('active');
+                    setTimeout(() => parentModal.remove(), 300);
+                };
+                
+                parentModal.onclick = function(event) {
+                    if (event.target === parentModal) {
+                        parentModal.classList.remove('active');
+                        setTimeout(() => parentModal.remove(), 300);
+                    }
+                };
+            } else {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            modal.classList.remove('active');
+            
+            const parentModal = window.parent.document.getElementById('logoutModalParent');
+            if (parentModal) {
+                parentModal.classList.remove('active');
+                setTimeout(() => parentModal.remove(), 300);
+            }
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            
+            sessionStorage.clear();
+            localStorage.clear();
+            
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const logoutMessage = document.createElement('div');
+            logoutMessage.style.cssText = `
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                color: white;
+                padding: 2.5rem 4rem;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                font-size: 1.4rem;
+                font-weight: 600;
+                text-align: center;
+            `;
+            logoutMessage.innerHTML = 'Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block;">Redirecting to login page</small>';
+            
+            overlay.appendChild(logoutMessage);
+            
+            if (window.parent !== window) {
+                window.parent.document.body.appendChild(overlay);
+            } else {
+                document.body.appendChild(overlay);
+            }
+            
+            setTimeout(function() {
+                window.parent.location.href = 'index.html';
+            }, 1500);
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                const link = pageLinks[page];
+                
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                if (link) {
+                    window.parent.location.href = link;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
