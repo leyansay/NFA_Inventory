@@ -5,6 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Transaction</title>
     <link rel="stylesheet" href="css/transaction.css" />
+    <style>
+        /* Date filter styles */
+        .date-filter-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        
+        .date-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .date-input.sort-dropdown {
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            min-width: 180px;
+            cursor: pointer;
+        }
+        
+        .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .calendar-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 18px;
+        }
+        
+        .clear-date-btn {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .clear-date-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .clear-date-btn:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .date-filter-info {
+            display: none;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 1rem 1.5rem;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            animation: slideDown 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .date-filter-info.active {
+            display: block;
+        }
+        
+        .date-filter-info span {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .date-filter-wrapper {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            
+            .date-input-wrapper {
+                flex: 1;
+                min-width: 200px;
+            }
+            
+            .date-input.sort-dropdown {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Load Sidebar from separate file -->
@@ -31,11 +146,25 @@
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
                 </select>
+                
+                <div class="date-filter-wrapper">
+                    <label class="sort-label">Filter by Date:</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" id="dateFilter" class="sort-dropdown date-input">
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                    <button class="clear-date-btn" id="clearDateFilter" disabled>Clear Filter</button>
+                </div>
             </div>
             <div class="action-buttons">
                 <button class="preview-btn" id="previewTransaction">Preview</button>
                 <button class="add-btn" id="addTransaction">+ Add Transaction</button>
             </div>
+        </div>
+
+        <!-- Date Filter Info Banner -->
+        <div class="date-filter-info" id="dateFilterInfo">
+            <span id="dateFilterText">Showing transactions for: </span>
         </div>
 
         <div class="table-container">

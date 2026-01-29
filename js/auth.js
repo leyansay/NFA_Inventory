@@ -60,8 +60,17 @@ function login(event) {
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("loginTime", new Date().toISOString());
         
-        // Redirect to home page
-        window.location.href = "home.html";
+        // Redirect based on username/role
+        if (loggedInUser.username === "nfa_admin") {
+          // NFA Admin goes to home.html
+          window.location.href = "home.html";
+        } else if (loggedInUser.username === "nfa_bsm") {
+          // BSM goes to bsm_homepage.html
+          window.location.href = "bsm_home.html";
+        } else {
+          // Default redirect for other users
+          window.location.href = "home.html";
+        }
       } else {
         console.log("Login failed - Invalid credentials");
         showError(errorBox, "Invalid username or password");
@@ -93,12 +102,26 @@ function checkLoginStatus() {
   const currentUser = sessionStorage.getItem("currentUser");
   
   if (isLoggedIn === "true" && currentUser) {
-    // User is already logged in, redirect to home
-    window.location.href = "home.html";
+    try {
+      const user = JSON.parse(currentUser);
+      
+      // Redirect based on username/role
+      if (user.username === "nfa_admin") {
+        window.location.href = "home.html";
+      } else if (user.username === "nfa_bsm") {
+        window.location.href = "bsm_home.html";
+      } else {
+        window.location.href = "home.html";
+      }
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+      // Clear invalid session data
+      sessionStorage.clear();
+    }
   }
 }
 
 // Check login status when page loads
-if (window.location.pathname.includes("login.html")) {
+if (window.location.pathname.includes("login.html") || window.location.pathname.includes("index.html")) {
   checkLoginStatus();
 }

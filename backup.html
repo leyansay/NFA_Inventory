@@ -49,10 +49,126 @@
             margin-bottom: 0.75rem;
         }
 
-        .loading-dates {
-            color: #999;
+        /* Confirmation Modal Styles */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirmation-modal.active {
+            display: flex;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .confirmation-message {
+            text-align: center;
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .confirmation-details {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
             font-size: 0.875rem;
-            font-style: italic;
+        }
+
+        .confirmation-details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .confirmation-details-item:last-child {
+            border-bottom: none;
+        }
+
+        .confirmation-details-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .confirmation-details-value {
+            color: #333;
+            text-align: right;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-confirm {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm-yes {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-confirm-yes:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-confirm-no {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-confirm-no:hover {
+            background-color: #da190b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        .warning-text {
+            color: #ff9800;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -101,7 +217,7 @@
                     <div class="date-selector" id="date-accountableOfficers">
                         <label>Select Date/Year:</label>
                         <select id="select-accountableOfficers">
-                            <option value="">Loading dates...</option>
+                            <option value="all">All Data</option>
                         </select>
                     </div>
                 </div>
@@ -114,20 +230,7 @@
                     <div class="date-selector" id="date-transactions">
                         <label>Select Date/Year:</label>
                         <select id="select-transactions">
-                            <option value="">Loading dates...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="backup-option">
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="table-checkbox" value="inventory" data-collection="inventory">
-                        <span>Inventory</span>
-                    </label>
-                    <div class="date-selector" id="date-inventory">
-                        <label>Select Date/Year:</label>
-                        <select id="select-inventory">
-                            <option value="">Loading dates...</option>
+                            <option value="all">All Data</option>
                         </select>
                     </div>
                 </div>
@@ -140,20 +243,7 @@
                     <div class="date-selector" id="date-activities">
                         <label>Select Date/Year:</label>
                         <select id="select-activities">
-                            <option value="">Loading dates...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="backup-option">
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="table-checkbox" value="cereals" data-collection="cereals">
-                        <span>Cereals</span>
-                    </label>
-                    <div class="date-selector" id="date-cereals">
-                        <label>Select Date/Year:</label>
-                        <select id="select-cereals">
-                            <option value="">Loading dates...</option>
+                            <option value="all">All Data</option>
                         </select>
                     </div>
                 </div>
@@ -166,7 +256,33 @@
                     <div class="date-selector" id="date-locations">
                         <label>Select Date/Year:</label>
                         <select id="select-locations">
-                            <option value="">Loading dates...</option>
+                            <option value="all">All Data</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="sacks" data-collection="sacks">
+                        <span>Sacks</span>
+                    </label>
+                    <div class="date-selector" id="date-sacks">
+                        <label>Select Date/Year:</label>
+                        <select id="select-sacks">
+                            <option value="all">All Data</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="backup-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="table-checkbox" value="varieties" data-collection="varieties">
+                        <span>Varieties</span>
+                    </label>
+                    <div class="date-selector" id="date-varieties">
+                        <label>Select Date/Year:</label>
+                        <select id="select-varieties">
+                            <option value="all">All Data</option>
                         </select>
                     </div>
                 </div>
@@ -179,20 +295,7 @@
                     <div class="date-selector" id="date-warehouses">
                         <label>Select Date/Year:</label>
                         <select id="select-warehouses">
-                            <option value="">Loading dates...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="backup-option">
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="table-checkbox" value="clients" data-collection="clients">
-                        <span>Clients</span>
-                    </label>
-                    <div class="date-selector" id="date-clients">
-                        <label>Select Date/Year:</label>
-                        <select id="select-clients">
-                            <option value="">Loading dates...</option>
+                            <option value="all">All Data</option>
                         </select>
                     </div>
                 </div>
@@ -200,7 +303,7 @@
                 <div class="error-message" id="backupError"></div>
                 <div class="success-message" id="backupSuccess"></div>
 
-                <button class="btn-save" onclick="createBackup()" id="createBackupBtn">
+                <button class="btn-save" onclick="showBackupConfirmation()" id="createBackupBtn">
                     <span>📥</span>
                     <span>Create Backup</span>
                 </button>
@@ -227,7 +330,7 @@
                 <div class="error-message" id="restoreError"></div>
                 <div class="success-message" id="restoreSuccess"></div>
 
-                <button class="btn-save" onclick="restoreBackup()" id="restoreBackupBtn">
+                <button class="btn-save" onclick="showRestoreConfirmation()" id="restoreBackupBtn">
                     <span>♻️</span>
                     <span>Restore to Firebase</span>
                 </button>
@@ -276,6 +379,24 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="confirmation-content">
+            <div class="confirmation-icon" id="confirmIcon">❓</div>
+            <h2 class="confirmation-title" id="confirmTitle">Confirm Action</h2>
+            <p class="confirmation-message" id="confirmMessage">Are you sure you want to proceed?</p>
+            <div class="confirmation-details" id="confirmDetails"></div>
+            <div class="confirmation-buttons">
+                <button class="btn-confirm btn-confirm-yes" id="confirmYes">
+                    ✓ Yes, Proceed
+                </button>
+                <button class="btn-confirm btn-confirm-no" id="confirmNo">
+                    ✗ No, Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -301,14 +422,14 @@
             }
             database = firebase.database();
             
-            console.log("Firebase initialized:", firebase.apps.length > 0);
+            console.log("✅ Firebase initialized successfully");
             
             // Update connection status
             document.getElementById('connectionStatus').textContent = '✅ Connected';
             document.getElementById('connectionStatus').className = 'connection-status status-connected';
             document.getElementById('setupAlert').style.display = 'none';
         } catch (error) {
-            console.error('Firebase initialization error:', error);
+            console.error('❌ Firebase initialization error:', error);
             showAlert('setupAlert', '❌ Firebase connection failed. Please check your configuration.', 'alert-warning');
         }
 
@@ -316,24 +437,28 @@
         let selectedFile = null;
         let backupHistory = [];
         let collectionDatesCache = {};
+        let pendingBackupData = null;
+        let pendingRestoreData = null;
 
-        // Handle checkbox changes to show/hide date selectors and load dates
+        // Handle checkbox changes
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Setting up checkbox listeners");
+            
             const checkboxes = document.querySelectorAll('.table-checkbox');
             
-            checkboxes.forEach(checkbox => {
+            checkboxes.forEach((checkbox) => {
                 checkbox.addEventListener('change', async function() {
                     const collection = this.dataset.collection;
                     const dateSelector = document.getElementById('date-' + collection);
                     
+                    console.log(`Checkbox ${collection}: ${this.checked}`);
+                    
                     if (this.checked) {
                         dateSelector.classList.add('show');
-                        // Load available dates for this collection
                         await loadAvailableDates(collection);
                     } else {
                         dateSelector.classList.remove('show');
-                        // Clear selection when unchecked
-                        document.getElementById('select-' + collection).value = '';
+                        document.getElementById('select-' + collection).value = 'all';
                     }
                 });
             });
@@ -341,148 +466,143 @@
             loadBackupHistory();
         });
 
-        // Load available dates from Firebase for a collection
+        // Load available dates from Firebase
         async function loadAvailableDates(collection) {
+            console.log(`\n📡 Loading dates for: ${collection}`);
             const selectElement = document.getElementById('select-' + collection);
             
-            // Check cache first
+            if (!selectElement) {
+                console.error(`❌ Select element not found`);
+                return;
+            }
+            
+            // Check cache
             if (collectionDatesCache[collection]) {
+                console.log(`✅ Using cached dates`);
                 populateDateDropdown(selectElement, collectionDatesCache[collection]);
                 return;
             }
 
-            selectElement.innerHTML = '<option value="">Loading dates from database...</option>';
+            selectElement.innerHTML = '<option value="all">Loading dates...</option>';
 
             try {
-                console.log(`Fetching dates from collection: ${collection}`);
                 const snapshot = await database.ref(collection).once('value');
                 
                 if (!snapshot.exists()) {
-                    console.log(`No data found in collection: ${collection}`);
-                    selectElement.innerHTML = '<option value="all">All Data (No records found in database)</option>';
+                    console.log(`⚠️ No data in ${collection}`);
+                    selectElement.innerHTML = '<option value="all">All Data (No records)</option>';
                     return;
                 }
 
                 const data = snapshot.val();
-                console.log(`Collection ${collection} has ${Object.keys(data).length} records`);
+                console.log(`📊 Records found: ${Object.keys(data).length}`);
                 
                 const yearsSet = new Set();
-                const monthsSet = new Set();
-                const datesSet = new Set();
+                const monthsMap = new Map();
+                const datesMap = new Map();
                 
                 let recordsWithDates = 0;
-                let recordsWithoutDates = 0;
                 
-                // Extract dates from records - check ALL possible date fields
+                // Check all possible date fields
+                const dateFields = [
+                    'transactionDate', 'date', 'createdAt', 'timestamp', 
+                    'created_at', 'dateCreated', 'fromDate', 'toDate'
+                ];
+                
                 Object.entries(data).forEach(([key, record]) => {
-                    if (!record) {
-                        recordsWithoutDates++;
-                        return;
-                    }
+                    if (!record) return;
                     
-                    // Check common date fields - check ALL date fields, not just the first one found
-                    const dateFields = [
-                        'createdAt', 'date', 'timestamp', 'created_at', 'dateCreated', 
-                        'Date', 'createdDate', 'updated_at', 'updatedAt',
-                        'fromDate', 'toDate', 'startDate', 'endDate'
-                    ];
-                    let foundDate = false;
-                    
-                    // Check all date fields (some records might have multiple date fields)
                     for (const field of dateFields) {
                         if (record[field]) {
-                            const date = new Date(record[field]);
+                            const dateValue = record[field];
+                            const date = new Date(dateValue);
+                            
                             if (!isNaN(date.getTime())) {
-                                foundDate = true;
+                                recordsWithDates++;
                                 
-                                // Extract year
+                                // Year
                                 const year = date.getFullYear();
                                 yearsSet.add(year);
                                 
-                                // Extract month-year
-                                const monthYear = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                                const monthDisplay = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
-                                monthsSet.add(JSON.stringify({ value: monthYear, display: monthDisplay }));
+                                // Month
+                                const monthKey = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                                const monthLabel = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                                monthsMap.set(monthKey, monthLabel);
                                 
-                                // Extract full date
-                                const dateStr = date.toISOString().split('T')[0];
-                                const dateDisplay = date.toLocaleDateString('en-US', { 
+                                // Date
+                                const dateKey = date.toISOString().split('T')[0];
+                                const dateLabel = date.toLocaleDateString('en-US', { 
                                     year: 'numeric', 
                                     month: 'long', 
                                     day: 'numeric' 
                                 });
-                                datesSet.add(JSON.stringify({ value: dateStr, display: dateDisplay }));
+                                datesMap.set(dateKey, dateLabel);
+                                
+                                break;
                             }
                         }
                     }
-                    
-                    if (foundDate) {
-                        recordsWithDates++;
-                    } else {
-                        recordsWithoutDates++;
-                    }
                 });
 
-                console.log(`Collection ${collection}: ${recordsWithDates} records with dates, ${recordsWithoutDates} without dates`);
-                console.log(`Found ${yearsSet.size} unique years, ${monthsSet.size} unique months, ${datesSet.size} unique dates`);
+                console.log(`✅ Found ${recordsWithDates} records with dates`);
+                console.log(`   Years: ${yearsSet.size}, Months: ${monthsMap.size}, Dates: ${datesMap.size}`);
 
-                // Build date options array
+                // Build options
                 const dateOptions = [];
                 
-                // Add years
+                // Add years (sorted newest first)
                 Array.from(yearsSet).sort((a, b) => b - a).forEach(year => {
                     dateOptions.push({ type: 'year', value: year.toString(), display: year.toString() });
                 });
                 
-                // Add months
-                Array.from(monthsSet).map(item => JSON.parse(item))
-                    .sort((a, b) => b.value.localeCompare(a.value))
-                    .forEach(month => {
-                        dateOptions.push({ type: 'month', value: month.value, display: month.display });
+                // Add months (sorted newest first)
+                Array.from(monthsMap.entries())
+                    .sort((a, b) => b[0].localeCompare(a[0]))
+                    .forEach(([value, display]) => {
+                        dateOptions.push({ type: 'month', value, display });
                     });
                 
-                // Add specific dates
-                Array.from(datesSet).map(item => JSON.parse(item))
-                    .sort((a, b) => b.value.localeCompare(a.value))
-                    .forEach(date => {
-                        dateOptions.push({ type: 'date', value: date.value, display: date.display });
+                // Add dates (sorted newest first)
+                Array.from(datesMap.entries())
+                    .sort((a, b) => b[0].localeCompare(a[0]))
+                    .forEach(([value, display]) => {
+                        dateOptions.push({ type: 'date', value, display });
                     });
 
                 if (dateOptions.length === 0) {
-                    console.log(`No valid dates found in collection: ${collection}`);
-                    selectElement.innerHTML = '<option value="all">All Data (No date fields found)</option>';
+                    console.log(`⚠️ No dates found`);
+                    selectElement.innerHTML = '<option value="all">All Data (No dates found)</option>';
                     return;
                 }
 
-                // Cache the results
+                // Cache results
                 collectionDatesCache[collection] = dateOptions;
                 
                 populateDateDropdown(selectElement, dateOptions);
-                console.log(`Successfully loaded ${dateOptions.length} date options for ${collection}`);
+                console.log(`✅ Loaded ${dateOptions.length} date options\n`);
 
             } catch (error) {
-                console.error('Error loading dates:', error);
-                selectElement.innerHTML = `<option value="all">All Data (Error: ${error.message})</option>`;
+                console.error('❌ Error:', error);
+                selectElement.innerHTML = '<option value="all">All Data (Error loading)</option>';
             }
         }
 
         function populateDateDropdown(selectElement, dateOptions) {
+            let html = '<option value="all">All Data</option>';
+            
             if (dateOptions.length === 0) {
-                selectElement.innerHTML = '<option value="all">All Data (No dates found)</option>';
+                selectElement.innerHTML = html;
                 return;
             }
 
-            let html = '<option value="all">All Data</option>';
-            html += '<optgroup label="─────────────────">';
-            
             let currentType = null;
             dateOptions.forEach(option => {
                 if (currentType !== option.type) {
                     if (currentType !== null) {
                         html += '</optgroup>';
                     }
-                    const label = option.type === 'year' ? 'Years' : 
-                                 option.type === 'month' ? 'Months' : 'Specific Dates';
+                    const label = option.type === 'year' ? 'By Year' : 
+                                 option.type === 'month' ? 'By Month' : 'By Date';
                     html += `<optgroup label="${label}">`;
                     currentType = option.type;
                 }
@@ -493,61 +613,47 @@
             selectElement.innerHTML = html;
         }
 
-        function filterDataBySelection(data, selection, collection) {
+        function filterDataBySelection(data, selection) {
             if (!selection || selection === 'all') {
-                return data; // Return all data
+                return data;
             }
 
             const [type, value] = selection.split(':');
             const filtered = {};
 
+            const dateFields = [
+                'transactionDate', 'date', 'createdAt', 'timestamp',
+                'created_at', 'dateCreated', 'fromDate', 'toDate'
+            ];
+
             for (const [key, record] of Object.entries(data)) {
                 if (!record) continue;
 
-                // Find date in record - check ALL possible date fields
-                const dateFields = [
-                    'createdAt', 'date', 'timestamp', 'created_at', 'dateCreated',
-                    'Date', 'createdDate', 'updated_at', 'updatedAt',
-                    'fromDate', 'toDate', 'startDate', 'endDate'
-                ];
-                let recordDates = [];
-
-                // Collect all valid dates from the record
-                for (const field of dateFields) {
-                    if (record[field]) {
-                        const recordDate = new Date(record[field]);
-                        if (!isNaN(recordDate.getTime())) {
-                            recordDates.push(recordDate);
-                        }
-                    }
-                }
-
-                // If no dates found, include the record
-                if (recordDates.length === 0) {
-                    filtered[key] = record;
-                    continue;
-                }
-
-                // Check if ANY of the dates in the record match the selection
                 let matches = false;
                 
-                for (const recordDate of recordDates) {
-                    if (type === 'year') {
-                        if (recordDate.getFullYear().toString() === value) {
-                            matches = true;
-                            break;
-                        }
-                    } else if (type === 'month') {
-                        const recordMonthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-                        if (recordMonthYear === value) {
-                            matches = true;
-                            break;
-                        }
-                    } else if (type === 'date') {
-                        const recordDateStr = recordDate.toISOString().split('T')[0];
-                        if (recordDateStr === value) {
-                            matches = true;
-                            break;
+                for (const field of dateFields) {
+                    if (record[field]) {
+                        const date = new Date(record[field]);
+                        
+                        if (!isNaN(date.getTime())) {
+                            if (type === 'year') {
+                                if (date.getFullYear().toString() === value) {
+                                    matches = true;
+                                    break;
+                                }
+                            } else if (type === 'month') {
+                                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                                if (monthYear === value) {
+                                    matches = true;
+                                    break;
+                                }
+                            } else if (type === 'date') {
+                                const dateStr = date.toISOString().split('T')[0];
+                                if (dateStr === value) {
+                                    matches = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -560,7 +666,154 @@
             return filtered;
         }
 
-        // Load backup history from localStorage
+        // Confirmation Modal Functions
+        function showConfirmationModal(config) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirmationModal');
+                const icon = document.getElementById('confirmIcon');
+                const title = document.getElementById('confirmTitle');
+                const message = document.getElementById('confirmMessage');
+                const details = document.getElementById('confirmDetails');
+                const yesBtn = document.getElementById('confirmYes');
+                const noBtn = document.getElementById('confirmNo');
+
+                icon.textContent = config.icon || '❓';
+                title.textContent = config.title || 'Confirm Action';
+                message.textContent = config.message || 'Are you sure?';
+                
+                if (config.details) {
+                    details.innerHTML = config.details;
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+
+                modal.classList.add('active');
+
+                const handleYes = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const cleanup = () => {
+                    modal.classList.remove('active');
+                    yesBtn.removeEventListener('click', handleYes);
+                    noBtn.removeEventListener('click', handleNo);
+                };
+
+                yesBtn.addEventListener('click', handleYes);
+                noBtn.addEventListener('click', handleNo);
+            });
+        }
+
+        async function showBackupConfirmation() {
+            if (!database) {
+                showError('backupError', 'Firebase not connected');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('.table-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showError('backupError', 'Please select at least one collection');
+                return;
+            }
+
+            const collections = Array.from(checkboxes).map(cb => cb.value);
+            
+            // Build details for confirmation
+            let detailsHTML = '';
+            collections.forEach(collection => {
+                const selection = document.getElementById('select-' + collection).value;
+                const selectEl = document.getElementById('select-' + collection);
+                const filterText = selectEl.options[selectEl.selectedIndex].text;
+                
+                detailsHTML += `
+                    <div class="confirmation-details-item">
+                        <span class="confirmation-details-label">${collection}</span>
+                        <span class="confirmation-details-value">${filterText}</span>
+                    </div>
+                `;
+            });
+
+            const confirmed = await showConfirmationModal({
+                icon: '📤',
+                title: 'Create Backup?',
+                message: `You are about to create a backup of ${collections.length} collection(s). This will download a JSON file to your computer.`,
+                details: detailsHTML
+            });
+
+            if (confirmed) {
+                await createBackup();
+            }
+        }
+
+        async function showRestoreConfirmation() {
+            if (!database) {
+                showError('restoreError', 'Firebase not connected');
+                return;
+            }
+
+            if (!selectedFile) {
+                showError('restoreError', 'Please select a backup file');
+                return;
+            }
+
+            // Parse file to get details
+            try {
+                const fileContent = await selectedFile.text();
+                const backupData = JSON.parse(fileContent);
+
+                if (!backupData.metadata || !backupData.data) {
+                    throw new Error('Invalid backup file');
+                }
+
+                const collections = Object.keys(backupData.data);
+                let totalRecords = 0;
+                let detailsHTML = '';
+
+                collections.forEach(collection => {
+                    const recordCount = Object.keys(backupData.data[collection]).length;
+                    totalRecords += recordCount;
+                    
+                    detailsHTML += `
+                        <div class="confirmation-details-item">
+                            <span class="confirmation-details-label">${collection}</span>
+                            <span class="confirmation-details-value">${recordCount} records</span>
+                        </div>
+                    `;
+                });
+
+                const confirmed = await showConfirmationModal({
+                    icon: '⚠️',
+                    title: 'Restore Backup?',
+                    message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s) in your Firebase database. This action cannot be undone!`,
+                    details: `
+                        <div class="warning-text">⚠️ THIS WILL REPLACE EXISTING DATA ⚠️</div>
+                        <div class="confirmation-details-item">
+                            <span class="confirmation-details-label">File</span>
+                            <span class="confirmation-details-value">${selectedFile.name}</span>
+                        </div>
+                        <div class="confirmation-details-item">
+                            <span class="confirmation-details-label">Backup Date</span>
+                            <span class="confirmation-details-value">${new Date(backupData.metadata.timestamp).toLocaleString()}</span>
+                        </div>
+                        ${detailsHTML}
+                    `
+                });
+
+                if (confirmed) {
+                    await restoreBackup(backupData);
+                }
+            } catch (error) {
+                showError('restoreError', 'Invalid backup file: ' + error.message);
+            }
+        }
+
         function loadBackupHistory() {
             const saved = localStorage.getItem('nfa_backup_history');
             if (saved) {
@@ -590,58 +843,17 @@
                     <td class="actions-cell">
                         <button class="action-btn" data-index="${index}">⋮</button>
                         <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="restore" data-index="${index}">
+                            <button class="dropdown-item" onclick="showQuickRestoreConfirmation(${index})">
                                 <span>♻️</span> Restore
                             </button>
-                            <button class="dropdown-item delete-item" data-action="delete" data-index="${index}">
+                            <button class="dropdown-item delete-item" onclick="deleteBackupRecord(${index})">
                                 <span>🗑️</span> Delete
                             </button>
                         </div>
                     </td>
                 </tr>
             `).reverse().join('');
-            
-            attachDropdownListeners();
         }
-
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
-
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = parseInt(item.dataset.index);
-                    const action = item.dataset.action;
-                    
-                    closeAllDropdowns();
-                    
-                    if (action === 'restore') {
-                        quickRestore(index);
-                    } else if (action === 'delete') {
-                        deleteBackupRecord(index);
-                    }
-                });
-            });
-        }
-
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
 
         function handleFileSelect(event) {
             selectedFile = event.target.files[0];
@@ -663,7 +875,7 @@
         function updateProgress(percent) {
             const fill = document.getElementById('progressFill');
             fill.style.width = percent + '%';
-            fill.textContent = percent + '%';
+            fill.textContent = Math.round(percent) + '%';
         }
 
         function hideProgress() {
@@ -697,17 +909,7 @@
         }
 
         async function createBackup() {
-            if (!database) {
-                showError('backupError', 'Firebase not connected. Please check your configuration.');
-                return;
-            }
-
             const checkboxes = document.querySelectorAll('.table-checkbox:checked');
-            if (checkboxes.length === 0) {
-                showError('backupError', 'Please select at least one collection to backup');
-                return;
-            }
-
             const collections = Array.from(checkboxes).map(cb => cb.value);
             
             showProgress('Creating Backup', 'Fetching data from Firebase...', '📤');
@@ -727,28 +929,27 @@
                 let progress = 0;
                 const increment = 80 / collections.length;
 
-                // Fetch each collection with filtering
                 for (const collection of collections) {
                     updateProgress(Math.min(progress, 80));
                     
                     const selection = document.getElementById('select-' + collection).value;
                     
-                    // Store filter in metadata
+                    // Store filter
                     if (selection && selection !== 'all') {
-                        const [type, value] = selection.split(':');
+                        const selectEl = document.getElementById('select-' + collection);
                         backupData.metadata.filters[collection] = {
-                            type: type,
-                            value: value,
-                            display: document.getElementById('select-' + collection).selectedOptions[0].text
+                            selection: selection,
+                            display: selectEl.options[selectEl.selectedIndex].text
                         };
                     }
                     
                     const snapshot = await database.ref(collection).once('value');
                     if (snapshot.exists()) {
                         const fullData = snapshot.val();
-                        // Apply filtering
-                        const filteredData = filterDataBySelection(fullData, selection, collection);
+                        const filteredData = filterDataBySelection(fullData, selection);
                         backupData.data[collection] = filteredData;
+                        
+                        console.log(`${collection}: ${Object.keys(filteredData).length} records`);
                     } else {
                         backupData.data[collection] = {};
                     }
@@ -758,14 +959,14 @@
 
                 updateProgress(90);
 
-                // Create and download file
+                // Download file
                 const jsonString = JSON.stringify(backupData, null, 2);
                 const blob = new Blob([jsonString], { type: 'application/json' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').substring(0, 19);
-                const filename = `nfa_firebase_backup_${timestamp}.json`;
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                const filename = `nfa_backup_${timestamp}.json`;
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
@@ -774,7 +975,7 @@
 
                 updateProgress(100);
 
-                // Save to history
+                // Save history
                 backupHistory.push({
                     datetime: new Date().toLocaleString(),
                     filename: filename,
@@ -786,7 +987,7 @@
 
                 document.getElementById('modalIcon').textContent = '✅';
                 document.getElementById('modalTitle').textContent = 'Backup Created!';
-                document.getElementById('modalMessage').textContent = 'Your backup file has been downloaded';
+                document.getElementById('modalMessage').textContent = 'File downloaded successfully';
                 
                 hideProgress();
                 showSuccess('backupSuccess', '✅ Backup created successfully!');
@@ -803,39 +1004,17 @@
             }
         }
 
-        async function restoreBackup() {
-            if (!database) {
-                showError('restoreError', 'Firebase not connected. Please check your configuration.');
-                return;
-            }
-
-            if (!selectedFile) {
-                showError('restoreError', 'Please select a backup file first');
-                return;
-            }
-
-            if (!confirm('⚠️ WARNING: This will add/update data in your Firebase database!\n\nAre you sure you want to restore this backup?')) {
-                return;
-            }
-
-            showProgress('Restoring Backup', 'Reading backup file...', '♻️');
+        async function restoreBackup(backupData) {
+            showProgress('Restoring Backup', 'Processing...', '♻️');
             document.getElementById('restoreBackupBtn').disabled = true;
 
             try {
-                const fileContent = await selectedFile.text();
-                const backupData = JSON.parse(fileContent);
-
-                if (!backupData.metadata || !backupData.data) {
-                    throw new Error('Invalid backup file format');
-                }
-
                 updateProgress(10);
 
                 const collections = Object.keys(backupData.data);
                 let progress = 10;
                 const increment = 80 / collections.length;
 
-                // Restore each collection
                 for (const collection of collections) {
                     document.getElementById('modalMessage').textContent = `Restoring ${collection}...`;
                     updateProgress(Math.min(progress, 90));
@@ -853,12 +1032,11 @@
 
                 document.getElementById('modalIcon').textContent = '✅';
                 document.getElementById('modalTitle').textContent = 'Restore Complete!';
-                document.getElementById('modalMessage').textContent = 'Database has been restored successfully';
+                document.getElementById('modalMessage').textContent = 'Data restored successfully';
                 
                 hideProgress();
-                showSuccess('restoreSuccess', '✅ Data restored to Firebase successfully!');
+                showSuccess('restoreSuccess', '✅ Restore completed!');
 
-                // Clear file selection
                 document.getElementById('restoreFile').value = '';
                 document.getElementById('fileName').textContent = '';
                 selectedFile = null;
@@ -875,9 +1053,9 @@
             }
         }
 
-        async function quickRestore(index) {
+        async function showQuickRestoreConfirmation(index) {
             if (!database) {
-                alert('❌ Firebase not connected. Please check your configuration.');
+                alert('❌ Firebase not connected');
                 return;
             }
 
@@ -887,11 +1065,49 @@
                 return;
             }
 
-            if (!confirm(`⚠️ WARNING: This will add/update data in your Firebase database!\n\nRestore from: ${backup.filename}?`)) {
-                return;
-            }
+            const collections = Object.keys(backup.data.data);
+            let totalRecords = 0;
+            let detailsHTML = '';
 
-            showProgress('Restoring Backup', 'Restoring from local history...', '♻️');
+            collections.forEach(collection => {
+                const recordCount = Object.keys(backup.data.data[collection]).length;
+                totalRecords += recordCount;
+                
+                detailsHTML += `
+                    <div class="confirmation-details-item">
+                        <span class="confirmation-details-label">${collection}</span>
+                        <span class="confirmation-details-value">${recordCount} records</span>
+                    </div>
+                `;
+            });
+
+            const confirmed = await showConfirmationModal({
+                icon: '⚠️',
+                title: 'Restore from History?',
+                message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s). This action cannot be undone!`,
+                details: `
+                    <div class="warning-text">⚠️ THIS WILL REPLACE EXISTING DATA ⚠️</div>
+                    <div class="confirmation-details-item">
+                        <span class="confirmation-details-label">Backup</span>
+                        <span class="confirmation-details-value">${backup.filename}</span>
+                    </div>
+                    <div class="confirmation-details-item">
+                        <span class="confirmation-details-label">Date</span>
+                        <span class="confirmation-details-value">${backup.datetime}</span>
+                    </div>
+                    ${detailsHTML}
+                `
+            });
+
+            if (confirmed) {
+                await quickRestore(index);
+            }
+        }
+
+        async function quickRestore(index) {
+            const backup = backupHistory[index];
+            
+            showProgress('Restoring', 'Processing...', '♻️');
 
             try {
                 const collections = Object.keys(backup.data.data);
@@ -915,14 +1131,14 @@
 
                 document.getElementById('modalIcon').textContent = '✅';
                 document.getElementById('modalTitle').textContent = 'Restore Complete!';
-                document.getElementById('modalMessage').textContent = 'Database has been restored successfully';
+                document.getElementById('modalMessage').textContent = 'Done';
                 
                 hideProgress();
 
             } catch (error) {
                 console.error('Restore error:', error);
                 document.getElementById('modalIcon').textContent = '❌';
-                document.getElementById('modalTitle').textContent = 'Restore Failed';
+                document.getElementById('modalTitle').textContent = 'Failed';
                 document.getElementById('modalMessage').textContent = error.message;
                 hideProgress();
             }
@@ -930,14 +1146,13 @@
 
         function deleteBackupRecord(index) {
             const backup = backupHistory[index];
-            if (!confirm(`Are you sure you want to delete:\n${backup.filename}?`)) {
+            if (!confirm(`Delete: ${backup.filename}?`)) {
                 return;
             }
 
             backupHistory.splice(index, 1);
             saveBackupHistory();
             displayBackupHistory();
-            alert('✅ Backup record deleted from history');
         }
     </script>
 </body>

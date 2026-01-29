@@ -116,6 +116,7 @@
             text-decoration: none;
             border-radius: 10px;
             border-left: 3px solid transparent;
+            position: relative;
         }
 
         .menu-item:hover {
@@ -133,6 +134,29 @@
             box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
         }
 
+        .menu-item.active::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            width: 8px;
+            height: 8px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+
         .menu-icon {
             font-size: 1.4rem;
             width: 28px;
@@ -147,24 +171,29 @@
 
         .info-card {
             background: white;
-            padding: 1rem;
+            padding: 0.9rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .info-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #6b7299;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .info-value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #8b5cf6;
             font-weight: 700;
+        }
+
+        .info-card.loading .info-value {
+            color: #a78bfa;
+            font-size: 0.9rem;
         }
 
         .logout-section {
@@ -348,22 +377,31 @@
                 <span>📊</span> MENU
             </li>
             
-            <li class="menu-item active" data-page="transaction-reports">
-                <span class="menu-icon">💳</span>
-                <span>Transaction Reports</span>
+            <li class="menu-item" data-page="transaction-reports">
+                <span class="menu-icon">🏠</span>
+                <span>Home</span>
+            </li>
+
+            <li class="menu-item" data-page="all-transactions">
+                <span class="menu-icon">🗓️</span>
+                <span>All Transactions</span>
+            </li>
+            
+            <li class="menu-item" data-page="today-transactions">
+                <span class="menu-icon">🗓️</span>
+                <span>Today's Transactions</span>
+            </li>
+            
+            <li class="menu-item" data-page="month-transactions">
+                <span class="menu-icon">🗓️</span>
+                <span>This Month</span>
+            </li>
+            
+            <li class="menu-item" data-page="year-transactions">
+                <span class="menu-icon">🗓️</span>
+                <span>This Year</span>
             </li>
         </ul>
-
-        <div class="info-section">
-            <div class="info-card">
-                <div class="info-label">Reports This Month</div>
-                <div class="info-value">47</div>
-            </div>
-            <div class="info-card">
-                <div class="info-label">Total Transactions</div>
-                <div class="info-value">1,234</div>
-            </div>
-        </div>
 
         <div class="logout-section">
             <button class="logout-btn" onclick="handleLogout()">
@@ -388,10 +426,129 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <script>
-        const pageLinks = {
-            'transaction-reports': 'bsm_transaction.html'
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314892469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
         };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        const pageLinks = {
+            'transaction-reports': 'bsm_home.html',
+            'all-transactions' : 'bsm_all.html',
+            'today-transactions': 'bsm_today.html',
+            'month-transactions': 'bsm_month.html',
+            'year-transactions': 'bsm_year.html'
+        };
+
+        // Function to set active menu item based on current page
+        function setActiveMenuItem() {
+            const currentPage = window.parent.location.pathname.split('/').pop();
+            
+            // Map current page to menu item
+            const pageToMenuItem = {
+                'bsm_home.html': 'transaction-reports',
+                'bsm_all.html' : 'all-transactions',
+                'bsm_today.html': 'today-transactions',
+                'bsm_month.html': 'month-transactions',
+                'bsm_year.html': 'year-transactions'
+            };
+
+            const activeMenuPage = pageToMenuItem[currentPage];
+            
+            // Remove active class from all items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active class to current page
+            if (activeMenuPage) {
+                const activeItem = document.querySelector(`[data-page="${activeMenuPage}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                }
+            }
+        }
+
+        // Load transaction statistics
+        function loadTransactionStats() {
+            database.ref('reports').on('value', (snapshot) => {
+                let todayCount = 0;
+                let monthCount = 0;
+                let yearCount = 0;
+
+                const now = new Date();
+                const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+                const currentMonth = now.getMonth(); // 0-11
+                const currentYear = now.getFullYear();
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const report = child.val();
+                        
+                        if (report.transactions && Array.isArray(report.transactions)) {
+                            report.transactions.forEach(transaction => {
+                                const transactionDate = transaction.transactionDate;
+                                
+                                if (transactionDate) {
+                                    // Check if today
+                                    if (transactionDate === today) {
+                                        todayCount++;
+                                    }
+                                    
+                                    // Check if this month
+                                    const txDate = new Date(transactionDate);
+                                    if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
+                                        monthCount++;
+                                    }
+                                    
+                                    // Check if this year
+                                    if (txDate.getFullYear() === currentYear) {
+                                        yearCount++;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Update UI
+                const todayEl = document.getElementById('todayTransactions');
+                const monthEl = document.getElementById('monthTransactions');
+                const yearEl = document.getElementById('yearTransactions');
+
+                if (todayEl) todayEl.textContent = todayCount.toLocaleString();
+                if (monthEl) monthEl.textContent = monthCount.toLocaleString();
+                if (yearEl) yearEl.textContent = yearCount.toLocaleString();
+
+                // Remove loading class
+                document.querySelectorAll('.info-card').forEach(card => {
+                    card.classList.remove('loading');
+                });
+            }, (error) => {
+                console.error('Error loading transaction stats:', error);
+                const todayEl = document.getElementById('todayTransactions');
+                const monthEl = document.getElementById('monthTransactions');
+                const yearEl = document.getElementById('yearTransactions');
+                
+                if (todayEl) todayEl.textContent = 'Error';
+                if (monthEl) monthEl.textContent = 'Error';
+                if (yearEl) yearEl.textContent = 'Error';
+            });
+        }
 
         function handleLogout() {
             const modal = document.getElementById('logoutModal');
@@ -492,19 +649,35 @@
             }, 1500);
         }
 
+        // Handle menu item clicks
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function() {
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
                 
+                // Remove active class from all items
                 document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                
+                // Add active class to clicked item
                 this.classList.add('active');
                 
+                // Navigate to page
                 if (link) {
                     window.parent.location.href = link;
                 }
             });
         });
+
+        // Load stats and set active menu when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            setActiveMenuItem();
+            loadTransactionStats();
+        });
+
+        // Update active menu item when parent page changes
+        if (window.parent !== window) {
+            setInterval(setActiveMenuItem, 500);
+        }
     </script>
 </body>
 </html>

@@ -17,12 +17,112 @@ const database = firebase.database();
 console.log("Firebase initialized:", firebase.apps.length > 0);
 
 let allTransactions = [];
+let filteredTransactions = [];
 let currentSortOrder = 'newest';
+let currentDateFilter = null;
 
 // Store all data for table modals
 let activitiesData = [];
 let sacksData = [];
 let varietiesData = [];
+
+// ===================================================================
+// DATE FILTER EVENT LISTENERS
+// ===================================================================
+
+// Event listener for date picker
+const dateFilterElement = document.getElementById('dateFilter');
+const clearDateFilterBtn = document.getElementById('clearDateFilter');
+
+if (dateFilterElement) {
+    dateFilterElement.addEventListener('change', function(e) {
+        const selectedDate = e.target.value;
+        if (selectedDate) {
+            filterTransactionsByDate(selectedDate);
+            // Enable clear button
+            if (clearDateFilterBtn) {
+                clearDateFilterBtn.disabled = false;
+            }
+        }
+    });
+}
+
+// Event listener for clear filter button
+if (clearDateFilterBtn) {
+    clearDateFilterBtn.addEventListener('click', function() {
+        clearDateFilter();
+    });
+}
+
+// ===================================================================
+// FILTER TRANSACTIONS BY DATE
+// ===================================================================
+
+function filterTransactionsByDate(selectedDate) {
+    console.log("Filtering by date:", selectedDate);
+    
+    // Store the current filter
+    currentDateFilter = selectedDate;
+    
+    // Filter transactions that match the selected date
+    filteredTransactions = allTransactions.filter(transaction => {
+        const transactionDate = transaction.data.transactionDate || '';
+        return transactionDate === selectedDate;
+    });
+    
+    console.log("Filtered transactions:", filteredTransactions.length);
+    
+    // Show the filter info banner
+    const dateFilterInfo = document.getElementById('dateFilterInfo');
+    const dateFilterText = document.getElementById('dateFilterText');
+    
+    if (dateFilterInfo && dateFilterText) {
+        // Format the date for display
+        const formattedDate = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        dateFilterText.textContent = `Showing ${filteredTransactions.length} transaction(s) for: ${formattedDate}`;
+        dateFilterInfo.classList.add('active');
+    }
+    
+    // Apply current sort to filtered data
+    sortTransactions(currentSortOrder, true);
+}
+
+// ===================================================================
+// CLEAR DATE FILTER
+// ===================================================================
+
+function clearDateFilter() {
+    console.log("Clearing date filter");
+    
+    // Reset the filter
+    currentDateFilter = null;
+    filteredTransactions = [];
+    
+    // Clear the date input
+    const dateFilterInput = document.getElementById('dateFilter');
+    if (dateFilterInput) {
+        dateFilterInput.value = '';
+    }
+    
+    // Disable clear button
+    if (clearDateFilterBtn) {
+        clearDateFilterBtn.disabled = true;
+    }
+    
+    // Hide the filter info banner
+    const dateFilterInfo = document.getElementById('dateFilterInfo');
+    if (dateFilterInfo) {
+        dateFilterInfo.classList.remove('active');
+    }
+    
+    // Render all transactions with current sort
+    sortTransactions(currentSortOrder, false);
+}
 
 function closeAllDropdowns() {
     document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
@@ -30,6 +130,8 @@ function closeAllDropdowns() {
 
 /* LOAD DROPDOWN OPTIONS */
 function loadDropdownOptions() {
+    console.log("Loading dropdown options...");
+    
     // Load activities
     database.ref('activities').once('value').then((snapshot) => {
         activitiesData = [];
@@ -47,8 +149,9 @@ function loadDropdownOptions() {
                 }
             });
             activitiesData.sort((a, b) => a.code.localeCompare(b.code));
+            console.log("Activities loaded:", activitiesData.length);
         }
-    });
+    }).catch(error => console.error("Error loading activities:", error));
 
     // Load sacks
     database.ref('sacks').once('value').then((snapshot) => {
@@ -66,8 +169,9 @@ function loadDropdownOptions() {
                 }
             });
             sacksData.sort((a, b) => a.code.localeCompare(b.code));
+            console.log("Sacks loaded:", sacksData.length);
         }
-    });
+    }).catch(error => console.error("Error loading sacks:", error));
 
     // Load varieties
     database.ref('varieties').once('value').then((snapshot) => {
@@ -84,8 +188,9 @@ function loadDropdownOptions() {
                 }
             });
             varietiesData.sort((a, b) => a.code.localeCompare(b.code));
+            console.log("Varieties loaded:", varietiesData.length);
         }
-    });
+    }).catch(error => console.error("Error loading varieties:", error));
 }
 
 /* CREATE SELECTION MODALS */
@@ -250,6 +355,7 @@ function loadOfficersFromFirebase() {
 
         attachOfficerSelectListeners();
     }).catch((error) => {
+        console.error("Error loading officers:", error);
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading officers</td></tr>';
     });
 }
@@ -335,66 +441,102 @@ function setupPreviewForm() {
 }
 
 /* HANDLE PREVIEW FORM SUBMISSION */
-document.getElementById('previewForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const officerId = document.getElementById('previewOfficerId').value.trim();
-    const officerName = document.getElementById('previewOfficerName').value;
-    const warehouseName = document.getElementById('previewWarehouseName').value;
-    const warehouseLocation = document.getElementById('previewWarehouseLocation').value;
-    const periodFrom = document.getElementById('previewPeriodFrom').value;
-    const periodTo = document.getElementById('previewPeriodTo').value;
-    
-    if (!officerId || !officerName || !periodFrom || !periodTo) {
-        alert('Please fill in all required fields');
-        return;
-    }
+const previewForm = document.getElementById('previewForm');
+if (previewForm) {
+    previewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const officerId = document.getElementById('previewOfficerId').value.trim();
+        const officerName = document.getElementById('previewOfficerName').value;
+        const warehouseName = document.getElementById('previewWarehouseName').value;
+        const warehouseLocation = document.getElementById('previewWarehouseLocation').value;
+        const periodFrom = document.getElementById('previewPeriodFrom').value;
+        const periodTo = document.getElementById('previewPeriodTo').value;
+        
+        if (!officerId || !officerName || !periodFrom || !periodTo) {
+            alert('Please fill in all required fields');
+            return;
+        }
 
-    const officer = officersData[officerId];
-    if (!officer) {
-        alert('Officer not found. Please enter a valid Officer ID.');
-        return;
-    }
+        const officer = officersData[officerId];
+        if (!officer) {
+            alert('Officer not found. Please enter a valid Officer ID.');
+            return;
+        }
 
-    const params = new URLSearchParams({
-        officerId: officerId,
-        officerName: officerName,
-        warehouseId: officer.warehouse,
-        warehouseName: warehouseName,
-        warehouseLocation: warehouseLocation,
-        periodFrom: periodFrom,
-        periodTo: periodTo
+        // Validate if transactions exist within the selected date range
+        const fromDate = new Date(periodFrom);
+        const toDate = new Date(periodTo);
+        
+        const key = `${officerId}_${officer.warehouse}`;
+        const officerTransactions = transactionsData[key] || [];
+        
+        const transactionsInRange = officerTransactions.filter(transaction => {
+            if (!transaction.transactionDate) return false;
+            const transactionDate = new Date(transaction.transactionDate);
+            return transactionDate >= fromDate && transactionDate <= toDate;
+        });
+        
+        if (transactionsInRange.length === 0) {
+            alert(`No transactions found for Officer ID "${officerId}" between ${periodFrom} and ${periodTo}.\n\nPlease select a different date range or verify the officer has transactions in this period.`);
+            return;
+        }
+
+        const params = new URLSearchParams({
+            officerId: officerId,
+            officerName: officerName,
+            warehouseId: officer.warehouse,
+            warehouseName: warehouseName,
+            warehouseLocation: warehouseLocation,
+            periodFrom: periodFrom,
+            periodTo: periodTo
+        });
+        
+        window.open(`transaction_preview.html?${params.toString()}`, '_blank');
+        document.getElementById('previewModal').classList.remove('active');
+        
+        this.reset();
     });
-    
-    window.open(`transaction_preview.html?${params.toString()}`, '_blank');
-    document.getElementById('previewModal').classList.remove('active');
-    
-    this.reset();
-});
+}
 
 /* OPEN MODALS */
-document.getElementById("addTransaction").onclick = () => {
-    loadOfficersFromFirebase();
-    loadDropdownOptions();
-    document.getElementById('officerModal').classList.add('active');
-};
+const addTransactionBtn = document.getElementById("addTransaction");
+if (addTransactionBtn) {
+    addTransactionBtn.onclick = () => {
+        loadOfficersFromFirebase();
+        loadDropdownOptions();
+        document.getElementById('officerModal').classList.add('active');
+    };
+}
 
-document.getElementById("previewTransaction").onclick = () => {
-    loadPreviewData();
-    document.getElementById('previewModal').classList.add('active');
-};
+const previewTransactionBtn = document.getElementById("previewTransaction");
+if (previewTransactionBtn) {
+    previewTransactionBtn.onclick = () => {
+        loadPreviewData();
+        document.getElementById('previewModal').classList.add('active');
+    };
+}
 
-document.getElementById("closeOfficer").onclick = () => {
-    document.getElementById('officerModal').classList.remove('active');
-};
+const closeOfficerBtn = document.getElementById("closeOfficer");
+if (closeOfficerBtn) {
+    closeOfficerBtn.onclick = () => {
+        document.getElementById('officerModal').classList.remove('active');
+    };
+}
 
-document.getElementById("closePreview").onclick = () => {
-    document.getElementById('previewModal').classList.remove('active');
-};
+const closePreviewBtn = document.getElementById("closePreview");
+if (closePreviewBtn) {
+    closePreviewBtn.onclick = () => {
+        document.getElementById('previewModal').classList.remove('active');
+    };
+}
 
-document.getElementById("closeTransaction").onclick = () => {
-    document.getElementById('transactionModal').classList.remove('active');
-};
+const closeTransactionBtn = document.getElementById("closeTransaction");
+if (closeTransactionBtn) {
+    closeTransactionBtn.onclick = () => {
+        document.getElementById('transactionModal').classList.remove('active');
+    };
+}
 
 /* SELECT OFFICER */
 function attachOfficerSelectListeners() {
@@ -483,118 +625,150 @@ function computeNetWeight() {
     document.getElementById("netWeight").value = (gross - totalSackWeight).toFixed(2);
 }
 
-document.getElementById("grossWeight").addEventListener("input", computeNetWeight);
-document.getElementById("sackWeight").addEventListener("input", computeNetWeight);
-document.getElementById("numberOfBags").addEventListener("input", computeNetWeight);
+const grossWeightInput = document.getElementById("grossWeight");
+if (grossWeightInput) {
+    grossWeightInput.addEventListener("input", computeNetWeight);
+}
+
+const sackWeightInputField = document.getElementById("sackWeight");
+if (sackWeightInputField) {
+    sackWeightInputField.addEventListener("input", computeNetWeight);
+}
+
+const numberOfBagsInput = document.getElementById("numberOfBags");
+if (numberOfBagsInput) {
+    numberOfBagsInput.addEventListener("input", computeNetWeight);
+}
 
 /* SAVE TRANSACTION */
-document.getElementById("transactionForm").onsubmit = e => {
-    e.preventDefault();
-    
-    const form = e.target;
-    const editId = form.getAttribute('data-edit-id');
-    
-    const transactionData = {
-        officerId: document.getElementById("officerId").value,
-        officerName: document.getElementById("officerName").value,
-        warehouseId: document.getElementById("warehouseId").value,
-        warehouseName: document.getElementById("warehouseName").value,
-        periodFrom: document.getElementById("periodFrom").value,
-        periodTo: document.getElementById("periodTo").value,
-        documentNo: document.getElementById("documentNo").value || "",
-        documentType: document.getElementById("documentType").value || "",
-        orNo: document.getElementById("orNo").value || "",
-        aiNo: document.getElementById("aiNo").value || "",
-        refWSINo: document.getElementById("refWSINo").value || "",
-        recdFromIssdTo: document.getElementById("recdFromIssdTo").value || "",
-        transactionDate: document.getElementById("transactionDate").value || "",
-        activityCode: document.getElementById("activityCode").value || "",
-        varietyCode: document.getElementById("varietyCode").value || "",
-        sackCode: document.getElementById("sackCode").value || "",
-        sackCondition: document.getElementById("sackCondition").value || "",
-        sackWeight: document.getElementById("sackWeight").value || "",
-        age: document.getElementById("age").value || "",
-        pileNo: document.getElementById("pileNo").value || "",
-        numberOfBags: document.getElementById("numberOfBags").value || "",
-        grossWeight: document.getElementById("grossWeight").value || "",
-        moistureContent: document.getElementById("moistureContent").value || "",
-        netWeight: document.getElementById("netWeight").value || "",
-        cancelled: document.getElementById("cancelled").checked,
-        timestamp: Date.now()
-    };
+const transactionForm = document.getElementById("transactionForm");
+if (transactionForm) {
+    transactionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const editId = form.getAttribute('data-edit-id');
+        
+        const transactionData = {
+            officerId: document.getElementById("officerId").value,
+            officerName: document.getElementById("officerName").value,
+            warehouseId: document.getElementById("warehouseId").value,
+            warehouseName: document.getElementById("warehouseName").value,
+            periodFrom: document.getElementById("periodFrom").value,
+            periodTo: document.getElementById("periodTo").value,
+            documentNo: document.getElementById("documentNo").value || "",
+            documentType: document.getElementById("documentType").value || "",
+            orNo: document.getElementById("orNo").value || "",
+            aiNo: document.getElementById("aiNo").value || "",
+            refWSINo: document.getElementById("refWSINo").value || "",
+            recdFromIssdTo: document.getElementById("recdFromIssdTo").value || "",
+            transactionDate: document.getElementById("transactionDate").value || "",
+            activityCode: document.getElementById("activityCode").value || "",
+            varietyCode: document.getElementById("varietyCode").value || "",
+            sackCode: document.getElementById("sackCode").value || "",
+            sackCondition: document.getElementById("sackCondition").value || "",
+            sackWeight: document.getElementById("sackWeight").value || "",
+            age: document.getElementById("age").value || "",
+            pileNo: document.getElementById("pileNo").value || "",
+            numberOfBags: document.getElementById("numberOfBags").value || "",
+            grossWeight: document.getElementById("grossWeight").value || "",
+            moistureContent: document.getElementById("moistureContent").value || "",
+            netWeight: document.getElementById("netWeight").value || "",
+            cancelled: document.getElementById("cancelled").checked,
+            timestamp: Date.now()
+        };
 
-    document.querySelectorAll('input, select').forEach(field => field.style.border = '');
-    
-    if (!transactionData.refWSINo) {
-        const requiredFieldIds = ['documentNo', 'documentType', 'orNo', 'aiNo', 'recdFromIssdTo',
-            'transactionDate', 'activityCode', 'varietyCode', 'sackCode', 'sackCondition',
-            'sackWeight', 'age', 'pileNo', 'numberOfBags', 'grossWeight', 'moistureContent', 'netWeight'];
+        document.querySelectorAll('input, select').forEach(field => field.style.border = '');
         
-        let hasEmptyFields = false;
-        requiredFieldIds.forEach(fieldId => {
-            const element = document.getElementById(fieldId);
-            if (!transactionData[fieldId]) {
-                element.style.border = '2px solid #ff6b6b';
-                hasEmptyFields = true;
+        if (!transactionData.refWSINo) {
+            const requiredFieldIds = ['documentNo', 'documentType', 'orNo', 'aiNo', 'recdFromIssdTo',
+                'transactionDate', 'activityCode', 'varietyCode', 'sackCode', 'sackCondition',
+                'sackWeight', 'age', 'pileNo', 'numberOfBags', 'grossWeight', 'moistureContent', 'netWeight'];
+            
+            let hasEmptyFields = false;
+            requiredFieldIds.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (!transactionData[fieldId]) {
+                    element.style.border = '2px solid #ff6b6b';
+                    hasEmptyFields = true;
+                }
+            });
+            
+            if (hasEmptyFields) {
+                alert('Please fill all required fields');
+                return;
             }
-        });
-        
-        if (hasEmptyFields) {
-            alert('Please fill all required fields');
-            return;
         }
-    }
-    
-    if (editId) {
-        transactionData.updatedAt = new Date().toISOString();
-        database.ref('transactions/' + editId).update(transactionData)
-            .then(() => {
-                alert("Transaction updated successfully!");
-                document.getElementById('transactionModal').classList.remove('active');
-                form.reset();
-                form.removeAttribute('data-edit-id');
-            })
-            .catch((error) => alert("Error: " + error.message));
-    } else {
-        transactionData.createdAt = new Date().toISOString();
-        database.ref('transactions').push().set(transactionData)
-            .then(() => {
-                alert("Transaction saved successfully!");
-                document.getElementById('transactionModal').classList.remove('active');
-                form.reset();
-            })
-            .catch((error) => alert("Error: " + error.message));
-    }
-};
+        
+        if (editId) {
+            transactionData.updatedAt = new Date().toISOString();
+            database.ref('transactions/' + editId).update(transactionData)
+                .then(() => {
+                    alert("Transaction updated successfully!");
+                    document.getElementById('transactionModal').classList.remove('active');
+                    form.reset();
+                    form.removeAttribute('data-edit-id');
+                })
+                .catch((error) => alert("Error: " + error.message));
+        } else {
+            transactionData.createdAt = new Date().toISOString();
+            database.ref('transactions').push().set(transactionData)
+                .then(() => {
+                    alert("Transaction saved successfully!");
+                    document.getElementById('transactionModal').classList.remove('active');
+                    form.reset();
+                })
+                .catch((error) => alert("Error: " + error.message));
+        }
+    });
+}
 
 /* SORT TRANSACTIONS */
-function sortTransactions(order) {
+function sortTransactions(order, keepFiltered = false) {
     currentSortOrder = order;
-    allTransactions.sort((a, b) => {
+    console.log("Sorting by:", order, "keepFiltered:", keepFiltered);
+    
+    // Determine which dataset to sort
+    const dataToSort = (keepFiltered && currentDateFilter) ? filteredTransactions : allTransactions;
+    
+    dataToSort.sort((a, b) => {
         const dateA = new Date(a.data.transactionDate || '1900-01-01');
         const dateB = new Date(b.data.transactionDate || '1900-01-01');
         return order === 'newest' ? dateB - dateA : dateA - dateB;
     });
-    renderTransactions();
+    
+    renderTransactions(dataToSort);
 }
 
 /* RENDER TRANSACTIONS */
-function renderTransactions() {
+function renderTransactions(transactionsToRender = allTransactions) {
+    console.log("Rendering transactions:", transactionsToRender.length);
     const tbody = document.getElementById("inventoryBody");
-    tbody.innerHTML = "";
     
-    if (allTransactions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="26" style="text-align:center;">No transactions found</td></tr>';
+    if (!tbody) {
+        console.error("inventoryBody element not found!");
         return;
     }
     
-    allTransactions.forEach(item => {
+    tbody.innerHTML = "";
+    
+    if (transactionsToRender.length === 0) {
+        const message = currentDateFilter 
+            ? 'No transactions found for the selected date' 
+            : 'No transactions found';
+        tbody.innerHTML = `<tr><td colspan="26" style="text-align:center;">${message}</td></tr>`;
+        return;
+    }
+    
+    transactionsToRender.forEach(item => {
         const data = item.data;
         const docId = item.docId;
         
+        // Highlight the DATE column if filter is active
+        const dateStyle = currentDateFilter ? 'style="background-color: #e7f3ff; font-weight: bold;"' : '';
+        
         const tr = document.createElement("tr");
         tr.innerHTML = `
-                    
             <td>${data.officerId || "-"}</td>
             <td>${data.officerName || "-"}</td>
             <td>${data.warehouseId || "-"}</td>
@@ -607,7 +781,7 @@ function renderTransactions() {
             <td>${data.aiNo || "-"}</td>
             <td>${data.refWSINo || "-"}</td>
             <td>${data.recdFromIssdTo || "-"}</td>
-            <td>${data.transactionDate || "-"}</td>
+            <td ${dateStyle}>${data.transactionDate || "-"}</td>
             <td>${data.activityCode || "-"}</td>
             <td>${data.varietyCode || "-"}</td>
             <td>${data.sackCode || "-"}</td>
@@ -638,6 +812,7 @@ function renderTransactions() {
     });
     
     attachDropdownListeners();
+    console.log("Transactions rendered successfully");
 }
 
 function attachDropdownListeners() {
@@ -679,20 +854,44 @@ window.addEventListener('scroll', closeAllDropdowns, true);
 
 /* LOAD TRANSACTIONS */
 function loadTransactions() {
+    console.log("Loading transactions from Firebase...");
     const tbody = document.getElementById("inventoryBody");
+    
+    if (!tbody) {
+        console.error("ERROR: inventoryBody element not found in DOM!");
+        return;
+    }
+    
+    tbody.innerHTML = '<tr><td colspan="26" class="loading">Loading data...</td></tr>';
+    
     database.ref("transactions").on("value", (snapshot) => {
+        console.log("Firebase snapshot received");
         allTransactions = [];
+        
         if (!snapshot.exists()) {
+            console.log("No transactions found in database");
             renderTransactions();
             return;
         }
+        
         snapshot.forEach((childSnapshot) => {
             allTransactions.push({
                 docId: childSnapshot.key,
                 data: childSnapshot.val()
             });
         });
-        sortTransactions(currentSortOrder);
+        
+        console.log("Total transactions loaded:", allTransactions.length);
+        
+        // If there's an active date filter, reapply it
+        if (currentDateFilter) {
+            filterTransactionsByDate(currentDateFilter);
+        } else {
+            sortTransactions(currentSortOrder, false);
+        }
+    }, (error) => {
+        console.error("Firebase error:", error);
+        tbody.innerHTML = '<tr><td colspan="26" style="text-align:center; color:red;">Error loading data: ' + error.message + '</td></tr>';
     });
 }
 
@@ -753,9 +952,20 @@ function editTransaction(docId) {
     });
 }
 
+/* INITIALIZATION */
 window.addEventListener("DOMContentLoaded", () => {
+    console.log("=== DOM LOADED ===");
+    console.log("Checking for inventoryBody:", document.getElementById("inventoryBody"));
+    
     loadTransactions();
-    document.getElementById('sortSelect')?.addEventListener('change', (e) => {
-        sortTransactions(e.target.value);
-    });
+    
+    // Sort dropdown listener
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            sortTransactions(e.target.value, currentDateFilter !== null);
+        });
+    }
+    
+    console.log("Event listeners attached");
 });
