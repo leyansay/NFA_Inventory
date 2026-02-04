@@ -13,52 +13,73 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1d2e;
+            background-color: #1B5E20;
             color: white;
         }
 
         .sidebar {
             width: 260px;
             height: 100vh;
-            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 100%);
             padding: 0;
             position: fixed;
             left: 0;
             top: 0;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
             display: flex;
             flex-direction: column;
         }
 
         .logo {
             padding: 1.8rem 1.5rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #4b86fc 0%, #5b8dee 100%);
-            box-shadow: 0 4px 12px rgba(75, 134, 252, 0.2);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-bottom: 3px solid #F9A825;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '🌾';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            opacity: 0.08;
         }
 
         .logo-container {
             display: flex;
             align-items: center;
             gap: 0.8rem;
+            position: relative;
+            z-index: 1;
         }
 
         .logo-image {
             width: 45px;
             height: 45px;
             object-fit: contain;
+            background: white;
+            padding: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(249, 168, 37, 0.3);
         }
 
         .logo h1 {
             font-size: 1.5rem;
             color: #ffffff;
             font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .logo p {
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: #F9A825;
             margin-top: 0.25rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .menu {
@@ -76,26 +97,27 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            color: #2c3e50;
+            color: rgba(255, 255, 255, 0.85);
             font-size: 0.95rem;
             text-decoration: none;
             border-radius: 10px;
             border-left: 3px solid transparent;
+            font-weight: 500;
         }
 
         .menu-item:hover {
-            background: linear-gradient(90deg, rgba(75, 134, 252, 0.1) 0%, rgba(75, 134, 252, 0.05) 100%);
-            border-left: 3px solid #4b86fc;
-            color: #4b86fc;
-            transform: translateX(2px);
+            background: linear-gradient(90deg, rgba(249, 168, 37, 0.2) 0%, rgba(249, 168, 37, 0.1) 100%);
+            border-left: 3px solid #F9A825;
+            color: #FDD835;
+            transform: translateX(4px);
         }
 
         .menu-item.active {
-            background: linear-gradient(90deg, rgba(75, 134, 252, 0.15) 0%, rgba(75, 134, 252, 0.08) 100%);
-            border-left: 3px solid #5b8dee;
-            color: #4b86fc;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(75, 134, 252, 0.15);
+            background: linear-gradient(90deg, rgba(249, 168, 37, 0.25) 0%, rgba(249, 168, 37, 0.15) 100%);
+            border-left: 3px solid #FFB300;
+            color: #FDD835;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
         }
 
         .menu-icon {
@@ -106,13 +128,13 @@
 
         .menu-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(249, 168, 37, 0.2);
             margin: 1rem 1.5rem;
         }
 
         .menu-section-title {
             padding: 1rem 1.5rem 0.5rem;
-            color: #6b7299;
+            color: #E8D8B5;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -133,6 +155,7 @@
         .dropdown-arrow {
             transition: transform 0.3s ease;
             font-size: 0.8rem;
+            color: #F9A825;
         }
 
         .dropdown-arrow.open {
@@ -143,12 +166,15 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            margin: 0.25rem 0.75rem;
         }
 
         .dropdown-menu.open {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
+            margin-top: 0.5rem;
         }
 
         .dropdown-menu::-webkit-scrollbar {
@@ -157,28 +183,32 @@
 
         .dropdown-menu::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
         }
 
         .dropdown-menu::-webkit-scrollbar-thumb {
-            background: rgba(91, 141, 238, 0.5);
+            background: rgba(249, 168, 37, 0.5);
             border-radius: 3px;
         }
 
         .dropdown-menu::-webkit-scrollbar-thumb:hover {
-            background: rgba(91, 141, 238, 0.7);
+            background: rgba(249, 168, 37, 0.7);
         }
 
         .dropdown-menu {
             scrollbar-width: thin;
-            scrollbar-color: rgba(91, 141, 238, 0.5) rgba(0, 0, 0, 0.2);
+            scrollbar-color: rgba(249, 168, 37, 0.5) rgba(0, 0, 0, 0.2);
         }
 
         .dropdown-menu-item {
             padding: 0.65rem 1.5rem 0.65rem 3.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #000000;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.9rem;
+            border-left: 2px solid transparent;
+            margin: 0.15rem 0.5rem;
+            border-radius: 6px;
         }
         
         .dropdown-menu-last{
@@ -186,50 +216,52 @@
         }
 
         .dropdown-menu-item:hover {
-            background: rgba(39, 109, 249, 0.15);
-            color: rgb(0, 0, 0);
+            background: rgba(249, 168, 37, 0.15);
+            color: #FDD835;
+            border-left: 2px solid #F9A825;
+            transform: translateX(2px);
         }
 
         .dropdown-menu-item.active {
-            background: rgba(89, 143, 250, 0.25);
-            color: rgb(0, 0, 0);
-            font-weight: 600;
-            border-left: 3px solid #5b8dee;
+            background: rgba(249, 168, 37, 0.25);
+            color: #FDD835;
+            font-weight: 700;
+            border-left: 2px solid #FFB300;
         }
 
         .logout-section {
             padding: 1rem 1.5rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            border-top: 2px solid rgba(249, 168, 37, 0.3);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%);
         }
 
         .logout-btn {
             width: 100%;
             padding: 0.85rem 1rem;
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: linear-gradient(135deg, #D84315 0%, #BF360C 100%);
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+            box-shadow: 0 4px 12px rgba(216, 67, 21, 0.3);
         }
 
         .logout-btn:hover {
-            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            background: linear-gradient(135deg, #BF360C 0%, #A52A14 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 6px 16px rgba(216, 67, 21, 0.4);
         }
 
         .logout-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+            box-shadow: 0 2px 8px rgba(216, 67, 21, 0.2);
         }
 
         .logout-icon {
@@ -242,7 +274,8 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(27, 94, 32, 0.7);
+            backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -258,11 +291,24 @@
             background: white;
             padding: 2.5rem;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             max-width: 450px;
             width: 90%;
             animation: slideUp 0.3s ease;
             text-align: center;
+            border: 3px solid #2E7D32;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #F9A825 0%, #FDD835 100%);
         }
 
         .modal-header {
@@ -280,12 +326,12 @@
         .modal-title {
             font-size: 1.6rem;
             font-weight: 700;
-            color: #2c3e50;
+            color: #1B5E20;
             margin: 0;
         }
 
         .modal-message {
-            color: #5a6c7d;
+            color: #5A6C5A;
             font-size: 1.05rem;
             line-height: 1.6;
             margin-bottom: 2rem;
@@ -302,31 +348,33 @@
             border: none;
             border-radius: 10px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             min-width: 130px;
         }
 
         .modal-btn-cancel {
-            background: #e9ecef;
-            color: #495057;
+            background: #E8D8B5;
+            color: #2E7D32;
+            border: 2px solid #D4C5A9;
         }
 
         .modal-btn-cancel:hover {
-            background: #dee2e6;
+            background: #D4C5A9;
+            transform: translateY(-2px);
         }
 
         .modal-btn-confirm {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: linear-gradient(135deg, #D84315 0%, #BF360C 100%);
             color: white;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 4px 12px rgba(216, 67, 21, 0.3);
         }
 
         .modal-btn-confirm:hover {
-            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            background: linear-gradient(135deg, #BF360C 0%, #A52A14 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+            box-shadow: 0 6px 16px rgba(216, 67, 21, 0.4);
         }
 
         @keyframes fadeIn {
@@ -350,16 +398,36 @@
         }
 
         .menu::-webkit-scrollbar-track {
-            background: transparent;
+            background: rgba(0, 0, 0, 0.2);
         }
 
         .menu::-webkit-scrollbar-thumb {
-            background: rgba(75, 134, 252, 0.3);
+            background: rgba(249, 168, 37, 0.4);
             border-radius: 3px;
         }
 
         .menu::-webkit-scrollbar-thumb:hover {
-            background: rgba(75, 134, 252, 0.5);
+            background: rgba(249, 168, 37, 0.6);
+        }
+
+        /* Subtle grain texture overlay */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.01) 2px,
+                    rgba(255, 255, 255, 0.01) 4px
+                );
+            pointer-events: none;
+            opacity: 0.5;
         }
     </style>
 </head>
@@ -380,34 +448,34 @@
 
         <ul class="menu">
             <li class="menu-item" data-page="home">
-                <span class="menu-icon">🏠</span>
+                <span class="menu-icon"></span>
                 <span>Home</span>
             </li>
             <li class="menu-item" data-page="accountable">
-                <span class="menu-icon">👥</span>
+                <span class="menu-icon"></span>
                 <span>Accountable Officer</span>
             </li>
             <li class="menu-item" data-page="transaction">
-                <span class="menu-icon">💳</span>
+                <span class="menu-icon"></span>
                 <span>Transaction</span>
             </li>
             <li class="menu-item" data-page="inventory">
-                <span class="menu-icon">📦</span>
+                <span class="menu-icon"></span>
                 <span>Inventory</span>
             </li>
             <li class="menu-item" data-page="report">
-                <span class="menu-icon">📋</span>
+                <span class="menu-icon"></span>
                 <span>Report</span>
             </li>
             <li class="menu-item" data-page="backup">
-                <span class="menu-icon">💾</span>
+                <span class="menu-icon"></span>
                 <span>Backup Data</span>
             </li>
             
             <li class="menu-item dropdown-item" onclick="toggleDropdown()">
                 <div class="dropdown-toggle">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span class="menu-icon">📚</span>
+                        <span class="menu-icon"></span>
                         <span>Library</span>
                     </div>
                     <span class="dropdown-arrow" id="dropdownArrow">▼</span>
@@ -552,7 +620,8 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(0, 0, 0, 0.6);
+                background: rgba(27, 94, 32, 0.85);
+                backdrop-filter: blur(8px);
                 z-index: 9999;
                 display: flex;
                 align-items: center;
@@ -561,17 +630,18 @@
             
             const logoutMessage = document.createElement('div');
             logoutMessage.style.cssText = `
-                background: linear-gradient(135deg, #4b86fc 0%, #5b8dee 100%);
+                background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
                 color: white;
                 padding: 2.5rem 4rem;
                 border-radius: 20px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
                 font-size: 1.4rem;
-                font-weight: 600;
+                font-weight: 700;
                 text-align: center;
                 animation: fadeInScale 0.3s ease-out;
+                border: 3px solid #F9A825;
             `;
-            logoutMessage.innerHTML = 'Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block;">Redirecting to login page</small>';
+            logoutMessage.innerHTML = '🌾 Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block; color: #FDD835;">Redirecting to login page</small>';
             
             overlay.appendChild(logoutMessage);
             

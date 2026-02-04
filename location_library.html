@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Library - NFA Inventory</title>
+    <title>Location Library - NFA Inventory System</title>
     <link rel="stylesheet" href="css/location.css" />
 </head>
 <body>
@@ -13,11 +13,12 @@
         <div class="header">
             <div class="header-left">
                 <h1>Location Library</h1>
+                <p style="color: #6B7C6B; font-size: 0.9rem; margin-top: 0.25rem;">Manage and organize location records</p>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">Administrator</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -25,7 +26,7 @@
 
         <div class="controls">
             <div class="sort-section">
-                <label>Sort by:</label>
+                <label>📊 Sort by:</label>
                 <select class="sort-select" id="sortSelect">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -34,11 +35,12 @@
                 </select>
             </div>
             <div class="button-group">
-                <button class="btn btn-preview" onclick="previewLocations()">
+                <button class="btn btn-preview" id="previewBtn">
+                    <span>👁️</span>
                     <span>Preview</span>
                 </button>
-                <button class="btn btn-add" onclick="openModal()">
-                    <span>+</span>
+                <button class="btn btn-add" id="addLocationBtn">
+                    <span>➕</span>
                     <span>Add Location</span>
                 </button>
             </div>
@@ -48,15 +50,17 @@
             <table>
                 <thead>
                     <tr>
-                        <th>LOCATION CODE</th>
-                        <th>PROVINCE NAME</th>
-                        <th>ABBREVIATION</th>
-                        <th>ACTIONS</th>
+                        <th>🔖 LOCATION CODE</th>
+                        <th>🏛️ PROVINCE NAME</th>
+                        <th>🏷️ ABBREVIATION</th>
                     </tr>
                 </thead>
                 <tbody id="locationTableBody">
                     <tr>
-                        <td colspan="4" style="text-align:center;">Loading locations...</td>
+                        <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">Loading locations...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -67,32 +71,28 @@
     <div class="modal-overlay" id="locationModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF LOCATION LIBRARY</h2>
-                <button class="close-btn" onclick="closeModal()">×</button>
+                <h2 class="modal-title">📋 DATA ENTRY OF LOCATION LIBRARY</h2>
+                <button class="close-btn" id="closeModalBtn">×</button>
             </div>
 
             <div class="modal-body">
                 <form id="locationForm">
-                    <!-- Location Code -->
                     <div class="form-group">
-                        <label class="form-label">Location Code:</label>
+                        <label class="form-label">🔖 Location Code: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="locationCode" placeholder="Enter Location Code" required>
                     </div>
 
-                    <!-- Province Name -->
                     <div class="form-group">
-                        <label class="form-label">Province Name:</label>
+                        <label class="form-label">🏛️ Province Name: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="provinceName" placeholder="Enter Province Name" required>
                     </div>
 
-                    <!-- Abbreviation -->
                     <div class="form-group">
-                        <label class="form-label">Abbreviation:</label>
+                        <label class="form-label">🏷️ Abbreviation: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="abbreviation" placeholder="Enter Abbreviation" required>
                     </div>
 
-                    <!-- Save Button -->
-                    <button type="submit" class="btn-save">Save Location</button>
+                    <button type="submit" class="btn-save">💾 Save Location</button>
                 </form>
             </div>
         </div>
@@ -102,9 +102,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-    <!-- Location Firebase Script -->
     <script>
-        // Firebase Configuration
+        // ===================== FIREBASE CONFIGURATION =====================
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -116,7 +115,6 @@
             measurementId: "G-ZEJP0S67SY"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -124,48 +122,54 @@
 
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        // Global variables
+        // ===================== GLOBAL VARIABLES =====================
         let allLocations = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null;
 
-        // Open Modal
-        function openModal() {
-            const form = document.getElementById('locationForm');
-            form.reset();
-            form.removeAttribute('data-edit-id');
-            document.getElementById('locationModal').classList.add('active');
-        }
+        // ===================== MODAL CONTROLS =====================
+        const locationModal = document.getElementById('locationModal');
+        const addLocationBtn = document.getElementById('addLocationBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const locationForm = document.getElementById('locationForm');
 
-        // Close Modal
-        function closeModal() {
-            document.getElementById('locationModal').classList.remove('active');
-        }
+        // Open modal
+        addLocationBtn.addEventListener('click', () => {
+            locationForm.reset();
+            locationForm.removeAttribute('data-edit-id');
+            locationModal.classList.add('active');
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            locationModal.classList.remove('active');
+        });
 
         // Close modal when clicking outside
-        document.getElementById('locationModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
+        locationModal.addEventListener('click', (e) => {
+            if (e.target === locationModal) {
+                locationModal.classList.remove('active');
             }
         });
 
         // Close modal with ESC key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                closeModal();
+                locationModal.classList.remove('active');
             }
         });
 
-        // Form Submit Handler
-        document.getElementById('locationForm').addEventListener('submit', function(e) {
+        // ===================== FORM SUBMIT (SAVE / UPDATE) =====================
+        locationForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const form = e.target;
             const editId = form.getAttribute('data-edit-id');
 
             const locationData = {
-                locationCode: document.getElementById('locationCode').value || "",
-                provinceName: document.getElementById('provinceName').value || "",
-                abbreviation: document.getElementById('abbreviation').value || "",
+                locationCode: document.getElementById('locationCode').value.trim() || "",
+                provinceName: document.getElementById('provinceName').value.trim() || "",
+                abbreviation: document.getElementById('abbreviation').value.trim() || "",
                 timestamp: Date.now()
             };
 
@@ -178,23 +182,20 @@
             // Validate required fields
             let hasEmptyFields = false;
             const requiredFields = [
-                { id: 'locationCode', label: 'Location Code' },
-                { id: 'provinceName', label: 'Province Name' },
-                { id: 'abbreviation', label: 'Abbreviation' }
+                { id: 'locationCode',  value: locationData.locationCode },
+                { id: 'provinceName',  value: locationData.provinceName },
+                { id: 'abbreviation',  value: locationData.abbreviation }
             ];
 
             requiredFields.forEach(field => {
-                const element = document.getElementById(field.id);
-                if (!element.value.trim()) {
-                    element.style.border = '2px solid #ff6b6b';
+                if (!field.value) {
+                    const element = document.getElementById(field.id);
+                    element.style.border = '2px solid #C62828';
                     hasEmptyFields = true;
 
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'field-error-message';
-                    errorMsg.style.color = '#ff6b6b';
-                    errorMsg.style.fontSize = '12px';
-                    errorMsg.style.marginTop = '4px';
-                    errorMsg.textContent = 'This field is required';
+                    errorMsg.textContent = '⚠️ This field is required';
                     element.parentElement.appendChild(errorMsg);
                 }
             });
@@ -211,46 +212,42 @@
             if (editId) {
                 // Update existing location
                 locationData.updatedAt = new Date().toISOString();
-                const locationRef = database.ref('locations/' + editId);
-
-                locationRef.update(locationData)
+                database.ref('locations/' + editId).update(locationData)
                     .then(() => {
-                        alert('Location updated successfully!');
-                        closeModal();
+                        alert('✅ Location updated successfully!');
+                        locationModal.classList.remove('active');
                         form.reset();
                         form.removeAttribute('data-edit-id');
+                        activeRowId = null;
                     })
                     .catch((error) => {
                         console.error('Error updating location:', error);
-                        alert('Error updating location: ' + error.message);
+                        alert('❌ Error updating location: ' + error.message);
                     });
             } else {
                 // Create new location
                 locationData.createdAt = new Date().toISOString();
-                const locationsRef = database.ref('locations');
-                const newLocationRef = locationsRef.push();
-
-                newLocationRef.set(locationData)
+                database.ref('locations').push(locationData)
                     .then(() => {
-                        alert('Location saved successfully!');
-                        closeModal();
+                        alert('✅ Location saved successfully!');
+                        locationModal.classList.remove('active');
                         form.reset();
                     })
                     .catch((error) => {
                         console.error('Error saving location:', error);
-                        alert('Error saving location: ' + error.message);
+                        alert('❌ Error saving location: ' + error.message);
                     });
             }
         });
 
-        // Sort locations
+        // ===================== SORT LOCATIONS =====================
         function sortLocations(order) {
             currentSortOrder = order;
 
             allLocations.sort((a, b) => {
                 if (order === 'newest' || order === 'oldest') {
-                    const dateA = new Date(a.data.createdAt || '1900-01-01');
-                    const dateB = new Date(b.data.createdAt || '1900-01-01');
+                    const dateA = a.data.timestamp || 0;
+                    const dateB = b.data.timestamp || 0;
                     return order === 'newest' ? dateB - dateA : dateA - dateB;
                 } else if (order === 'code-asc' || order === 'code-desc') {
                     const codeA = (a.data.locationCode || '').toLowerCase();
@@ -262,7 +259,7 @@
             renderLocations();
         }
 
-        // Render locations to table
+        // ===================== RENDER LOCATIONS =====================
         function renderLocations() {
             const tbody = document.getElementById('locationTableBody');
             tbody.innerHTML = '';
@@ -270,7 +267,11 @@
             if (allLocations.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center;">No locations found</td>
+                        <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No locations found</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Location" to create your first entry</div>
+                        </td>
                     </tr>`;
                 return;
             }
@@ -280,114 +281,117 @@
                 const docId = item.docId;
 
                 const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.dataset.id = docId;
                 tr.innerHTML = `
                     <td>${data.locationCode || '-'}</td>
                     <td>${data.provinceName || '-'}</td>
                     <td>${data.abbreviation || '-'}</td>
-                    <td class="actions-cell">
-                        <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
-                                <span>✏️</span> Edit
-                            </button>
-                            <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
-                                <span>🗑️</span> Delete
-                            </button>
-                        </div>
-                    </td>
                 `;
 
                 tbody.appendChild(tr);
             });
 
-            attachDropdownListeners();
+            attachRowClickListeners();
         }
 
-        // Attach dropdown listeners
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
+        // ===================== ROW CLICK → FLOATING BUTTONS =====================
+        function attachRowClickListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const rowId = row.dataset.id;
 
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = item.dataset.docId;
-                    const action = item.dataset.action;
+                    const existingButtons = document.querySelector('.floating-action-buttons');
 
-                    closeAllDropdowns();
+                    if (activeRowId === rowId) {
+                        // --- Clicking the SAME row → hide buttons (toggle off) ---
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('row-selected');
+                        activeRowId = null;
+                    } else {
+                        // --- Clicking a DIFFERENT row → move buttons there ---
 
-                    if (action === 'edit') {
-                        editLocation(docId);
-                    } else if (action === 'delete') {
-                        if (confirm('Are you sure you want to delete this location?')) {
-                            deleteLocation(docId);
-                        }
+                        // 1. Remove old buttons & highlight
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+                        // 2. Highlight the new row
+                        row.classList.add('row-selected');
+                        activeRowId = rowId;
+
+                        // 3. Create floating Edit / Delete buttons
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+
+                        // Append to body so position:fixed works reliably
+                        document.body.appendChild(buttonContainer);
+
+                        // 4. Wire up Edit
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editLocation(rowId);
+                        });
+
+                        // 5. Wire up Delete
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this location?')) {
+                                deleteLocation(rowId);
+                            }
+                        });
                     }
                 });
             });
         }
 
-        // Close all dropdowns
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
-
-        // Edit location
+        // ===================== EDIT LOCATION =====================
         function editLocation(docId) {
-            const locationRef = database.ref('locations/' + docId);
-
-            locationRef.once('value')
+            database.ref('locations/' + docId).once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        alert('Location not found!');
+                        alert('❌ Location not found!');
                         return;
                     }
 
                     const data = snapshot.val();
 
-                    document.getElementById('locationCode').value = data.locationCode || '';
-                    document.getElementById('provinceName').value = data.provinceName || '';
-                    document.getElementById('abbreviation').value = data.abbreviation || '';
+                    document.getElementById('locationCode').value  = data.locationCode || '';
+                    document.getElementById('provinceName').value  = data.provinceName || '';
+                    document.getElementById('abbreviation').value  = data.abbreviation || '';
 
-                    document.getElementById('locationForm').setAttribute('data-edit-id', docId);
-                    document.getElementById('locationModal').classList.add('active');
+                    locationForm.setAttribute('data-edit-id', docId);
+                    locationModal.classList.add('active');
                 })
                 .catch((error) => {
                     console.error('Error loading location:', error);
-                    alert('Error loading location: ' + error.message);
+                    alert('❌ Error loading location: ' + error.message);
                 });
         }
 
-        // Delete location
+        // ===================== DELETE LOCATION =====================
         function deleteLocation(docId) {
-            const locationRef = database.ref('locations/' + docId);
-
-            locationRef.remove()
+            database.ref('locations/' + docId).remove()
                 .then(() => {
-                    alert('Location deleted successfully!');
+                    alert('✅ Location deleted successfully!');
+                    activeRowId = null;
                 })
                 .catch((error) => {
                     console.error('Error deleting location:', error);
-                    alert('Error deleting location: ' + error.message);
+                    alert('❌ Error deleting location: ' + error.message);
                 });
         }
 
-        // Load locations from Firebase
+        // ===================== LOAD LOCATIONS FROM FIREBASE =====================
         function loadLocations() {
             const tbody = document.getElementById('locationTableBody');
             const locationsRef = database.ref('locations');
@@ -398,18 +402,19 @@
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align:center;">No locations found</td>
+                            <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No locations found</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Location" to create your first entry</div>
+                            </td>
                         </tr>`;
                     return;
                 }
 
                 snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    const docId = childSnapshot.key;
-
                     allLocations.push({
-                        docId: docId,
-                        data: data
+                        docId: childSnapshot.key,
+                        data: childSnapshot.val()
                     });
                 });
 
@@ -418,24 +423,39 @@
                 console.error('Error loading locations:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center; color: red;">Error loading locations: ${error.message}</td>
+                        <td colspan="3" style="text-align:center; color: #C62828; padding: 3rem;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">Error loading locations</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">${error.message}</div>
+                        </td>
                     </tr>`;
             });
         }
 
-        function previewLocations() {
-            alert('Opening Preview mode...');
-        }
-
-        // Sort select handler
+        // ===================== SORT SELECT HANDLER =====================
         document.getElementById('sortSelect').addEventListener('change', (e) => {
             sortLocations(e.target.value);
         });
 
-        // Initialize on page load
+        // ===================== PREVIEW BUTTON =====================
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            window.open('location-preview.html');
+        });
+
+        // ===================== INIT =====================
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Location Library page loaded');
+            console.log('🌾 Location Library page loaded');
             loadLocations();
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
 </body>

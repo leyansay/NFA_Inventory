@@ -8,21 +8,22 @@
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
         :root {
-            --primary-navy: #0f172a;
-            --primary-blue: #3b82f6;
-            --primary-blue-dark: #2563eb;
-            --accent-blue: #60a5fa;
+            --primary-green: #1B5E20;
+            --primary-green-light: #2E7D32;
+            --primary-green-dark: #0D3D11;
+            --accent-green: #4CAF50;
+            --accent-yellow: #FFA500;
             --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border-color: #e2e8f0;
-            --border-hover: #cbd5e1;
-            --success: #10b981;
+            --bg-secondary: #F5F5DC;
+            --bg-tertiary: #E8E4D0;
+            --text-primary: #1B5E20;
+            --text-secondary: #6B7C6B;
+            --text-tertiary: #8B9B8B;
+            --border-color: #D4C4A0;
+            --border-hover: #C4B490;
+            --success: #4CAF50;
             --danger: #ef4444;
-            --warning: #f59e0b;
+            --warning: #FFA500;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -37,7 +38,7 @@
 
         body {
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #F5F5DC 0%, #E8E4D0 100%);
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
@@ -59,8 +60,14 @@
             border-radius: 16px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
-            position: relative;
+            position: sticky;
+            top: 0; /* Add this - required for sticky positioning */
+            z-index: 100; /* Add this to keep header above other content */
             overflow: hidden;
+        }
+
+        .header.scrolled {
+            box-shadow: var(--shadow-lg);
         }
 
         .header::before {
@@ -70,13 +77,13 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            background: linear-gradient(90deg, var(--primary-green) 0%, var(--accent-yellow) 100%);
         }
 
         .header-left h1 {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--primary-navy);
+            color: var(--primary-green);
             margin-bottom: 0.5rem;
             letter-spacing: -0.02em;
             position: relative;
@@ -89,7 +96,7 @@
             content: '';
             width: 6px;
             height: 32px;
-            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            background: linear-gradient(180deg, var(--primary-green) 0%, var(--accent-green) 100%);
             border-radius: 3px;
         }
 
@@ -124,7 +131,7 @@
             width: 50px;
             height: 50px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -164,7 +171,7 @@
         .section-title {
             font-size: 1rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--primary-green);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -175,7 +182,7 @@
             content: '';
             width: 4px;
             height: 20px;
-            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            background: linear-gradient(180deg, var(--primary-green) 0%, var(--accent-green) 100%);
             border-radius: 2px;
         }
 
@@ -213,8 +220,8 @@
         }
 
         .form-input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1);
             background: white;
         }
 
@@ -227,7 +234,7 @@
         }
 
         .btn-save {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, #FF8C00 100%);
             color: white;
             border: none;
             padding: 1rem 2.5rem;
@@ -398,7 +405,6 @@
                 </div>
 
                 <button type="submit" class="btn-save">
-                    <span>💾</span>
                     <span>Save Signatories</span>
                 </button>
             </form>

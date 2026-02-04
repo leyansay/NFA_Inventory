@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BSM Sidebar</title>
     <style>
+        /* ==========================================
+           NFA THEME COLORS
+           ========================================== */
+        :root {
+            /* Primary - Deep Rice-Field Green */
+            --primary-green: #1B5E20;
+            --primary-green-light: #2E7D32;
+            --primary-green-dark: #0D3D11;
+            
+            /* Secondary - Warm Grain Beige */
+            --beige-light: #F1E9D2;
+            --beige-main: #E8D8B5;
+            --beige-dark: #D4C4A0;
+            
+            /* Accent - Harvest Gold */
+            --gold-main: #F9A825;
+            --gold-light: #FFB300;
+            --gold-dark: #E89600;
+            
+            /* Neutrals */
+            --white: #FFFFFF;
+            --gray-light: #F5F5F5;
+            --text-primary: #1B1B1B;
+            --text-secondary: #555555;
+            
+            /* Status Colors */
+            --error-red: #D32F2F;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,14 +42,14 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1d2e;
+            background-color: var(--primary-green-dark);
             color: white;
         }
 
         .sidebar {
             width: 260px;
             height: 100vh;
-            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            background: linear-gradient(180deg, #ffffff 0%, var(--beige-light) 100%);
             padding: 0;
             position: fixed;
             left: 0;
@@ -32,9 +61,9 @@
 
         .logo {
             padding: 1.8rem 1.5rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
         }
 
         .logo-container {
@@ -47,6 +76,9 @@
             width: 45px;
             height: 45px;
             object-fit: contain;
+            background: var(--beige-light);
+            border-radius: 8px;
+            padding: 5px;
         }
 
         .logo h1 {
@@ -57,31 +89,8 @@
 
         .logo p {
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             margin-top: 0.25rem;
-        }
-
-        .role-badge {
-            background: rgba(139, 92, 246, 0.1);
-            padding: 0.75rem 1.5rem;
-            margin: 0 1.5rem 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-
-        .role-badge-title {
-            font-size: 0.7rem;
-            color: #6b7299;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.25rem;
-        }
-
-        .role-badge-name {
-            font-size: 0.95rem;
-            color: #8b5cf6;
-            font-weight: 700;
         }
 
         .menu {
@@ -93,7 +102,7 @@
 
         .menu-section-title {
             padding: 1rem 1.5rem 0.75rem;
-            color: #8b5cf6;
+            color: var(--primary-green);
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -111,7 +120,7 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            color: #2c3e50;
+            color: var(--text-primary);
             font-size: 1rem;
             text-decoration: none;
             border-radius: 10px;
@@ -120,18 +129,18 @@
         }
 
         .menu-item:hover {
-            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
-            border-left: 3px solid #8b5cf6;
-            color: #8b5cf6;
+            background: linear-gradient(90deg, rgba(27, 94, 32, 0.1) 0%, rgba(27, 94, 32, 0.05) 100%);
+            border-left: 3px solid var(--primary-green);
+            color: var(--primary-green);
             transform: translateX(2px);
         }
 
         .menu-item.active {
-            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%);
-            border-left: 3px solid #8b5cf6;
-            color: #8b5cf6;
+            background: linear-gradient(90deg, rgba(249, 168, 37, 0.15) 0%, rgba(249, 168, 37, 0.08) 100%);
+            border-left: 3px solid var(--gold-main);
+            color: var(--primary-green);
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+            box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
         }
 
         .menu-item.active::after {
@@ -140,9 +149,9 @@
             right: 1rem;
             width: 8px;
             height: 8px;
-            background: #8b5cf6;
+            background: var(--gold-main);
             border-radius: 50%;
-            box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 8px rgba(249, 168, 37, 0.6);
             animation: pulse 2s infinite;
         }
 
@@ -163,49 +172,16 @@
             text-align: center;
         }
 
-        .info-section {
-            padding: 1rem 1.5rem;
-            background: #f8f9fa;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .info-card {
-            background: white;
-            padding: 0.9rem;
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .info-label {
-            font-size: 0.65rem;
-            color: #6b7299;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.4rem;
-        }
-
-        .info-value {
-            font-size: 1.3rem;
-            color: #8b5cf6;
-            font-weight: 700;
-        }
-
-        .info-card.loading .info-value {
-            color: #a78bfa;
-            font-size: 0.9rem;
-        }
-
         .logout-section {
             padding: 1rem 1.5rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            border-top: 2px solid var(--beige-main);
+            background: linear-gradient(180deg, var(--beige-light) 0%, #ffffff 100%);
         }
 
         .logout-btn {
             width: 100%;
             padding: 0.85rem 1rem;
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: linear-gradient(135deg, var(--error-red) 0%, #c62828 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -217,13 +193,13 @@
             justify-content: center;
             gap: 0.8rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
         }
 
         .logout-btn:hover {
-            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 6px 16px rgba(211, 47, 47, 0.3);
         }
 
         .modal-overlay {
@@ -253,6 +229,7 @@
             width: 90%;
             animation: slideUp 0.3s ease;
             text-align: center;
+            border-top: 5px solid var(--primary-green);
         }
 
         .modal-header {
@@ -270,12 +247,12 @@
         .modal-title {
             font-size: 1.6rem;
             font-weight: 700;
-            color: #2c3e50;
+            color: var(--primary-green);
             margin: 0;
         }
 
         .modal-message {
-            color: #5a6c7d;
+            color: var(--text-secondary);
             font-size: 1.05rem;
             line-height: 1.6;
             margin-bottom: 2rem;
@@ -299,24 +276,24 @@
         }
 
         .modal-btn-cancel {
-            background: #e9ecef;
-            color: #495057;
+            background: var(--beige-main);
+            color: var(--text-primary);
         }
 
         .modal-btn-cancel:hover {
-            background: #dee2e6;
+            background: var(--beige-dark);
         }
 
         .modal-btn-confirm {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: linear-gradient(135deg, var(--error-red) 0%, #c62828 100%);
             color: white;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
         }
 
         .modal-btn-confirm:hover {
-            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+            box-shadow: 0 6px 16px rgba(211, 47, 47, 0.4);
         }
 
         @keyframes fadeIn {
@@ -344,12 +321,12 @@
         }
 
         .menu::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.3);
+            background: rgba(27, 94, 32, 0.3);
             border-radius: 3px;
         }
 
         .menu::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.5);
+            background: rgba(27, 94, 32, 0.5);
         }
     </style>
 </head>
@@ -367,38 +344,24 @@
             </div>
         </div>
 
-        <div class="role-badge">
-            <div class="role-badge-title">Access Level</div>
-            <div class="role-badge-name">Branch Supply Manager</div>
-        </div>
-
         <ul class="menu">
-            <li class="menu-section-title">
-                <span>📊</span> MENU
-            </li>
-            
             <li class="menu-item" data-page="transaction-reports">
-                <span class="menu-icon">🏠</span>
                 <span>Home</span>
             </li>
 
             <li class="menu-item" data-page="all-transactions">
-                <span class="menu-icon">🗓️</span>
                 <span>All Transactions</span>
             </li>
             
             <li class="menu-item" data-page="today-transactions">
-                <span class="menu-icon">🗓️</span>
                 <span>Today's Transactions</span>
             </li>
             
             <li class="menu-item" data-page="month-transactions">
-                <span class="menu-icon">🗓️</span>
                 <span>This Month</span>
             </li>
             
-            <li class="menu-item" data-page="year-transactions">
-                <span class="menu-icon">🗓️</span>
+            <li class="menu-item" data-page="year-transactions">    
                 <span>This Year</span>
             </li>
         </ul>
@@ -625,7 +588,7 @@
             
             const logoutMessage = document.createElement('div');
             logoutMessage.style.cssText = `
-                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
                 color: white;
                 padding: 2.5rem 4rem;
                 border-radius: 20px;
@@ -634,7 +597,7 @@
                 font-weight: 600;
                 text-align: center;
             `;
-            logoutMessage.innerHTML = 'Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block;">Redirecting to login page</small>';
+            logoutMessage.innerHTML = '🌾 Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block;">Redirecting to login page</small>';
             
             overlay.appendChild(logoutMessage);
             

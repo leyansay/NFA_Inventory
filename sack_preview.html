@@ -60,6 +60,34 @@
             overflow-x: auto;
         }
 
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-bottom: 2px solid #003d82;
+            margin-bottom: 20px;
+        }
+
+        .logo-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003d82;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0 0 0;
+        }
+
         .preview-table {
             width: 100%;
             border-collapse: collapse;
@@ -75,18 +103,28 @@
             color: #495057;
         }
 
+        .preview-table th:first-child {
+            text-align: center;
+            width: 50px;
+        }
+
         .preview-table td {
             border: 1px solid #dee2e6;
             padding: 10px 8px;
             color: #212529;
         }
 
-        .preview-table tbody tr:hover {
-            background-color: #f8f9fa;
+        .preview-table td:first-child {
+            text-align: center;
+            font-weight: 500;
         }
 
-        .preview-table td:not(:first-child) {
+        .preview-table td:not(:first-child):not(:nth-child(2)) {
             text-align: right;
+        }
+
+        .preview-table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
         @media print {
@@ -97,6 +135,11 @@
 
             .action-buttons {
                 display: none;
+            }
+
+            .logo-image {
+                width: 50px;
+                height: 50px;
             }
 
             .table-container {
@@ -117,9 +160,20 @@
     </div>
 
     <div class="table-container">
+        <div class="logo-container">
+            <img src="images/nfa.png" 
+                 alt="NFA Logo" 
+                 class="logo-image">
+            <div class="logo-text">
+                <h1>NATIONAL FOOD AUTHORITY</h1>
+                <p>Sack Library - Weight Classification Records</p>
+            </div>
+        </div>
+
         <table class="preview-table" id="previewTable">
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>SACK CODE</th>
                     <th>BRAND NEW</th>
                     <th>SECOND HAND</th>
@@ -128,7 +182,7 @@
             </thead>
             <tbody id="previewTableBody">
                 <tr>
-                    <td colspan="4" style="text-align:center;">Loading sacks...</td>
+                    <td colspan="5" style="text-align:center;">Loading sacks...</td>
                 </tr>
             </tbody>
         </table>
@@ -173,16 +227,18 @@
                     if (!snapshot.exists()) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="4" style="text-align:center;">No sacks found</td>
+                                <td colspan="5" style="text-align:center;">No sacks found</td>
                             </tr>`;
                         return;
                     }
 
+                    let rowNumber = 1;
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
                         
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
+                            <td>${rowNumber}</td>
                             <td>${data.sackCode || '-'}</td>
                             <td>${formatWeight(data.brandNew)}</td>
                             <td>${formatWeight(data.secondHand)}</td>
@@ -190,13 +246,14 @@
                         `;
                         
                         tbody.appendChild(tr);
+                        rowNumber++;
                     });
                 })
                 .catch((error) => {
                     console.error('Error loading sacks:', error);
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align:center; color: red;">Error loading sacks: ${error.message}</td>
+                            <td colspan="5" style="text-align:center; color: red;">Error loading sacks: ${error.message}</td>
                         </tr>`;
                 });
         }

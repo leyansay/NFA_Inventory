@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions Preview - NFA Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-print {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: #218838;
+        }
+
+        .btn-back {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background-color: #c82333;
+        }
+
+        .table-container {
+            background-color: white;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-bottom: 2px solid #003d82;
+            margin-bottom: 20px;
+        }
+
+        .logo-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003d82;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0 0 0;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .preview-table th {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px 6px;
+            text-align: left;
+            font-weight: bold;
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        .preview-table th:first-child {
+            text-align: center;
+            width: 40px;
+        }
+
+        .preview-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 6px;
+            color: #212529;
+            white-space: nowrap;
+        }
+
+        .preview-table td:first-child {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .preview-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .action-buttons {
+                display: none;
+            }
+
+            .logo-image {
+                width: 50px;
+                height: 50px;
+            }
+
+            .table-container {
+                box-shadow: none;
+                padding: 10px;
+            }
+
+            .preview-table {
+                font-size: 9px;
+            }
+
+            .preview-table th,
+            .preview-table td {
+                padding: 5px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-buttons">
+        <button class="btn btn-print" onclick="window.print()">
+            <span>🖨️</span> Print
+        </button>
+        <button class="btn btn-back" onclick="window.close()">
+            <span>←</span> Close Preview
+        </button>
+    </div>
+
+    <div class="table-container">
+        <div class="logo-container">
+            <img src="images/nfa.png" 
+                 alt="NFA Logo" 
+                 class="logo-image">
+            <div class="logo-text">
+                <h1>NATIONAL FOOD AUTHORITY</h1>
+                <p>Transaction Records - Branch Supply Manager</p>
+            </div>
+        </div>
+
+        <table class="preview-table" id="previewTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>OFFICER ID</th>
+                    <th>OFFICER NAME</th>
+                    <th>WAREHOUSE ID</th>
+                    <th>WAREHOUSE NAME</th>
+                    <th>PERIOD FROM</th>
+                    <th>PERIOD TO</th>
+                    <th>DOCUMENT NO.</th>
+                    <th>DOC TYPE</th>
+                    <th>OR NO.</th>
+                    <th>AI NO.</th>
+                    <th>REF WSI</th>
+                    <th>RECD FROM</th>
+                    <th>DATE</th>
+                    <th>ACTIVITY</th>
+                    <th>VARIETY</th>
+                    <th>SACK CODE</th>
+                    <th>CONDITION</th>
+                    <th>SACK WT</th>
+                    <th>AGE</th>
+                    <th>PILE</th>
+                    <th>BAGS</th>
+                    <th>GROSS WT</th>
+                    <th>MC%</th>
+                    <th>NET WT</th>
+                    <th>CANCELLED</th>
+                </tr>
+            </thead>
+            <tbody id="previewTableBody">
+                <tr>
+                    <td colspan="26" style="text-align:center;">Loading transactions...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Load and display transactions from sessionStorage
+        function loadTransactions() {
+            const tbody = document.getElementById('previewTableBody');
+            
+            try {
+                const storedData = sessionStorage.getItem('previewTransactions');
+                
+                if (!storedData) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="26" style="text-align:center; padding: 2rem;">
+                                No transactions to preview
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                const transactions = JSON.parse(storedData);
+                
+                if (!transactions || transactions.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="26" style="text-align:center; padding: 2rem;">
+                                No transactions found
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                
+                transactions.forEach((item, index) => {
+                    const data = item.data;
+                    const rowNumber = index + 1;
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${rowNumber}</td>
+                        <td>${data.officerId || '-'}</td>
+                        <td>${data.officerName || '-'}</td>
+                        <td>${data.warehouseId || '-'}</td>
+                        <td>${data.warehouseName || '-'}</td>
+                        <td>${data.periodFrom || '-'}</td>
+                        <td>${data.periodTo || '-'}</td>
+                        <td>${data.documentNo || '-'}</td>
+                        <td>${data.documentType || '-'}</td>
+                        <td>${data.orNo || '-'}</td>
+                        <td>${data.aiNo || '-'}</td>
+                        <td>${data.refWSINo || '-'}</td>
+                        <td>${data.recdFromIssdTo || '-'}</td>
+                        <td>${data.transactionDate || '-'}</td>
+                        <td>${data.activityCode || '-'}</td>
+                        <td>${data.varietyCode || '-'}</td>
+                        <td>${data.sackCode || '-'}</td>
+                        <td>${data.sackCondition || '-'}</td>
+                        <td>${data.sackWeight || '-'}</td>
+                        <td>${data.age || '-'}</td>
+                        <td>${data.pileNo || '-'}</td>
+                        <td>${data.numberOfBags || '-'}</td>
+                        <td>${data.grossWeight || '-'}</td>
+                        <td>${data.moistureContent || '-'}</td>
+                        <td>${data.netWeight || '-'}</td>
+                        <td>${data.cancelled ? 'Yes' : 'No'}</td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="26" style="text-align:center; color: red; padding: 2rem;">
+                            Error loading transactions: ${error.message}
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('BSM Transaction Preview loaded');
+            loadTransactions();
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Preview - NFA Inventory</title>
+    <title>Location Preview - NFA Inventory</title>
     <style>
         * {
             margin: 0;
@@ -162,7 +162,7 @@
                  class="logo-image">
             <div class="logo-text">
                 <h1>NATIONAL FOOD AUTHORITY</h1>
-                <p>Warehouse Library - Facility Records</p>
+                <p>Location Library - Province Records</p>
             </div>
         </div>
 
@@ -170,14 +170,14 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>WAREHOUSE CODE</th>
-                    <th>WAREHOUSE NAME</th>
-                    <th>LOCATION</th>
+                    <th>LOCATION CODE</th>
+                    <th>PROVINCE NAME</th>
+                    <th>ABBREVIATION</th>
                 </tr>
             </thead>
             <tbody id="previewTableBody">
                 <tr>
-                    <td colspan="4" style="text-align:center;">Loading warehouses...</td>
+                    <td colspan="4" style="text-align:center;">Loading locations...</td>
                 </tr>
             </tbody>
         </table>
@@ -195,7 +195,8 @@
             projectId: "nfa-main",
             storageBucket: "nfa-main.firebasestorage.app",
             messagingSenderId: "314192469082",
-            appId: "1:314192469082:web:2f301895179a22dbe68c63"
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
         };
 
         // Initialize Firebase
@@ -204,19 +205,19 @@
         }
         const database = firebase.database();
 
-        // Load and display warehouses
-        function loadWarehouses() {
+        // Load and display locations
+        function loadLocations() {
             const tbody = document.getElementById('previewTableBody');
-            const warehousesRef = database.ref('warehouses');
+            const locationsRef = database.ref('locations');
 
-            warehousesRef.once('value')
+            locationsRef.once('value')
                 .then((snapshot) => {
                     tbody.innerHTML = '';
 
                     if (!snapshot.exists()) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="4" style="text-align:center;">No warehouses found</td>
+                                <td colspan="4" style="text-align:center;">No locations found</td>
                             </tr>`;
                         return;
                     }
@@ -228,9 +229,9 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${rowNumber}</td>
-                            <td>${data.warehouseCode || '-'}</td>
-                            <td>${data.warehouseName || '-'}</td>
-                            <td>${data.location || '-'}</td>
+                            <td>${data.locationCode || '-'}</td>
+                            <td>${data.provinceName || '-'}</td>
+                            <td>${data.abbreviation || '-'}</td>
                         `;
                         
                         tbody.appendChild(tr);
@@ -238,18 +239,18 @@
                     });
                 })
                 .catch((error) => {
-                    console.error('Error loading warehouses:', error);
+                    console.error('Error loading locations:', error);
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align:center; color: red;">Error loading warehouses: ${error.message}</td>
+                            <td colspan="4" style="text-align:center; color: red;">Error loading locations: ${error.message}</td>
                         </tr>`;
                 });
         }
 
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Warehouse Preview loaded');
-            loadWarehouses();
+            console.log('Location Preview loaded');
+            loadLocations();
         });
     </script>
 </body>

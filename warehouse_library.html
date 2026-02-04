@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Library - NFA Inventory</title>
+    <title>Warehouse Library - NFA Inventory System</title>
     <link rel="stylesheet" href="css/warehouse.css" />
 </head>
 <body>
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
 
-   
     <div class="main-content">
         <div class="header">
             <div class="header-left">
                 <h1>Warehouse Library</h1>
+                <p style="color: #6B7C6B; font-size: 0.9rem; margin-top: 0.25rem;">Manage and organize warehouse records</p>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">Administrator</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -26,7 +26,7 @@
 
         <div class="controls">
             <div class="sort-section">
-                <label>Sort by:</label>
+                <label>📊 Sort by:</label>
                 <select class="sort-select" id="sortSelect">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -36,11 +36,11 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-preview" id="previewBtn">
-                    <span>👁</span>
+                    <span>👁️</span>
                     <span>Preview</span>
                 </button>
                 <button class="btn btn-add" id="addWarehouseBtn">
-                    <span>+</span>
+                    <span>➕</span>
                     <span>Add Warehouse</span>
                 </button>
             </div>
@@ -50,46 +50,48 @@
             <table>
                 <thead>
                     <tr>
-                        <th>WAREHOUSE CODE</th>
-                        <th>WAREHOUSE NAME</th>
-                        <th>LOCATION</th>
-                        <th>ACTIONS</th>
+                        <th>🔖 WAREHOUSE CODE</th>
+                        <th>🏭 WAREHOUSE NAME</th>
+                        <th>📍 LOCATION</th>
                     </tr>
                 </thead>
                 <tbody id="warehouseTableBody">
                     <tr>
-                        <td colspan="4" style="text-align:center;">Loading warehouses...</td>
+                        <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">Loading warehouses...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal Form -->
+    <!-- Modal -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
+        <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF WAREHOUSE</h2>
+                <h2 class="modal-title">📋 DATA ENTRY OF WAREHOUSE LIBRARY</h2>
                 <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="warehouseForm">
                     <div class="form-group">
-                        <label class="form-label">Warehouse Code:</label>
+                        <label class="form-label">🔖 Warehouse Code: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="warehouseCode" placeholder="Enter Warehouse Code" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Warehouse Name:</label>
+                        <label class="form-label">🏭 Warehouse Name: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="warehouseName" placeholder="Enter Warehouse Name" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Location:</label>
+                        <label class="form-label">📍 Location: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="location" placeholder="Enter Location" required>
                     </div>
 
-                    <button type="submit" class="btn-save">Save Warehouse</button>
+                    <button type="submit" class="btn-save">💾 Save Warehouse</button>
                 </form>
             </div>
         </div>
@@ -99,7 +101,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <script>
-        // ===================== FIREBASE CONFIG =====================
+        // ===================== FIREBASE CONFIGURATION =====================
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -107,7 +109,8 @@
             projectId: "nfa-main",
             storageBucket: "nfa-main.firebasestorage.app",
             messagingSenderId: "314192469082",
-            appId: "1:314192469082:web:2f301895179a22dbe68c63"
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -118,6 +121,7 @@
         // ===================== GLOBAL VARIABLES =====================
         let allWarehouses = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null;
 
         // ===================== MODAL CONTROLS =====================
         const modalOverlay = document.getElementById('modalOverlay');
@@ -125,30 +129,22 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const warehouseForm = document.getElementById('warehouseForm');
 
-        // Open modal
         addWarehouseBtn.addEventListener('click', () => {
             warehouseForm.reset();
             warehouseForm.removeAttribute('data-edit-id');
             modalOverlay.classList.add('active');
         });
 
-        // Close modal
         closeModalBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('active');
         });
 
-        // Close modal when clicking outside
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
-            }
+            if (e.target === modalOverlay) modalOverlay.classList.remove('active');
         });
 
-        // Close modal with ESC key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                modalOverlay.classList.remove('active');
-            }
+            if (e.key === 'Escape') modalOverlay.classList.remove('active');
         });
 
         // ===================== SAVE WAREHOUSE =====================
@@ -160,267 +156,227 @@
 
             const warehouseCode = document.getElementById('warehouseCode').value.trim();
             const warehouseName = document.getElementById('warehouseName').value.trim();
-            const location = document.getElementById('location').value.trim();
+            const location      = document.getElementById('location').value.trim();
 
             // Clear previous errors
-            document.querySelectorAll('input').forEach(field => {
-                field.style.border = '';
-            });
+            document.querySelectorAll('input').forEach(field => { field.style.border = ''; });
             document.querySelectorAll('.field-error-message').forEach(msg => msg.remove());
 
-            // Validate required fields
+            // Validate
             let hasEmptyFields = false;
-            const requiredFields = [
-                { id: 'warehouseCode', label: 'Warehouse Code' },
-                { id: 'warehouseName', label: 'Warehouse Name' },
-                { id: 'location', label: 'Location' }
-            ];
-
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field.id);
-                if (!element.value.trim()) {
-                    element.style.border = '2px solid #ff6b6b';
+            [
+                { id: 'warehouseCode', value: warehouseCode },
+                { id: 'warehouseName', value: warehouseName },
+                { id: 'location',      value: location }
+            ].forEach(field => {
+                if (!field.value) {
+                    const element = document.getElementById(field.id);
+                    element.style.border = '2px solid #C62828';
                     hasEmptyFields = true;
-                    
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'field-error-message';
-                    errorMsg.textContent = 'This field is required';
+                    errorMsg.textContent = '⚠️ This field is required';
                     element.parentElement.appendChild(errorMsg);
                 }
             });
 
             if (hasEmptyFields) {
-                const firstEmptyField = document.querySelector('[style*="border: 2px solid"]');
-                if (firstEmptyField) {
-                    firstEmptyField.focus();
-                }
+                const first = document.querySelector('[style*="border: 2px solid"]');
+                if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
                 return;
             }
 
-            const warehouseData = { 
-                warehouseCode, 
-                warehouseName, 
-                location, 
-                timestamp: Date.now() 
-            };
+            const warehouseData = { warehouseCode, warehouseName, location, timestamp: Date.now() };
 
             if (editId) {
-                // Update existing warehouse
                 warehouseData.updatedAt = new Date().toISOString();
                 database.ref('warehouses/' + editId).update(warehouseData)
                     .then(() => {
-                        alert('Warehouse updated successfully!');
+                        alert('✅ Warehouse updated successfully!');
                         form.reset();
                         form.removeAttribute('data-edit-id');
-                        modalOverlay.classList.remove('show');
+                        modalOverlay.classList.remove('active');
+                        activeRowId = null;
                     })
-                    .catch((error) => {
-                        console.error('Error updating warehouse:', error);
-                        alert('Error updating warehouse: ' + error.message);
-                    });
+                    .catch(err => alert('❌ Error updating warehouse: ' + err.message));
             } else {
-                // Create new warehouse
                 warehouseData.createdAt = new Date().toISOString();
                 database.ref('warehouses').push(warehouseData)
                     .then(() => {
-                        alert('Warehouse added successfully!');
+                        alert('✅ Warehouse added successfully!');
                         form.reset();
-                        modalOverlay.classList.remove('show');
+                        modalOverlay.classList.remove('active');
                     })
-                    .catch((error) => {
-                        console.error('Error adding warehouse:', error);
-                        alert('Error adding warehouse: ' + error.message);
-                    });
+                    .catch(err => alert('❌ Error adding warehouse: ' + err.message));
             }
         });
 
-        // ===================== LOAD WAREHOUSES FROM FIREBASE =====================
+        // ===================== LOAD WAREHOUSES =====================
         function loadWarehouses() {
             const tbody = document.getElementById('warehouseTableBody');
-            const warehousesRef = database.ref('warehouses');
 
-            warehousesRef.on('value', (snapshot) => {
+            database.ref('warehouses').on('value', (snapshot) => {
                 allWarehouses = [];
 
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
-                        <tr>
-                            <td colspan="4" style="text-align:center;">No warehouses found</td>
-                        </tr>`;
+                        <tr><td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No warehouses found</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Warehouse" to create your first entry</div>
+                        </td></tr>`;
                     return;
                 }
 
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    const docId = childSnapshot.key;
-                    
-                    allWarehouses.push({
-                        id: docId,
-                        data: data
-                    });
+                snapshot.forEach(child => {
+                    allWarehouses.push({ id: child.key, data: child.val() });
                 });
-                
+
                 sortWarehouses(currentSortOrder);
             }, (error) => {
-                console.error('Error loading warehouses:', error);
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center; color: red;">Error loading warehouses: ${error.message}</td>
-                    </tr>`;
+                    <tr><td colspan="3" style="text-align:center; color: #C62828; padding: 3rem;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                        <div style="font-size: 1.1rem; font-weight: 600;">Error loading warehouses</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">${error.message}</div>
+                    </td></tr>`;
             });
         }
 
-        // ===================== SORT WAREHOUSES =====================
+        // ===================== SORT =====================
         function sortWarehouses(order) {
             currentSortOrder = order;
-            
             allWarehouses.sort((a, b) => {
                 if (order === 'newest' || order === 'oldest') {
                     const dateA = a.data.timestamp || 0;
                     const dateB = b.data.timestamp || 0;
                     return order === 'newest' ? dateB - dateA : dateA - dateB;
-                } else if (order === 'code-asc' || order === 'code-desc') {
-                    const codeA = (a.data.warehouseCode || '').toLowerCase();
-                    const codeB = (b.data.warehouseCode || '').toLowerCase();
-                    return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
                 }
+                const codeA = (a.data.warehouseCode || '').toLowerCase();
+                const codeB = (b.data.warehouseCode || '').toLowerCase();
+                return order === 'code-asc' ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
             });
-            
             renderWarehouses();
         }
 
-        // ===================== RENDER WAREHOUSES =====================
+        // ===================== RENDER =====================
         function renderWarehouses() {
             const tbody = document.getElementById('warehouseTableBody');
             tbody.innerHTML = '';
 
             if (allWarehouses.length === 0) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align:center;">No warehouses found</td>
-                    </tr>`;
+                    <tr><td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No warehouses found</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Warehouse" to create your first entry</div>
+                    </td></tr>`;
                 return;
             }
 
             allWarehouses.forEach(item => {
-                const d = item.data;
+                const d  = item.data;
                 const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.dataset.id = item.id;
                 tr.innerHTML = `
                     <td>${d.warehouseCode || '-'}</td>
                     <td>${d.warehouseName || '-'}</td>
                     <td>${d.location || '-'}</td>
-
-                    <td class="actions-cell">
-                <button class="action-btn" data-id="${item.id}" title="More actions">⋮</button>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" data-action="edit" data-id="${item.id}">
-                        <span>✏️</span> Edit
-                    </button>
-                    <button class="dropdown-item" data-action="delete" data-id="${item.id}">
-                        <span>🗑️</span> Delete
-                    </button>
-                </div>
-            </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            attachDropdownListeners();
+            attachRowClickListeners();
         }
 
-        // ===================== DROPDOWN HANDLERS =====================
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
+        // ===================== ROW CLICK → FLOATING BUTTONS =====================
+        function attachRowClickListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const rowId = row.dataset.id;
+                    const existingButtons = document.querySelector('.floating-action-buttons');
 
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
+                    if (activeRowId === rowId) {
+                        // Toggle off
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('row-selected');
+                        activeRowId = null;
+                    } else {
+                        // Move to new row
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.row-selected').forEach(r => r.classList.remove('row-selected'));
 
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = item.dataset.id;
-                    const action = item.dataset.action;
-                    
-                    closeAllDropdowns();
-                    
-                    if (action === 'edit') {
-                        editWarehouse(id);
-                    } else if (action === 'delete') {
-                        if (confirm('Are you sure you want to delete this warehouse?')) {
-                            deleteWarehouse(id);
-                        }
+                        row.classList.add('row-selected');
+                        activeRowId = rowId;
+
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+                        document.body.appendChild(buttonContainer);
+
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editWarehouse(rowId);
+                        });
+
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this warehouse?')) {
+                                deleteWarehouse(rowId);
+                            }
+                        });
                     }
                 });
             });
         }
 
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
-
-        // ===================== EDIT WAREHOUSE =====================
+        // ===================== EDIT =====================
         function editWarehouse(id) {
             database.ref('warehouses/' + id).once('value')
-                .then((snapshot) => {
-                    if (!snapshot.exists()) {
-                        alert('Warehouse not found!');
-                        return;
-                    }
-                    
+                .then(snapshot => {
+                    if (!snapshot.exists()) { alert('❌ Warehouse not found!'); return; }
                     const data = snapshot.val();
-                    
                     document.getElementById('warehouseCode').value = data.warehouseCode || '';
                     document.getElementById('warehouseName').value = data.warehouseName || '';
-                    document.getElementById('location').value = data.location || '';
-                    
+                    document.getElementById('location').value      = data.location || '';
                     warehouseForm.setAttribute('data-edit-id', id);
                     modalOverlay.classList.add('active');
                 })
-                .catch((error) => {
-                    console.error('Error loading warehouse:', error);
-                    alert('Error loading warehouse: ' + error.message);
-                });
+                .catch(err => alert('❌ Error loading warehouse: ' + err.message));
         }
 
-        // ===================== DELETE WAREHOUSE =====================
+        // ===================== DELETE =====================
         function deleteWarehouse(id) {
             database.ref('warehouses/' + id).remove()
-                .then(() => {
-                    alert('Warehouse deleted successfully!');
-                })
-                .catch((error) => {
-                    console.error('Error deleting warehouse:', error);
-                    alert('Error deleting warehouse: ' + error.message);
-                });
+                .then(() => { alert('✅ Warehouse deleted successfully!'); activeRowId = null; })
+                .catch(err => alert('❌ Error deleting warehouse: ' + err.message));
         }
 
-        // ===================== SORT SELECT HANDLER =====================
-        document.getElementById('sortSelect').addEventListener('change', (e) => {
-            sortWarehouses(e.target.value);
-        });
+        // ===================== SORT SELECT =====================
+        document.getElementById('sortSelect').addEventListener('change', (e) => sortWarehouses(e.target.value));
 
-          // Preview button - opens preview page in new window
-        document.getElementById('previewBtn').addEventListener('click', () => {
-            window.open('warehouse_preview.html');
-        });
+        // ===================== PREVIEW =====================
+        document.getElementById('previewBtn').addEventListener('click', () => window.open('warehouse_preview.html'));
 
         // ===================== INIT =====================
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Warehouse Library page loaded');
+            console.log('🌾 Warehouse Library page loaded');
             loadWarehouses();
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            document.querySelector('.header').classList.toggle('scrolled', window.scrollY > 0);
         });
     </script>
 </body>

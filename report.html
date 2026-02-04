@@ -3,592 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/report.css" />
     <title>Reports - NFA Inventory</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #ffffff;
-            color: #333333;
-            display: flex;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: calc(100% - 250px);
-            min-height: 100vh;
-        }
-
-        .header {
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            color: #5b8dee;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: #666666;
-            font-size: 0.95rem;
-        }
-
-        .filters-section {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e0e0e0;
-        }
-
-        .filters-section h2 {
-            color: #5b8dee;
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .filter-group label {
-            color: #333333;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .filter-group input {
-            padding: 0.65rem;
-            border: 1px solid #d0d0d0;
-            border-radius: 6px;
-            background: white;
-            color: #333333;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .filter-group input:focus {
-            outline: none;
-            border-color: #5b8dee;
-        }
-
-        .filter-group input:disabled {
-            background: #f5f5f5;
-            color: #999999;
-            cursor: not-allowed;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background: #5b8dee;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #4a7bd8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(91, 141, 238, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333333;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-        }
-
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
-            margin-right: 0.5rem;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
-        }
-
-        .section-title {
-            color: #5b8dee;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid rgba(91, 141, 238, 0.3);
-        }
-
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .report-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            border: 1px solid #e0e0e0;
-        }
-
-        .report-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(91, 141, 238, 0.2);
-            border-color: #5b8dee;
-        }
-
-        .report-card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .report-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(91, 141, 238, 0.2);
-            border-radius: 10px;
-        }
-
-        .report-card h3 {
-            color: #333333;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .report-card p {
-            color: #666666;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .report-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        /* Results Section */
-        .results-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e0e0e0;
-            display: none;
-        }
-
-        .results-section.active {
-            display: block;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .results-header h2 {
-            color: #5b8dee;
-            font-size: 1.3rem;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .results-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .results-info p {
-            margin: 0.25rem 0;
-            color: #333333;
-        }
-
-        .results-info strong {
-            color: #5b8dee;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            max-height: 600px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 2000px;
-        }
-
-        .report-table th {
-            background: #5b8dee;
-            color: white;
-            padding: 0.75rem;
-            text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-
-        .report-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e0e0e0;
-            white-space: nowrap;
-        }
-
-        .report-table tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .report-table tbody tr:nth-child(even) {
-            background: #fafbfc;
-        }
-
-        .report-table tbody tr:nth-child(even):hover {
-            background: #f0f2f5;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 2rem;
-            color: #666666;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #5b8dee;
-            font-style: italic;
-        }
-
-        /* Success Message */
-        .success-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: slideInModal 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-icon {
-            font-size: 48px;
-            margin-right: 15px;
-        }
-
-        .modal-icon.success {
-            color: #28a745;
-        }
-
-        .modal-icon.warning {
-            color: #ff9800;
-        }
-
-        .modal-icon.error {
-            color: #f44336;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .modal-body {
-            margin-bottom: 25px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .modal-details {
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .modal-details p {
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .modal-details strong {
-            color: #333;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .modal-btn-primary {
-            background-color: #2196F3;
-            color: white;
-        }
-
-        .modal-btn-primary:hover {
-            background-color: #1976D2;
-        }
-
-        .modal-btn-secondary {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-
-        .modal-btn-secondary:hover {
-            background-color: #d0d0d0;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideInModal {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 1rem;
-            }
-
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .report-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .filters-section h2,
-            .section-title {
-                font-size: 1.2rem;
-            }
-
-            .report-table {
-                font-size: 0.75rem;
-            }
-
-            .report-table th,
-            .report-table td {
-                padding: 0.5rem;
-            }
-
-            .results-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-
-            .button-group {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .filter-actions {
-                flex-direction: column;
-            }
-
-            .modal-content {
-                padding: 20px;
-                max-width: 95%;
-            }
-
-            .modal-title {
-                font-size: 20px;
-            }
-
-            .modal-icon {
-                font-size: 36px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-content {
-                padding: 0.5rem;
-            }
-
-            .filters-section,
-            .results-section {
-                padding: 1rem;
-            }
-
-            .report-table {
-                font-size: 0.7rem;
-            }
-
-            .report-table th,
-            .report-table td {
-                padding: 0.4rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
@@ -596,31 +13,73 @@
     <!-- Success Message -->
     <div class="success-message" id="successMessage"></div>
 
-    <!-- Modal -->
-    <div id="saveReportModal" class="modal">
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span id="modalIcon" class="modal-icon"></span>
-                <h2 id="modalTitle" class="modal-title"></h2>
+                <div class="modal-header-content">
+                    <span id="confirmIcon" class="modal-icon"></span>
+                    <h2 id="confirmTitle" class="modal-title"></h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('confirmModal')">✕</button>
             </div>
             <div class="modal-body">
-                <p id="modalMessage"></p>
-                <div id="modalDetails" class="modal-details" style="display: none;"></div>
+                <p id="confirmMessage" style="color: #333; line-height: 1.6;"></p>
+                <div id="confirmDetails" class="modal-details" style="display: none;"></div>
             </div>
             <div class="modal-footer">
-                <button id="modalBtnSecondary" class="modal-btn modal-btn-secondary" style="display: none;">Cancel</button>
-                <button id="modalBtnPrimary" class="modal-btn modal-btn-primary">OK</button>
+                <button id="confirmBtnSecondary" class="modal-btn modal-btn-secondary" style="display: none;">Cancel</button>
+                <button id="confirmBtnPrimary" class="modal-btn modal-btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Details Modal -->
+    <div id="reportDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <span class="modal-icon">📊</span>
+                    <h2 class="modal-title">Report Details</h2>
+                </div>
+                <button class="modal-close-btn" onclick="closeModal('reportDetailsModal')">✕</button>
+            </div>
+            <div class="modal-body" id="reportDetailsBody">
+                <!-- Report details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-danger" id="deleteReportBtn">
+                    <span>🗑️</span>
+                    <span>Delete Report</span>
+                </button>
+                <button class="modal-btn modal-btn-success" id="exportReportBtn">
+                    <span>📊</span>
+                    <span>Export to Excel</span>
+                </button>
             </div>
         </div>
     </div>
 
     <div class="main-content">
         <div class="header">
-            <h1>Reports</h1>
-            <p>Generate and view various inventory reports</p>
+            <div class="header-left">
+                <div>
+                    <h1>
+                        Reports
+                    </h1>
+                    <p>Generate and view various inventory reports</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-greeting">Hi, nfa_admin</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                    <div class="user-avatar">N</div>
+                </div>
+            </div>
         </div>
-
-        
 
         <div class="filters-section">
             <h2>Report Filters</h2>
@@ -643,8 +102,13 @@
                 </div>
             </div>
             <div class="filter-actions">
-                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-                <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <span>Apply Filters</span>
+                </button>
+                <button class="btn btn-secondary" onclick="resetFilters()">
+                    <span>↻</span>
+                    <span>Reset</span>
+                </button>
             </div>
         </div>
 
@@ -653,8 +117,12 @@
             <div class="results-header">
                 <h2>Filtered Transactions</h2>
                 <div class="button-group">
-                    <button class="btn btn-success" onclick="saveReportToDatabase()">💾 Save Report</button>
-                    <button class="btn btn-secondary" onclick="exportToExcel()">📊 Export to Excel</button>
+                    <button class="btn btn-success" onclick="saveReportToDatabase()">
+                        <span>Save Report</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <span>Export to Excel</span>
+                    </button>
                 </div>
             </div>
             <div class="results-info" id="resultsInfo"></div>
@@ -698,9 +166,9 @@
             <div class="results-header">
                 <h2>Recent Reports</h2>
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="loadRecentReports()">🔄 Refresh</button>
                 </div>
             </div>
+            <p style="color: #558b2f; font-size: 0.9rem; margin-bottom: 1rem;">Click on any row to view report details</p>
             <div class="table-container" style="max-height: 400px;">
                 <table class="report-table" id="recentReportsTable" style="min-width: 1200px;">
                     <thead>
@@ -711,11 +179,10 @@
                             <th>Warehouse</th>
                             <th>Report Date</th>
                             <th>Total Transactions</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="recentReportsTableBody">
-                        <tr><td colspan="7" class="loading">Loading reports...</td></tr>
+                        <tr><td colspan="6" class="loading">Loading reports...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -749,16 +216,17 @@
         let allTransactions = [];
         let filteredTransactions = [];
         let recentReports = [];
+        let currentReportId = null;
 
         // Modal Functions
-        function showModal(type, title, message, details = null, showCancel = false) {
-            const modal = document.getElementById('saveReportModal');
-            const modalIcon = document.getElementById('modalIcon');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalDetails = document.getElementById('modalDetails');
-            const btnPrimary = document.getElementById('modalBtnPrimary');
-            const btnSecondary = document.getElementById('modalBtnSecondary');
+        function showModal(modalId, type, title, message, details = null, showCancel = false) {
+            const modal = document.getElementById(modalId);
+            const modalIcon = document.getElementById('confirmIcon');
+            const modalTitle = document.getElementById('confirmTitle');
+            const modalMessage = document.getElementById('confirmMessage');
+            const modalDetails = document.getElementById('confirmDetails');
+            const btnPrimary = document.getElementById('confirmBtnPrimary');
+            const btnSecondary = document.getElementById('confirmBtnSecondary');
 
             const icons = {
                 success: '✅',
@@ -784,39 +252,38 @@
 
             return new Promise((resolve) => {
                 btnPrimary.onclick = () => {
-                    closeModal();
+                    closeModal(modalId);
                     resolve(true);
                 };
                 btnSecondary.onclick = () => {
-                    closeModal();
+                    closeModal(modalId);
                     resolve(false);
                 };
             });
         }
 
-        function closeModal() {
-            const modal = document.getElementById('saveReportModal');
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
             modal.classList.remove('show');
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('saveReportModal');
-            if (event.target === modal) {
-                closeModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
             }
         };
 
         // Load Recent Reports
         function loadRecentReports() {
             const tableBody = document.getElementById('recentReportsTableBody');
-            tableBody.innerHTML = '<tr><td colspan="7" class="loading">Loading reports...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" class="loading">Loading reports...</td></tr>';
 
             database.ref('reports').orderByChild('timestamp').limitToLast(50).once('value').then((snapshot) => {
                 tableBody.innerHTML = '';
                 recentReports = [];
 
                 if (!snapshot.exists()) {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No reports found</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No reports found</td></tr>';
                     return;
                 }
 
@@ -842,6 +309,7 @@
                     });
 
                     const tr = document.createElement('tr');
+                    tr.onclick = () => viewReportDetails(report.id);
                     tr.innerHTML = `
                         <td>${formattedDate}</td>
                         <td>${data.officerId || '-'}</td>
@@ -849,53 +317,80 @@
                         <td>${data.warehouseName || '-'}</td>
                         <td>${data.reportDate || '-'}</td>
                         <td>${data.totalTransactions || 0}</td>
-                        <td>
-                            <button class="btn btn-info" onclick="viewReport('${report.id}')">👁️ View</button>
-                            <button class="btn btn-danger" onclick="deleteReport('${report.id}')">🗑️ Delete</button>
-                        </td>
                     `;
                     tableBody.appendChild(tr);
                 });
             }).catch((error) => {
                 console.error('Error loading reports:', error);
-                tableBody.innerHTML = '<tr><td colspan="7" class="no-data" style="color: #dc3545;">Error loading reports</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" class="no-data" style="color: #d32f2f;">Error loading reports</td></tr>';
             });
         }
 
-        // View Report
-        function viewReport(reportId) {
+        // View Report Details in Modal
+        function viewReportDetails(reportId) {
             const report = recentReports.find(r => r.id === reportId);
             if (!report) {
-                showModal('error', 'Report Not Found', 'The selected report could not be found.');
+                showModal('confirmModal', 'error', 'Report Not Found', 'The selected report could not be found.');
                 return;
             }
 
+            currentReportId = reportId;
             const data = report.data;
+            const createdDate = new Date(data.createdAt || data.timestamp);
+            const formattedDate = createdDate.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-            // Populate filter fields
-            document.getElementById('officerId').value = data.officerId || '';
-            document.getElementById('officerName').value = data.officerName || '';
-            document.getElementById('warehouseName').value = data.warehouseName || '';
-            document.getElementById('reportDate').value = data.reportDate || '';
+            const modalBody = document.getElementById('reportDetailsBody');
+            modalBody.innerHTML = `
+                <table class="report-details-table">
+                    <tr>
+                        <td>Date Created:</td>
+                        <td>${formattedDate}</td>
+                    </tr>
+                    <tr>
+                        <td>Officer ID:</td>
+                        <td>${data.officerId || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Officer Name:</td>
+                        <td>${data.officerName || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Warehouse:</td>
+                        <td>${data.warehouseName || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Report Date:</td>
+                        <td>${data.reportDate || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Transactions:</td>
+                        <td><strong style="color: #2e7d32; font-size: 1.1rem;">${data.totalTransactions || 0}</strong></td>
+                    </tr>
+                </table>
+            `;
 
-            // Set filtered transactions
-            filteredTransactions = data.transactions || [];
+            // Set up button handlers
+            document.getElementById('deleteReportBtn').onclick = () => deleteCurrentReport();
+            document.getElementById('exportReportBtn').onclick = () => exportCurrentReport();
 
-            // Display the report
-            displayFilteredTransactions(
-                data.officerId,
-                data.officerName,
-                data.warehouseName,
-                data.reportDate
-            );
-
-            // Scroll to results
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Show modal
+            document.getElementById('reportDetailsModal').classList.add('show');
         }
 
-        // Delete Report
-        async function deleteReport(reportId) {
+        // Delete Current Report
+        async function deleteCurrentReport() {
+            if (!currentReportId) return;
+
+            closeModal('reportDetailsModal');
+
             const confirmed = await showModal(
+                'confirmModal',
                 'warning',
                 'Confirm Deletion',
                 'Are you sure you want to delete this report? This action cannot be undone.',
@@ -904,17 +399,50 @@
             );
 
             if (!confirmed) {
+                document.getElementById('reportDetailsModal').classList.add('show');
                 return;
             }
 
             try {
-                await database.ref('reports/' + reportId).remove();
-                await showModal('success', 'Report Deleted', 'The report has been successfully deleted.');
+                await database.ref('reports/' + currentReportId).remove();
+                await showModal('confirmModal', 'success', 'Report Deleted', 'The report has been successfully deleted.');
                 loadRecentReports();
+                currentReportId = null;
             } catch (error) {
                 console.error('Error deleting report:', error);
-                await showModal('error', 'Error', 'An error occurred while deleting the report: ' + error.message);
+                await showModal('confirmModal', 'error', 'Error', 'An error occurred while deleting the report: ' + error.message);
             }
+        }
+
+        // Export Current Report
+        function exportCurrentReport() {
+            if (!currentReportId) return;
+
+            const report = recentReports.find(r => r.id === currentReportId);
+            if (!report || !report.data.transactions) {
+                showModal('confirmModal', 'error', 'Export Error', 'No transaction data found in this report.');
+                return;
+            }
+
+            const transactions = report.data.transactions;
+            let csv = 'Officer ID,Officer Name,Warehouse ID,Warehouse Name,Document No,Document Type,OR No,AI No,Ref WSI No,Recd From/Issd To,Transaction Date,Activity Code,Variety Code,Sack Code,Sack Condition,Sack Weight,Age,Pile No,No. of Bags,Gross Weight,Moisture %,Net Weight,Cancelled\n';
+
+            transactions.forEach(data => {
+                csv += `${data.officerId || ''},${data.officerName || ''},${data.warehouseId || ''},${data.warehouseName || ''},${data.documentNo || ''},${data.documentType || ''},${data.orNo || ''},${data.aiNo || ''},${data.refWSINo || ''},${data.recdFromIssdTo || ''},${data.transactionDate || ''},${data.activityCode || ''},${data.varietyCode || ''},${data.sackCode || ''},${data.sackCondition || ''},${data.sackWeight || ''},${data.age || ''},${data.pileNo || ''},${data.numberOfBags || ''},${data.grossWeight || ''},${data.moistureContent || ''},${data.netWeight || ''},${data.cancelled ? 'Yes' : 'No'}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = `report_${report.data.officerId}_${report.data.reportDate}.csv`;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showSuccessMessage('Report exported successfully!');
         }
 
         // Load officer data
@@ -954,6 +482,7 @@
             }
         });
 
+        // UPDATED FUNCTION: Check for duplicate reports before filtering
         async function applyFilters() {
             const officerId = document.getElementById('officerId').value.trim();
             const officerName = document.getElementById('officerName').value;
@@ -961,13 +490,76 @@
             const reportDate = document.getElementById('reportDate').value;
 
             if (!officerId) {
-                await showModal('warning', 'Missing Information', 'Please enter an Officer ID');
+                await showModal('confirmModal', 'warning', 'Missing Information', 'Please enter an Officer ID');
                 return;
             }
 
             if (!officerName) {
-                await showModal('warning', 'Invalid Officer ID', 'Please enter a valid Officer ID.');
+                await showModal('confirmModal', 'warning', 'Invalid Officer ID', 'Please enter a valid Officer ID.');
                 return;
+            }
+
+            // Check if this report already exists in the database
+            try {
+                const snapshot = await database.ref('reports')
+                    .orderByChild('officerId')
+                    .equalTo(officerId)
+                    .once('value');
+                
+                let reportExists = false;
+                let existingReportId = null;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const report = child.val();
+                        if (report.reportDate === reportDate) {
+                            reportExists = true;
+                            existingReportId = child.key;
+                        }
+                    });
+                }
+
+                if (reportExists) {
+                    const details = `
+                        <p style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                            <strong>Officer ID:</strong>
+                            <span>${officerId}</span>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                            <strong>Officer Name:</strong>
+                            <span>${officerName}</span>
+                        </p>
+                        <p style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                            <strong>Report Date:</strong>
+                            <span>${reportDate}</span>
+                        </p>
+                        <p style="color: #d32f2f; margin-top: 1rem; font-weight: 500; text-align: center;">
+                            ⚠️ This report has already been saved to the database.
+                        </p>
+                        <p style="color: #666; margin-top: 0.5rem; font-size: 0.9rem; text-align: center;">
+                            You can view it in the "Recent Reports" section below.
+                        </p>
+                    `;
+                    await showModal(
+                        'confirmModal',
+                        'warning', 
+                        'Report Already Exists', 
+                        'A report for this Officer ID and date already exists in the database.',
+                        details
+                    );
+                    
+                    // Scroll to recent reports section to help user find the existing report
+                    document.getElementById('recentReportsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking for existing reports:', error);
+                await showModal(
+                    'confirmModal',
+                    'error', 
+                    'Error Checking Reports', 
+                    'An error occurred while checking for existing reports. You may proceed, but be aware that duplicate reports could exist.'
+                );
             }
 
             // Filter transactions
@@ -1057,7 +649,7 @@
             
             document.getElementById('resultsSection').classList.remove('active');
             
-            await showModal('info', 'Filters Reset', 'Filters have been reset to default values.');
+            await showModal('confirmModal', 'info', 'Filters Reset', 'Filters have been reset to default values.');
         }
 
         function showSuccessMessage(message) {
@@ -1072,7 +664,7 @@
 
         async function saveReportToDatabase() {
             if (filteredTransactions.length === 0) {
-                await showModal('warning', 'No Data Available', 'No data to save. Please apply filters first.');
+                await showModal('confirmModal', 'warning', 'No Data Available', 'No data to save. Please apply filters first.');
                 return;
             }
 
@@ -1097,10 +689,17 @@
 
                 if (reportExists) {
                     const details = `
-                        <p><strong>Officer ID:</strong> ${officerId}</p>
-                        <p><strong>Report Date:</strong> ${reportDate}</p>
+                        <p style="display: flex; justify-content: space-between;">
+                            <strong>Officer ID:</strong>
+                            <span>${officerId}</span>
+                        </p>
+                        <p style="display: flex; justify-content: space-between;">
+                            <strong>Report Date:</strong>
+                            <span>${reportDate}</span>
+                        </p>
                     `;
                     await showModal(
+                        'confirmModal',
                         'warning', 
                         'Report Already Exists', 
                         'A report for this Officer ID and date has already been saved to the database.',
@@ -1123,13 +722,26 @@
                 await database.ref('reports').push().set(reportData);
 
                 const successDetails = `
-                    <p><strong>Officer:</strong> ${officerName}</p>
-                    <p><strong>Warehouse:</strong> ${warehouseName}</p>
-                    <p><strong>Date:</strong> ${reportDate}</p>
-                    <p><strong>Total Transactions:</strong> ${filteredTransactions.length}</p>
+                    <p style="display: flex; justify-content: space-between;">
+                        <strong>Officer:</strong>
+                        <span>${officerName}</span>
+                    </p>
+                    <p style="display: flex; justify-content: space-between;">
+                        <strong>Warehouse:</strong>
+                        <span>${warehouseName}</span>
+                    </p>
+                    <p style="display: flex; justify-content: space-between;">
+                        <strong>Date:</strong>
+                        <span>${reportDate}</span>
+                    </p>
+                    <p style="display: flex; justify-content: space-between;">
+                        <strong>Total Transactions:</strong>
+                        <span>${filteredTransactions.length}</span>
+                    </p>
                 `;
 
                 await showModal(
+                    'confirmModal',
                     'success', 
                     'Report Saved Successfully', 
                     'Your report has been saved to the database.',
@@ -1144,6 +756,7 @@
             } catch (error) {
                 console.error('Error saving report:', error);
                 await showModal(
+                    'confirmModal',
                     'error', 
                     'Error Saving Report', 
                     'An error occurred while saving the report: ' + error.message
@@ -1153,7 +766,7 @@
 
         async function exportToExcel() {
             if (filteredTransactions.length === 0) {
-                await showModal('warning', 'No Data Available', 'No data to export. Please apply filters first.');
+                await showModal('confirmModal', 'warning', 'No Data Available', 'No data to export. Please apply filters first.');
                 return;
             }
 
@@ -1172,14 +785,8 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        }
 
-        function generateReport(reportType) {
-            console.log('Generating report:', reportType);
-        }
-
-        function exportReport(reportType) {
-            console.log('Exporting report:', reportType);
+            showSuccessMessage('Report exported successfully!');
         }
 
         function loadAllTransactions() {

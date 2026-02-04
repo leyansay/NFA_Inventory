@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Accountable Officer</title>
     <link rel="stylesheet" href="css/accountable.css" />
-
 </head>
 <body>
     <div id="sidebar-container"><iframe id="sidebar-frame" src="sidebar.html"></iframe></div>
@@ -24,13 +23,37 @@
             <div class="search-box"><input type="text" placeholder="Search inventory..." id="searchInput"></div>
             <button class="add-btn" id="openModal">+ Add Accountable Officer</button>
         </div>
+        
+        <!-- Table Container with Action Buttons Below -->
         <div class="table-container">
             <table class="inventory-table">
-                <thead><tr><th>OFFICER ID</th><th>LAST NAME</th><th>FIRST NAME</th><th>MIDDLE NAME</th><th>WAREHOUSE CODE</th><th>WAREHOUSE NAME</th><th>PERIOD OF ACCOUNTABILITY</th><th>ACTIONS</th></tr></thead>
-                <tbody><tr><td colspan="8" class="loading">Loading data...</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th>OFFICER ID</th>
+                        <th>LAST NAME</th>
+                        <th>FIRST NAME</th>
+                        <th>MIDDLE NAME</th>
+                        <th>WAREHOUSE CODE</th>
+                        <th>WAREHOUSE NAME</th>
+                        <th>PERIOD OF ACCOUNTABILITY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="7" class="loading">Loading data...</td></tr>
+                </tbody>
             </table>
         </div>
+        
+        <!-- Action Buttons Container (appears when row is selected) -->
+        <div class="action-buttons-container" id="actionButtonsContainer">
+            <button class="action-btn edit-btn" id="editTransactionBtn"> Edit Transaction
+            </button>
+            <button class="action-btn delete-btn-action" id="deleteTransactionBtn">Delete Transaction
+            </button>
+        </div>
     </div>
+
+    <!-- Add Accountable Officer Modal -->
     <div id="accountableModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -39,15 +62,31 @@
             </div>
             <div class="modal-body">
                 <form id="accountableForm">
-                    <div class="form-group"><label for="officerId">Officer ID</label><input type="text" id="officerId" required></div>
-                    <div class="form-group"><label for="firstName">First Name</label><input type="text" id="firstName" required></div>
-                    <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName" required></div>
-                    <div class="form-group"><label for="middleName">Middle Name</label><input type="text" id="middleName"></div>
-                    <div class="modal-footer"><button type="submit" class="btn-submit">Add Officer</button></div>
+                    <div class="form-group">
+                        <label for="officerId">Officer ID</label>
+                        <input type="text" id="officerId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="middleName">Middle Name</label>
+                        <input type="text" id="middleName">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn-submit">Add Officer</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Edit Masterfile Modal -->
     <div id="masterfileModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -56,19 +95,33 @@
             </div>
             <div class="modal-body">
                 <form id="masterfileForm">
-                    <div class="form-group"><label>Officer ID</label><input type="text" id="officerMaster" readonly></div>
-                    <div class="form-group"><label>Officer Name</label><input type="text" id="officerName" readonly></div>
+                    <div class="form-group">
+                        <label>Officer ID</label>
+                        <input type="text" id="officerMaster" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Officer Name</label>
+                        <input type="text" id="officerName" readonly>
+                    </div>
                     <div class="form-group">
                         <label>Select Warehouse</label>
                         <div class="warehouse-dropdown-container">
-                            <button type="button" class="warehouse-dropdown-trigger placeholder" id="warehouseDropdownTrigger">Select a warehouse...</button>
+                            <button type="button" class="warehouse-dropdown-trigger placeholder" id="warehouseDropdownTrigger">
+                                Select a warehouse...
+                            </button>
                             <div class="warehouse-dropdown-menu" id="warehouseDropdownMenu">
                                 <div class="warehouse-search-box">
                                     <input type="text" class="warehouse-search-input" id="warehouseSearchInput" placeholder="🔍 Search warehouses...">
                                 </div>
                                 <div class="warehouse-dropdown-table-wrapper">
                                     <table class="warehouse-dropdown-table">
-                                        <thead><tr><th>Code</th><th>Warehouse Name</th><th>Location</th></tr></thead>
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Warehouse Name</th>
+                                                <th>Location</th>
+                                            </tr>
+                                        </thead>
                                         <tbody id="warehouseDropdownTableBody">
                                             <tr><td colspan="3" class="no-warehouses-found">Loading warehouses...</td></tr>
                                         </tbody>
@@ -78,17 +131,34 @@
                         </div>
                         <div class="warehouse-info-display" id="warehouseInfoDisplay">
                             <span class="warehouse-info-label">Selected Warehouse</span>
-                            <div><span class="warehouse-info-code" id="selectedWarehouseCode">-</span><span class="warehouse-info-value" id="selectedWarehouseDetails">-</span></div>
+                            <div>
+                                <span class="warehouse-info-code" id="selectedWarehouseCode">-</span>
+                                <span class="warehouse-info-value" id="selectedWarehouseDetails">-</span>
+                            </div>
                         </div>
                     </div>
-                    <input type="hidden" id="warehouse"><input type="hidden" id="warehouse_name">
-                    <div class="form-group"><label for="fromDate">From Date</label><input type="date" id="fromDate" required></div>
-                    <div class="form-group"><label for="toDate">To Date</label><input type="date" id="toDate" required></div>
+                    <input type="hidden" id="warehouse">
+                    <input type="hidden" id="warehouse_name">
+                    <div class="form-group">
+                        <label for="fromDate">From Date</label>
+                        <input type="date" id="fromDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="toDate">To Date</label>
+                        <input type="date" id="toDate" required>
+                    </div>
                     <div class="form-group">
                         <label for="statusExam">Status</label>
-                        <select id="statusExam" required><option value="">Select Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+                        <select id="statusExam" required>
+                            <option value="">Select Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
                     </div>
-                    <div class="form-group"><label for="note">Note</label><textarea id="note" rows="3"></textarea></div>
+                    <div class="form-group">
+                        <label for="note">Note</label>
+                        <textarea id="note" rows="3"></textarea>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
                         <button type="submit" class="btn-submit">Save Masterfile</button>
@@ -97,31 +167,539 @@
             </div>
         </div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/back-prevention.js"></script>
     <script>
-const firebaseConfig={apiKey:"AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",authDomain:"nfa-main.firebaseapp.com",databaseURL:"https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"nfa-main",storageBucket:"nfa-main.firebasestorage.app",messagingSenderId:"314192469082",appId:"1:314192469082:web:2f301895179a22dbe68c63",measurementId:"G-ZEJP0S67SY"};
-if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-let curOfficer=null,allWarehouses=[],selWarehouse=null;
-function closeDrops(){document.querySelectorAll('.dropdown-content').forEach(d=>d.style.display='none')}
-function closeWH(){const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger');d.classList.remove('show');t.classList.remove('active')}
-function toggleWH(){const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger'),o=d.classList.contains('show');if(o)closeWH();else{d.classList.add('show');t.classList.add('active');setTimeout(()=>document.getElementById('warehouseSearchInput').focus(),100)}}
-function loadWH(){const tb=document.getElementById('warehouseDropdownTableBody'),ref=db.ref('warehouses');ref.on('value',snap=>{allWarehouses=[];tb.innerHTML='';if(!snap.exists()){tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found">No warehouses available</td></tr>';return}snap.forEach(c=>{const d=c.val(),id=c.key;allWarehouses.push({id:id,code:d.warehouseCode||'',name:d.warehouseName||'',location:d.location||''})});renderWH(allWarehouses)},e=>{console.error('Error:',e);tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found" style="color:#ef4444">Error</td></tr>'})}
-function renderWH(whs){const tb=document.getElementById('warehouseDropdownTableBody');tb.innerHTML='';if(whs.length===0){tb.innerHTML='<tr><td colspan="3" class="no-warehouses-found">No match</td></tr>';return}whs.forEach(w=>{const tr=document.createElement('tr');tr.dataset.warehouseId=w.id;tr.dataset.code=w.code;tr.dataset.name=w.name;tr.dataset.location=w.location;tr.innerHTML=`<td>${w.code}</td><td>${w.name}</td><td>${w.location}</td>`;tr.addEventListener('click',function(){document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r=>r.classList.remove('selected'));this.classList.add('selected');selWarehouse={id:this.dataset.warehouseId,code:this.dataset.code,name:this.dataset.name,location:this.dataset.location};document.getElementById('warehouse').value=selWarehouse.code;document.getElementById('warehouse_name').value=selWarehouse.name;const t=document.getElementById('warehouseDropdownTrigger');t.textContent=`${selWarehouse.code} - ${selWarehouse.name}`;t.classList.remove('placeholder');document.getElementById('selectedWarehouseCode').textContent=selWarehouse.code;document.getElementById('selectedWarehouseDetails').textContent=`${selWarehouse.name} - ${selWarehouse.location}`;document.getElementById('warehouseInfoDisplay').classList.add('show');closeWH()});tb.appendChild(tr)})}
-function initModals(){const am=document.getElementById("accountableModal"),oa=document.getElementById("openModal"),ca=document.getElementById("closeAccountable");if(oa)oa.addEventListener("click",()=>{closeDrops();am.style.display="flex"});if(ca)ca.addEventListener("click",()=>am.style.display="none");document.getElementById('closeMasterfile')?.addEventListener('click',()=>{document.getElementById('masterfileModal').style.display='none';curOfficer=null;resetWH()});document.getElementById('cancelBtn')?.addEventListener('click',()=>{document.getElementById('masterfileModal').style.display='none';curOfficer=null;resetWH()});window.addEventListener("click",e=>{if(e.target===am)am.style.display="none";const mm=document.getElementById('masterfileModal');if(e.target===mm){mm.style.display="none";curOfficer=null;resetWH()}})}
-function resetWH(){selWarehouse=null;document.getElementById('warehouse').value='';document.getElementById('warehouse_name').value='';document.getElementById('warehouseSearchInput').value='';document.getElementById('warehouseInfoDisplay').classList.remove('show');const t=document.getElementById('warehouseDropdownTrigger');t.textContent='Select a warehouse...';t.classList.add('placeholder');document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r=>r.classList.remove('selected'));closeWH();renderWH(allWarehouses)}
-function loadOfficers(){const ref=db.ref('accountableOfficers');ref.once('value').then(snap=>{const tb=document.querySelector(".inventory-table tbody");tb.innerHTML="";if(!snap.exists()){tb.innerHTML='<tr><td colspan="8" style="text-align:center">No officers</td></tr>';return}snap.forEach(c=>{addRow(c.key,c.val())});attachDrops()}).catch(e=>{console.error(e);alert("Error: "+e.message)})}
-function addRow(id,d){const tb=document.querySelector(".inventory-table tbody"),tr=document.createElement("tr");tr.dataset.docId=id;let per="-";if(d.fromDate&&d.toDate)per=`${d.fromDate} to ${d.toDate}`;tr.innerHTML=`<td>${d.officerId||"-"}</td><td>${d.lastName||"-"}</td><td>${d.firstName||"-"}</td><td>${d.middleName||"-"}</td><td>${d.warehouse||"-"}</td><td>${d.warehouseName||"-"}</td><td>${per}</td><td class="action-cell"><div class="dropdown"><span class="dot-menu">&#8942;</span><div class="dropdown-content"><button class="masterfile-btn" data-doc-id="${id}"><span style="color:#2196F3">📝</span> Add/Edit Masterfile</button><button class="delete-btn" data-doc-id="${id}"><span style="color:#f44336">🗑️</span> Delete</button></div></div></td>`;tb.appendChild(tr)}
-document.getElementById("accountableForm").addEventListener("submit",e=>{e.preventDefault();const officerId=document.getElementById("officerId").value.trim();if(!officerId){alert("Officer ID is required");return}db.ref('accountableOfficers').once('value').then(snap=>{let isDuplicate=false;if(snap.exists()){snap.forEach(c=>{const d=c.val();if(d.officerId===officerId){isDuplicate=true}})}if(isDuplicate){alert(`Officer ID "${officerId}" already exists. Please use a different Officer ID.`);return}const fd={officerId:officerId,firstName:document.getElementById("firstName").value,lastName:document.getElementById("lastName").value,middleName:document.getElementById("middleName").value,warehouse:"",warehouseName:"",fromDate:"",toDate:"",statusExam:"",note:"",createdAt:new Date().toISOString()};db.ref('accountableOfficers').push().set(fd).then(()=>{alert("Officer added successfully!");document.getElementById("accountableModal").style.display="none";e.target.reset();loadOfficers()}).catch(err=>{console.error(err);alert("Error: "+err.message)})}).catch(err=>{console.error(err);alert("Error checking for duplicates: "+err.message)})});
-document.getElementById("masterfileForm").addEventListener("submit",e=>{e.preventDefault();if(!curOfficer){alert("No officer selected");return}if(!selWarehouse){alert("Select a warehouse");return}const md={warehouse:document.getElementById("warehouse").value,warehouseName:document.getElementById("warehouse_name").value,fromDate:document.getElementById("fromDate").value,toDate:document.getElementById("toDate").value,statusExam:document.getElementById("statusExam").value,note:document.getElementById("note").value,updatedAt:new Date().toISOString()};db.ref('accountableOfficers/'+curOfficer).update(md).then(()=>{alert("Saved!");document.getElementById('masterfileModal').style.display="none";e.target.reset();curOfficer=null;resetWH();loadOfficers()}).catch(e=>{console.error(e);alert("Error: "+e.message)})});
-function attachDrops(){document.querySelectorAll('.dot-menu').forEach(d=>d.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.dropdown-content').forEach(dd=>{if(dd!==d.nextElementSibling)dd.style.display='none'});const dr=d.nextElementSibling;dr.style.display=dr.style.display==='block'?'none':'block'}));document.querySelectorAll('.masterfile-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.docId;curOfficer=id;closeDrops();resetWH();db.ref('accountableOfficers/'+id).once('value').then(s=>{const d=s.val();if(d){document.getElementById("officerMaster").value=d.officerId||"";const fn=`${d.lastName||""}, ${d.firstName||""} ${d.middleName||""}`.trim();document.getElementById("officerName").value=fn;if(d.warehouse&&d.warehouseName){const wr=document.querySelector(`tr[data-code="${d.warehouse}"]`);if(wr)wr.click()}document.getElementById("fromDate").value=d.fromDate||"";document.getElementById("toDate").value=d.toDate||"";document.getElementById("statusExam").value=d.statusExam||"";document.getElementById("note").value=d.note||""}document.getElementById('masterfileModal').style.display="flex"}).catch(e=>{console.error(e);document.getElementById('masterfileModal').style.display="flex"})}));document.querySelectorAll('.delete-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.docId;closeDrops();if(confirm("Delete officer?")){db.ref('accountableOfficers/'+id).remove().then(()=>{alert("Deleted!");loadOfficers()}).catch(e=>{console.error(e);alert("Error: "+e.message)})}}))}
-document.addEventListener('DOMContentLoaded',()=>{const si=document.getElementById('warehouseSearchInput'),dt=document.getElementById('warehouseDropdownTrigger');if(dt)dt.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleWH()});if(si){si.addEventListener('input',e=>{const st=e.target.value.toLowerCase(),fw=allWarehouses.filter(w=>w.code.toLowerCase().includes(st)||w.name.toLowerCase().includes(st)||w.location.toLowerCase().includes(st));renderWH(fw)});si.addEventListener('click',e=>e.stopPropagation())}document.addEventListener('click',e=>{const d=document.getElementById('warehouseDropdownMenu'),t=document.getElementById('warehouseDropdownTrigger');if(!d.contains(e.target)&&e.target!==t)closeWH()})});
-document.getElementById('searchInput').addEventListener('input',e=>{const st=e.target.value.toLowerCase(),rows=document.querySelectorAll('.inventory-table tbody tr');rows.forEach(r=>{const t=r.textContent.toLowerCase();r.style.display=t.includes(st)?'':'none'})});
-window.addEventListener('click',e=>{if(!e.target.closest('.dropdown'))closeDrops()});
-window.addEventListener('scroll',()=>closeDrops(),true);
-window.addEventListener('DOMContentLoaded',()=>{initModals();loadOfficers();loadWH()});
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+    authDomain: "nfa-main.firebaseapp.com",
+    databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "nfa-main",
+    storageBucket: "nfa-main.firebasestorage.app",
+    messagingSenderId: "314192469082",
+    appId: "1:314192469082:web:2f301895179a22dbe68c63",
+    measurementId: "G-ZEJP0S67SY"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let curOfficer = null;
+let curOfficerId = null; // stores the officerId field value (e.g. "OFS-001")
+let allWarehouses = [];
+let selWarehouse = null;
+let selectedRowId = null; // Track selected row
+
+// Warehouse dropdown functions
+function closeWH() {
+    const d = document.getElementById('warehouseDropdownMenu');
+    const t = document.getElementById('warehouseDropdownTrigger');
+    d.classList.remove('show');
+    t.classList.remove('active');
+}
+
+function toggleWH() {
+    const d = document.getElementById('warehouseDropdownMenu');
+    const t = document.getElementById('warehouseDropdownTrigger');
+    const o = d.classList.contains('show');
+    if (o) {
+        closeWH();
+    } else {
+        d.classList.add('show');
+        t.classList.add('active');
+        setTimeout(() => document.getElementById('warehouseSearchInput').focus(), 100);
+    }
+}
+
+function loadWH() {
+    const tb = document.getElementById('warehouseDropdownTableBody');
+    const ref = db.ref('warehouses');
+    
+    ref.on('value', snap => {
+        allWarehouses = [];
+        tb.innerHTML = '';
+        
+        if (!snap.exists()) {
+            tb.innerHTML = '<tr><td colspan="3" class="no-warehouses-found">No warehouses available</td></tr>';
+            return;
+        }
+        
+        snap.forEach(c => {
+            const d = c.val();
+            const id = c.key;
+            allWarehouses.push({
+                id: id,
+                code: d.warehouseCode || '',
+                name: d.warehouseName || '',
+                location: d.location || ''
+            });
+        });
+        
+        renderWH(allWarehouses);
+    }, e => {
+        console.error('Error:', e);
+        tb.innerHTML = '<tr><td colspan="3" class="no-warehouses-found" style="color:#ef4444">Error loading warehouses</td></tr>';
+    });
+}
+
+function renderWH(whs) {
+    const tb = document.getElementById('warehouseDropdownTableBody');
+    tb.innerHTML = '';
+    
+    if (whs.length === 0) {
+        tb.innerHTML = '<tr><td colspan="3" class="no-warehouses-found">No matching warehouses</td></tr>';
+        return;
+    }
+    
+    whs.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.dataset.warehouseId = w.id;
+        tr.dataset.code = w.code;
+        tr.dataset.name = w.name;
+        tr.dataset.location = w.location;
+        tr.innerHTML = `<td>${w.code}</td><td>${w.name}</td><td>${w.location}</td>`;
+        
+        tr.addEventListener('click', function() {
+            document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r => r.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            selWarehouse = {
+                id: this.dataset.warehouseId,
+                code: this.dataset.code,
+                name: this.dataset.name,
+                location: this.dataset.location
+            };
+            
+            document.getElementById('warehouse').value = selWarehouse.code;
+            document.getElementById('warehouse_name').value = selWarehouse.name;
+            
+            const t = document.getElementById('warehouseDropdownTrigger');
+            t.textContent = `${selWarehouse.code} - ${selWarehouse.name}`;
+            t.classList.remove('placeholder');
+            
+            document.getElementById('selectedWarehouseCode').textContent = selWarehouse.code;
+            document.getElementById('selectedWarehouseDetails').textContent = `${selWarehouse.name} - ${selWarehouse.location}`;
+            document.getElementById('warehouseInfoDisplay').classList.add('show');
+            
+            closeWH();
+        });
+        
+        tb.appendChild(tr);
+    });
+}
+
+function resetWH() {
+    selWarehouse = null;
+    document.getElementById('warehouse').value = '';
+    document.getElementById('warehouse_name').value = '';
+    document.getElementById('warehouseSearchInput').value = '';
+    document.getElementById('warehouseInfoDisplay').classList.remove('show');
+    
+    const t = document.getElementById('warehouseDropdownTrigger');
+    t.textContent = 'Select a warehouse...';
+    t.classList.add('placeholder');
+    
+    document.querySelectorAll('.warehouse-dropdown-table tbody tr').forEach(r => r.classList.remove('selected'));
+    closeWH();
+    renderWH(allWarehouses);
+}
+
+// Modal initialization
+function initModals() {
+    const am = document.getElementById("accountableModal");
+    const oa = document.getElementById("openModal");
+    const ca = document.getElementById("closeAccountable");
+    
+    if (oa) oa.addEventListener("click", () => {
+        am.style.display = "flex";
+    });
+    
+    if (ca) ca.addEventListener("click", () => am.style.display = "none");
+    
+    document.getElementById('closeMasterfile')?.addEventListener('click', () => {
+        document.getElementById('masterfileModal').style.display = 'none';
+        curOfficer = null;
+        curOfficerId = null;
+        resetWH();
+    });
+    
+    document.getElementById('cancelBtn')?.addEventListener('click', () => {
+        document.getElementById('masterfileModal').style.display = 'none';
+        curOfficer = null;
+        curOfficerId = null;
+        resetWH();
+    });
+    
+    window.addEventListener("click", e => {
+        if (e.target === am) am.style.display = "none";
+        const mm = document.getElementById('masterfileModal');
+        if (e.target === mm) {
+            mm.style.display = "none";
+            curOfficer = null;
+            curOfficerId = null;
+            resetWH();
+        }
+    });
+}
+
+// Load officers from Firebase
+function loadOfficers() {
+    const ref = db.ref('accountableOfficers');
+    
+    ref.once('value').then(snap => {
+        const tb = document.querySelector(".inventory-table tbody");
+        tb.innerHTML = "";
+        
+        if (!snap.exists()) {
+            tb.innerHTML = '<tr><td colspan="7" style="text-align:center">No officers found</td></tr>';
+            return;
+        }
+        
+        snap.forEach(c => {
+            addRow(c.key, c.val());
+        });
+        
+        attachRowClickHandlers();
+    }).catch(e => {
+        console.error(e);
+        alert("Error loading data: " + e.message);
+    });
+}
+
+// Add table row
+function addRow(id, d) {
+    const tb = document.querySelector(".inventory-table tbody");
+    const tr = document.createElement("tr");
+    tr.dataset.docId = id;
+    
+    let per = "-";
+    if (d.fromDate && d.toDate) per = `${d.fromDate} to ${d.toDate}`;
+    
+    tr.innerHTML = `
+        <td>${d.officerId || "-"}</td>
+        <td>${d.lastName || "-"}</td>
+        <td>${d.firstName || "-"}</td>
+        <td>${d.middleName || "-"}</td>
+        <td>${d.warehouse || "-"}</td>
+        <td>${d.warehouseName || "-"}</td>
+        <td>${per}</td>
+    `;
+    
+    tb.appendChild(tr);
+}
+
+// Attach click handlers to table rows
+function attachRowClickHandlers() {
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    const actionContainer = document.getElementById('actionButtonsContainer');
+    
+    rows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Remove selection from all rows
+            rows.forEach(r => r.classList.remove('selected'));
+            
+            // If clicking the same row, deselect and hide buttons
+            if (selectedRowId === this.dataset.docId) {
+                selectedRowId = null;
+                actionContainer.classList.remove('show');
+                return;
+            }
+            
+            // Select new row
+            this.classList.add('selected');
+            selectedRowId = this.dataset.docId;
+            actionContainer.classList.add('show');
+        });
+    });
+}
+
+// Add Accountable Officer form submission
+document.getElementById("accountableForm").addEventListener("submit", e => {
+    e.preventDefault();
+    
+    const officerId = document.getElementById("officerId").value.trim();
+    if (!officerId) {
+        alert("Officer ID is required");
+        return;
+    }
+    
+    db.ref('accountableOfficers').once('value').then(snap => {
+        let isDuplicate = false;
+        
+        if (snap.exists()) {
+            snap.forEach(c => {
+                const d = c.val();
+                if (d.officerId === officerId) {
+                    isDuplicate = true;
+                }
+            });
+        }
+        
+        if (isDuplicate) {
+            alert(`Officer ID "${officerId}" already exists. Please use a different Officer ID.`);
+            return;
+        }
+        
+        const fd = {
+            officerId: officerId,
+            firstName: document.getElementById("firstName").value,
+            lastName: document.getElementById("lastName").value,
+            middleName: document.getElementById("middleName").value,
+            warehouse: "",
+            warehouseName: "",
+            fromDate: "",
+            toDate: "",
+            statusExam: "",
+            note: "",
+            createdAt: new Date().toISOString()
+        };
+        
+        db.ref('accountableOfficers').push().set(fd).then(() => {
+            alert("Officer added successfully!");
+            document.getElementById("accountableModal").style.display = "none";
+            e.target.reset();
+            loadOfficers();
+        }).catch(err => {
+            console.error(err);
+            alert("Error: " + err.message);
+        });
+    }).catch(err => {
+        console.error(err);
+        alert("Error checking for duplicates: " + err.message);
+    });
+});
+
+// ===================================================================
+// CASCADE UPDATE: propagate officer masterfile changes to transactions
+// ===================================================================
+function cascadeUpdateTransactions(officerId, updatedFields) {
+    // updatedFields contains: warehouseId, warehouseName, periodFrom, periodTo
+    // We query all transactions where officerId matches, then batch-update them.
+
+    return new Promise((resolve, reject) => {
+        db.ref('transactions').once('value').then(snap => {
+            if (!snap.exists()) {
+                console.log("No transactions exist — nothing to cascade.");
+                resolve(0);
+                return;
+            }
+
+            const updates = {};   // Firebase multi-path update map
+            let matchCount = 0;
+
+            snap.forEach(child => {
+                const txn = child.val();
+                // Match on officerId field inside each transaction
+                if (txn.officerId === officerId) {
+                    const path = 'transactions/' + child.key;
+                    updates[path + '/warehouseId']   = updatedFields.warehouseId;
+                    updates[path + '/warehouseName'] = updatedFields.warehouseName;
+                    updates[path + '/periodFrom']    = updatedFields.periodFrom;
+                    updates[path + '/periodTo']      = updatedFields.periodTo;
+                    matchCount++;
+                }
+            });
+
+            if (matchCount === 0) {
+                console.log("No transactions matched officerId:", officerId);
+                resolve(0);
+                return;
+            }
+
+            // Single atomic multi-path write
+            db.ref().update(updates).then(() => {
+                console.log("Cascade updated", matchCount, "transaction(s) for officer:", officerId);
+                resolve(matchCount);
+            }).catch(reject);
+
+        }).catch(reject);
+    });
+}
+
+// Masterfile form submission  →  save officer  →  cascade to transactions
+document.getElementById("masterfileForm").addEventListener("submit", e => {
+    e.preventDefault();
+    
+    if (!curOfficer) {
+        alert("No officer selected");
+        return;
+    }
+    
+    if (!selWarehouse) {
+        alert("Please select a warehouse");
+        return;
+    }
+
+    const fromDateVal = document.getElementById("fromDate").value;
+    const toDateVal   = document.getElementById("toDate").value;
+    
+    // 1) Data to save on the accountableOfficers record
+    const md = {
+        warehouse:     document.getElementById("warehouse").value,
+        warehouseName: document.getElementById("warehouse_name").value,
+        fromDate:      fromDateVal,
+        toDate:        toDateVal,
+        statusExam:    document.getElementById("statusExam").value,
+        note:          document.getElementById("note").value,
+        updatedAt:     new Date().toISOString()
+    };
+    
+    // 2) Update the officer masterfile first
+    db.ref('accountableOfficers/' + curOfficer).update(md).then(() => {
+        console.log("Officer masterfile saved. Now cascading to transactions...");
+
+        // 3) Cascade the changed fields into all matching transactions
+        //    curOfficerId holds the human-readable officerId (e.g. "OFS-001")
+        const cascadeFields = {
+            warehouseId:   md.warehouse,
+            warehouseName: md.warehouseName,
+            periodFrom:    fromDateVal,
+            periodTo:      toDateVal
+        };
+
+        return cascadeUpdateTransactions(curOfficerId, cascadeFields);
+
+    }).then(updatedCount => {
+        // 4) Show result to user
+        let msg = "Masterfile saved successfully!";
+        if (updatedCount > 0) {
+            msg += `\n✔ ${updatedCount} transaction(s) updated automatically.`;
+        } else {
+            msg += "\n(No existing transactions to update.)";
+        }
+        alert(msg);
+
+        // 5) Cleanup
+        document.getElementById('masterfileModal').style.display = "none";
+        document.getElementById("masterfileForm").reset();
+        curOfficer   = null;
+        curOfficerId = null;
+        resetWH();
+        loadOfficers();
+
+    }).catch(err => {
+        console.error("Error saving masterfile or cascading:", err);
+        alert("Error: " + err.message);
+    });
+});
+
+// Edit button handler
+document.getElementById('editTransactionBtn').addEventListener('click', () => {
+    if (!selectedRowId) {
+        alert("No officer selected");
+        return;
+    }
+    
+    curOfficer = selectedRowId;   // Firebase key of accountableOfficers record
+    resetWH();
+    
+    db.ref('accountableOfficers/' + selectedRowId).once('value').then(s => {
+        const d = s.val();
+        if (d) {
+            // Store the human-readable officerId so we can match transactions later
+            curOfficerId = d.officerId || null;
+
+            document.getElementById("officerMaster").value = d.officerId || "";
+            const fn = `${d.lastName || ""}, ${d.firstName || ""} ${d.middleName || ""}`.trim();
+            document.getElementById("officerName").value = fn;
+            
+            // Pre-select the current warehouse in the dropdown
+            if (d.warehouse && d.warehouseName) {
+                // Find the matching row in the warehouse dropdown and click it
+                // (rows are keyed by data-code)
+                const warehouseRows = document.querySelectorAll('.warehouse-dropdown-table tbody tr');
+                warehouseRows.forEach(row => {
+                    if (row.dataset.code === d.warehouse) {
+                        row.click(); // triggers the existing selection logic
+                    }
+                });
+            }
+            
+            document.getElementById("fromDate").value = d.fromDate || "";
+            document.getElementById("toDate").value = d.toDate || "";
+            document.getElementById("statusExam").value = d.statusExam || "";
+            document.getElementById("note").value = d.note || "";
+        }
+        
+        document.getElementById('masterfileModal').style.display = "flex";
+    }).catch(e => {
+        console.error(e);
+        document.getElementById('masterfileModal').style.display = "flex";
+    });
+});
+
+// Delete button handler
+document.getElementById('deleteTransactionBtn').addEventListener('click', () => {
+    if (!selectedRowId) {
+        alert("No officer selected");
+        return;
+    }
+    
+    if (confirm("Are you sure you want to delete this officer?")) {
+        db.ref('accountableOfficers/' + selectedRowId).remove().then(() => {
+            alert("Officer deleted successfully!");
+            selectedRowId = null;
+            document.getElementById('actionButtonsContainer').classList.remove('show');
+            loadOfficers();
+        }).catch(e => {
+            console.error(e);
+            alert("Error: " + e.message);
+        });
+    }
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', e => {
+    const st = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    
+    rows.forEach(r => {
+        const t = r.textContent.toLowerCase();
+        r.style.display = t.includes(st) ? '' : 'none';
+    });
+});
+
+// Warehouse dropdown event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const si = document.getElementById('warehouseSearchInput');
+    const dt = document.getElementById('warehouseDropdownTrigger');
+    
+    if (dt) dt.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWH();
+    });
+    
+    if (si) {
+        si.addEventListener('input', e => {
+            const st = e.target.value.toLowerCase();
+            const fw = allWarehouses.filter(w =>
+                w.code.toLowerCase().includes(st) ||
+                w.name.toLowerCase().includes(st) ||
+                w.location.toLowerCase().includes(st)
+            );
+            renderWH(fw);
+        });
+        
+        si.addEventListener('click', e => e.stopPropagation());
+    }
+    
+    document.addEventListener('click', e => {
+        const d = document.getElementById('warehouseDropdownMenu');
+        const t = document.getElementById('warehouseDropdownTrigger');
+        if (!d.contains(e.target) && e.target !== t) closeWH();
+    });
+});
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
+    initModals();
+    loadOfficers();
+    loadWH();
+});
     </script>
 </body>
 </html>

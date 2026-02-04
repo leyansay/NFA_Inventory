@@ -12,12 +12,16 @@
      <div class="main-content">
         <div class="header">
             <div class="header-left">
-                <h1>Variety Library</h1>
+                <div class="icon-badge">📚</div>
+                <div class="header-text">
+                    <h1>Variety Library</h1>
+                    <p class="header-subtitle">Manage and organize all variety records</p>
+                </div>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">ADMINISTRATOR</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -25,6 +29,7 @@
 
         <div class="controls">
             <div class="sort-section">
+                <span class="sort-icon">📊</span>
                 <label>Sort by:</label>
                 <select class="sort-select" id="sortSelect">
                     <option value="newest">Newest First</option>
@@ -35,11 +40,11 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-preview" id="previewBtn">
-                    <span>👁</span>
+                    <span class="btn-icon">👁</span>
                     <span>Preview</span>
                 </button>
                 <button class="btn btn-add" id="addVarietyBtn">
-                    <span>+</span>
+                    <span class="btn-icon">+</span>
                     <span>Add Variety</span>
                 </button>
             </div>
@@ -49,15 +54,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th>VARIETY CODE</th>
-                        <th>DESCRIPTION</th>
-                        <th>CEREAL TYPE</th>
-                        <th>ACTIONS</th>
+                        <th><span class="th-content">📋 VARIETY CODE</span></th>
+                        <th><span class="th-content">📝 DESCRIPTION</span></th>
+                        <th><span class="th-content">🌾 CEREAL TYPE</span></th>
                     </tr>
                 </thead>
                 <tbody id="varietyTableBody">
                     <tr>
-                        <td colspan="4" style="text-align:center;">Loading varieties...</td>
+                        <td colspan="3" style="text-align:center;">Loading varieties...</td>
                     </tr>
                 </tbody>
             </table>
@@ -68,27 +72,42 @@
     <div class="modal-overlay" id="modalOverlay">
        <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF VARIETY LIBRARY</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">🌾</div>
+                    <h2 class="modal-title">Variety Library Entry</h2>
+                </div>
                 <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="varietyForm">
                     <div class="form-group">
-                        <label class="form-label">Variety Code:</label>
+                        <label class="form-label">
+                            <span class="label-icon">📋</span>
+                            Variety Code
+                        </label>
                         <input type="text" class="form-input" id="varietyCode" placeholder="Enter Variety Code" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Description:</label>
-                        <input type="text" class="form-input" id="description" placeholder="Enter Description" >
+                        <label class="form-label">
+                            <span class="label-icon">📝</span>
+                            Description
+                        </label>
+                        <input type="text" class="form-input" id="description" placeholder="Enter Description">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Cereal Type:</label>
+                        <label class="form-label">
+                            <span class="label-icon">🌾</span>
+                            Cereal Type
+                        </label>
                         <input type="text" class="form-input" id="cerealType" placeholder="Enter Cereal Type" required>
                     </div>
 
-                    <button type="submit" class="btn-save">Save Variety</button>
+                    <button type="submit" class="btn-save">
+                        <span class="btn-icon">💾</span>
+                        Save Variety
+                    </button>
                 </form>
             </div>
         </div>
@@ -118,6 +137,7 @@
         // ===================== GLOBAL VARIABLES =====================
         let allVarieties = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null;
 
        // ===================== MODAL CONTROLS =====================
         const modalOverlay = document.getElementById('modalOverlay');
@@ -129,25 +149,25 @@
         addVarietyBtn.addEventListener('click', () => {
             varietyForm.reset();
             varietyForm.removeAttribute('data-edit-id');
-            modalOverlay.classList.add('show'); // Changed from 'show' to 'active'
+            modalOverlay.classList.add('show');
         });
 
         // Close modal
         closeModalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('show'); // Changed from 'show' to 'active'
+            modalOverlay.classList.remove('show');
         });
 
         // Close modal when clicking outside
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('show'); // Changed from 'show' to 'active'
+                modalOverlay.classList.remove('show');
             }
         });
 
         // Close modal with ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                modalOverlay.classList.remove('show'); // Changed from 'show' to 'active'
+                modalOverlay.classList.remove('show');
             }
         });
 
@@ -172,14 +192,13 @@
             let hasEmptyFields = false;
             const requiredFields = [
                 { id: 'varietyCode', value: varietyCode, label: 'Variety Code' },
-                // { id: 'description', value: description, label: 'Description' },
                 { id: 'cerealType', value: cerealType, label: 'Cereal Type' }
             ];
 
             requiredFields.forEach(field => {
                 if (!field.value) {
                     const element = document.getElementById(field.id);
-                    element.style.border = '2px solid #ff6b6b';
+                    element.style.border = '2px solid #D32F2F';
                     hasEmptyFields = true;
                     
                     const errorMsg = document.createElement('div');
@@ -210,27 +229,27 @@
                 varietyData.updatedAt = new Date().toISOString();
                 database.ref('varieties/' + editId).update(varietyData)
                     .then(() => {
-                        alert('Variety updated successfully!');
+                        alert('✅ Variety updated successfully!');
                         form.reset();
                         form.removeAttribute('data-edit-id');
                         modalOverlay.classList.remove('show');
                     })
                     .catch((error) => {
                         console.error('Error updating variety:', error);
-                        alert('Error updating variety: ' + error.message);
+                        alert('❌ Error updating variety: ' + error.message);
                     });
             } else {
                 // Create new variety
                 varietyData.createdAt = new Date().toISOString();
                 database.ref('varieties').push(varietyData)
                     .then(() => {
-                        alert('Variety added successfully!');
+                        alert('✅ Variety added successfully!');
                         form.reset();
                         modalOverlay.classList.remove('show');
                     })
                     .catch((error) => {
                         console.error('Error adding variety:', error);
-                        alert('Error adding variety: ' + error.message);
+                        alert('❌ Error adding variety: ' + error.message);
                     });
             }
         });
@@ -246,7 +265,7 @@
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align:center;">No varieties found</td>
+                            <td colspan="3" style="text-align:center;">No varieties found</td>
                         </tr>`;
                     return;
                 }
@@ -266,7 +285,7 @@
                 console.error('Error loading varieties:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center; color: red;">Error loading varieties: ${error.message}</td>
+                        <td colspan="3" style="text-align:center; color: #D32F2F;">Error loading varieties: ${error.message}</td>
                     </tr>`;
             });
         }
@@ -298,7 +317,7 @@
             if (allVarieties.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center;">No varieties found</td>
+                        <td colspan="3" style="text-align:center;">No varieties found</td>
                     </tr>`;
                 return;
             }
@@ -306,78 +325,82 @@
             allVarieties.forEach(item => {
                 const d = item.data;
                 const tr = document.createElement('tr');
+                tr.className = 'data-row';
+                tr.dataset.id = item.id;
+                
                 tr.innerHTML = `
-                    <td>${d.varietyCode || '-'}</td>
+                    <td><span class="code-badge">${d.varietyCode || '-'}</span></td>
                     <td>${d.description || '-'}</td>
-                    <td>${d.cerealType || '-'}</td>
-
-                    <td class="actions-cell">
-                <button class="action-btn" data-id="${item.id}" title="More actions">⋮</button>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" data-action="edit" data-id="${item.id}">
-                        <span>✏️</span> Edit
-                    </button>
-                    <button class="dropdown-item" data-action="delete" data-id="${item.id}">
-                        <span>🗑️</span> Delete
-                    </button>
-                </div>
-            </td>
+                    <td><span class="cereal-tag">${d.cerealType || '-'}</span></td>
                 `;
+                
                 tbody.appendChild(tr);
             });
 
-            attachDropdownListeners();
+            attachRowListeners();
         }
 
-        // ===================== DROPDOWN HANDLERS =====================
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
-
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = item.dataset.id;
-                    const action = item.dataset.action;
+        // ===================== ROW CLICK HANDLERS =====================
+        function attachRowListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const rowId = row.dataset.id;
                     
-                    closeAllDropdowns();
+                    // Check if buttons are already showing
+                    const existingButtons = document.querySelector('.floating-action-buttons');
                     
-                    if (action === 'edit') {
-                        editVariety(id);
-                    } else if (action === 'delete') {
-                        if (confirm('Are you sure you want to delete this variety?')) {
-                            deleteVariety(id);
-                        }
+                    if (activeRowId === rowId) {
+                        // Hide buttons if clicking same row
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('active');
+                        activeRowId = null;
+                    } else {
+                        // Remove previous buttons and highlight
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.active').forEach(r => r.classList.remove('active'));
+                        
+                        // Add new buttons
+                        row.classList.add('active');
+                        activeRowId = rowId;
+                        
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+                        
+                        document.querySelector('.table-container').appendChild(buttonContainer);
+                        
+                        // Attach event listeners
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editVariety(rowId);
+                        });
+                        
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this variety?')) {
+                                deleteVariety(rowId);
+                            }
+                        });
                     }
                 });
             });
         }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
 
         // ===================== EDIT VARIETY =====================
         function editVariety(id) {
             database.ref('varieties/' + id).once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        alert('Variety not found!');
+                        alert('❌ Variety not found!');
                         return;
                     }
                     
@@ -392,7 +415,7 @@
                 })
                 .catch((error) => {
                     console.error('Error loading variety:', error);
-                    alert('Error loading variety: ' + error.message);
+                    alert('❌ Error loading variety: ' + error.message);
                 });
         }
 
@@ -400,11 +423,12 @@
         function deleteVariety(id) {
             database.ref('varieties/' + id).remove()
                 .then(() => {
-                    alert('Variety deleted successfully!');
+                    alert('✅ Variety deleted successfully!');
+                    activeRowId = null;
                 })
                 .catch((error) => {
                     console.error('Error deleting variety:', error);
-                    alert('Error deleting variety: ' + error.message);
+                    alert('❌ Error deleting variety: ' + error.message);
                 });
         }
 
@@ -414,9 +438,18 @@
         });
 
         // ===================== PREVIEW BUTTON =====================
-       // Preview button - opens preview page in new window
         document.getElementById('previewBtn').addEventListener('click', () => {
             window.open('variety_preview.html');
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
 
         // ===================== INIT =====================

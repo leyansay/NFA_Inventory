@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Library - NFA Inventory</title>
+    <title>Activity Library - NFA Inventory System</title>
     <link rel="stylesheet" href="css/activity.css" />
 </head>
 <body>
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
 
- <div class="main-content">
+    <div class="main-content">
         <div class="header">
             <div class="header-left">
                 <h1>Activity Library</h1>
+                <p style="color: #6B7C6B; font-size: 0.9rem; margin-top: 0.25rem;">Manage and organize all activity records</p>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">Administrator</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -25,7 +26,7 @@
 
         <div class="controls">
             <div class="sort-section">
-                <label>Sort by:</label>
+                <label>📊 Sort by:</label>
                 <select class="sort-select" id="sortSelect">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -35,11 +36,11 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-preview" id="previewBtn">
-                    <span>👁</span>
+                    <span>👁️</span>
                     <span>Preview</span>
                 </button>
                 <button class="btn btn-add" id="addActivityBtn">
-                    <span>+</span>
+                    <span>➕</span>
                     <span>Add Activity</span>
                 </button>
             </div>
@@ -49,27 +50,30 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ACTIVITY CODE</th>
-                        <th>DESCRIPTION</th>
-                        <th>ABBREVIATION</th>
-                        <th>INCLUDE IN TA</th>
-                        <th>IN-WHSE. ACT.</th>
-                        <th>Action</th>
+                        <th>🔖 ACTIVITY CODE</th>
+                        <th>📝 DESCRIPTION</th>
+                        <th>🏷️ ABBREVIATION</th>
+                        <th>✅ INCLUDE IN TA</th>
+                        <th>🏭 IN-WHSE. ACT.</th>
                     </tr>
                 </thead>
                 <tbody id="activityTableBody">
                     <tr>
-                        <td colspan="6" style="text-align:center;">Loading activities...</td>
+                        <td colspan="5" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">Loading activities...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- Modal -->
     <div class="modal-overlay" id="activityModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF ACTIVITY LIBRARY</h2>
+                <h2 class="modal-title">📋 DATA ENTRY OF ACTIVITY LIBRARY</h2>
                 <button class="close-btn" id="closeModalBtn">×</button>
             </div>
 
@@ -77,39 +81,39 @@
                 <form id="activityForm">
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label class="form-label">Activity Code:</label>
-                            <input type="text" class="form-input" id="activityCode" required>
+                            <label class="form-label">🔖 Activity Code: <span style="color: #C62828;">*</span></label>
+                            <input type="text" class="form-input" id="activityCode" required placeholder="Enter activity code">
                         </div>
 
                         <div class="form-group full-width">
-                            <label class="form-label">Description</label>
-                            <input type="text" class="form-input" id="description" required>
+                            <label class="form-label">📝 Description <span style="color: #C62828;">*</span></label>
+                            <input type="text" class="form-input" id="description" required placeholder="Enter description">
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Abbreviation</label>
-                                <input type="text" class="form-input" id="abbreviation">
+                                <label class="form-label">🏷️ Abbreviation</label>
+                                <input type="text" class="form-input" id="abbreviation" placeholder="Enter abbreviation">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Include in TA:</label>
-                                <input type="text" class="form-input" id="includeInTA">
+                                <label class="form-label">✅ Include in TA:</label>
+                                <input type="text" class="form-input" id="includeInTA" placeholder="Yes/No">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">In-Whse. Act:</label>
-                                <input type="text" class="form-input" id="inWhseAct">
+                                <label class="form-label">🏭 In-Whse. Act:</label>
+                                <input type="text" class="form-input" id="inWhseAct" placeholder="Yes/No">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Transaction Date</label>
+                                <label class="form-label">📅 Transaction Date</label>
                                 <input type="date" class="form-input" id="transactionDate">
                             </div>
                         </div>
 
                         <div class="form-group full-width">
-                            <button type="submit" class="btn-save">Save Transaction</button>
+                            <button type="submit" class="btn-save">💾 Save Transaction</button>
                         </div>
                     </div>
                 </form>
@@ -121,7 +125,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase Configuration
+        // ===================== FIREBASE CONFIGURATION =====================
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -133,7 +137,6 @@
             measurementId: "G-ZEJP0S67SY"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -141,11 +144,12 @@
 
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        // Global variables
+        // ===================== GLOBAL VARIABLES =====================
         let allActivities = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null; // ← ADDED: tracks currently selected row (same as Variety)
 
-        // Modal controls
+        // ===================== MODAL CONTROLS =====================
         const activityModal = document.getElementById('activityModal');
         const addActivityBtn = document.getElementById('addActivityBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
@@ -177,7 +181,7 @@
             }
         });
 
-        // Form submit handler
+        // ===================== FORM SUBMIT (SAVE / UPDATE) =====================
         activityForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -210,12 +214,12 @@
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
                 if (!element.value.trim()) {
-                    element.style.border = '2px solid #ff6b6b';
+                    element.style.border = '2px solid #C62828';
                     hasEmptyFields = true;
                     
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'field-error-message';
-                    errorMsg.textContent = 'This field is required';
+                    errorMsg.textContent = '⚠️ This field is required';
                     element.parentElement.appendChild(errorMsg);
                 }
             });
@@ -232,39 +236,35 @@
             if (editId) {
                 // Update existing activity
                 activityData.updatedAt = new Date().toISOString();
-                const activityRef = database.ref('activities/' + editId);
-                
-                activityRef.update(activityData)
+                database.ref('activities/' + editId).update(activityData)
                     .then(() => {
-                        alert('Activity updated successfully!');
+                        alert('✅ Activity updated successfully!');
                         activityModal.classList.remove('active');
                         form.reset();
                         form.removeAttribute('data-edit-id');
+                        activeRowId = null;
                     })
                     .catch((error) => {
                         console.error('Error updating activity:', error);
-                        alert('Error updating activity: ' + error.message);
+                        alert('❌ Error updating activity: ' + error.message);
                     });
             } else {
                 // Create new activity
                 activityData.createdAt = new Date().toISOString();
-                const activitiesRef = database.ref('activities');
-                const newActivityRef = activitiesRef.push();
-                
-                newActivityRef.set(activityData)
+                database.ref('activities').push(activityData)
                     .then(() => {
-                        alert('Activity saved successfully!');
+                        alert('✅ Activity saved successfully!');
                         activityModal.classList.remove('active');
                         form.reset();
                     })
                     .catch((error) => {
                         console.error('Error saving activity:', error);
-                        alert('Error saving activity: ' + error.message);
+                        alert('❌ Error saving activity: ' + error.message);
                     });
             }
         });
 
-        // Sort activities
+        // ===================== SORT ACTIVITIES =====================
         function sortActivities(order) {
             currentSortOrder = order;
             
@@ -283,7 +283,7 @@
             renderActivities();
         }
 
-        // Render activities to table
+        // ===================== RENDER ACTIVITIES =====================
         function renderActivities() {
             const tbody = document.getElementById('activityTableBody');
             tbody.innerHTML = '';
@@ -291,7 +291,11 @@
             if (allActivities.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align:center;">No activities found</td>
+                        <td colspan="5" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No activities found</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Activity" to create your first entry</div>
+                        </td>
                     </tr>`;
                 return;
             }
@@ -301,93 +305,99 @@
                 const docId = item.docId;
                 
                 const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.dataset.id = docId; // ← CHANGED: use dataset.id (same pattern as Variety)
                 tr.innerHTML = `
                     <td>${data.activityCode || '-'}</td>
                     <td>${data.description || '-'}</td>
                     <td>${data.abbreviation || '-'}</td>
                     <td>${data.includeTA || '-'}</td>
                     <td>${data.inWhse || '-'}</td>
-                    <td class="actions-cell">
-                        <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
-                                <span>✏️</span> Edit
-                            </button>
-                            <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
-                                <span>🗑️</span> Delete
-                            </button>
-                        </div>
-                    </td>
                 `;
                 
                 tbody.appendChild(tr);
             });
             
-            attachDropdownListeners();
+            attachRowClickListeners();
         }
 
-        // Attach dropdown listeners
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
+        // ===================== ROW CLICK → FLOATING BUTTONS =====================
+        // ← REWRITTEN: exact same toggle logic as the working Variety page
+        function attachRowClickListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const rowId = row.dataset.id;
 
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = item.dataset.docId;
-                    const action = item.dataset.action;
-                    
-                    closeAllDropdowns();
-                    
-                    if (action === 'edit') {
-                        editActivity(docId);
-                    } else if (action === 'delete') {
-                        if (confirm('Are you sure you want to delete this activity?')) {
-                            deleteActivity(docId);
-                        }
+                    // Reference to any existing floating buttons
+                    const existingButtons = document.querySelector('.floating-action-buttons');
+
+                    if (activeRowId === rowId) {
+                        // --- Clicking the SAME row → hide buttons (toggle off) ---
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('row-selected');
+                        activeRowId = null;
+                    } else {
+                        // --- Clicking a DIFFERENT row → move buttons there ---
+
+                        // 1. Remove old buttons & highlight
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+                        // 2. Highlight the new row
+                        row.classList.add('row-selected');
+                        activeRowId = rowId;
+
+                        // 3. Create floating Edit / Delete buttons
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+
+                        // Append to body so position:fixed works reliably
+                        document.body.appendChild(buttonContainer);
+
+                        // 4. Wire up Edit
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editActivity(rowId);
+                        });
+
+                        // 5. Wire up Delete
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this activity?')) {
+                                deleteActivity(rowId);
+                            }
+                        });
                     }
                 });
             });
         }
 
-        // Close all dropdowns
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
-
-        // Edit activity
+        // ===================== EDIT ACTIVITY =====================
         function editActivity(docId) {
-            const activityRef = database.ref('activities/' + docId);
-            
-            activityRef.once('value')
+            database.ref('activities/' + docId).once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        alert('Activity not found!');
+                        alert('❌ Activity not found!');
                         return;
                     }
                     
                     const data = snapshot.val();
                     
-                    document.getElementById('activityCode').value = data.activityCode || '';
-                    document.getElementById('description').value = data.description || '';
-                    document.getElementById('abbreviation').value = data.abbreviation || '';
-                    document.getElementById('includeInTA').value = data.includeTA || '';
-                    document.getElementById('inWhseAct').value = data.inWhse || '';
+                    document.getElementById('activityCode').value  = data.activityCode || '';
+                    document.getElementById('description').value   = data.description || '';
+                    document.getElementById('abbreviation').value  = data.abbreviation || '';
+                    document.getElementById('includeInTA').value   = data.includeTA || '';
+                    document.getElementById('inWhseAct').value     = data.inWhse || '';
                     document.getElementById('transactionDate').value = data.transactionDate || '';
                     
                     activityForm.setAttribute('data-edit-id', docId);
@@ -395,25 +405,24 @@
                 })
                 .catch((error) => {
                     console.error('Error loading activity:', error);
-                    alert('Error loading activity: ' + error.message);
+                    alert('❌ Error loading activity: ' + error.message);
                 });
         }
 
-        // Delete activity
+        // ===================== DELETE ACTIVITY =====================
         function deleteActivity(docId) {
-            const activityRef = database.ref('activities/' + docId);
-            
-            activityRef.remove()
+            database.ref('activities/' + docId).remove()
                 .then(() => {
-                    alert('Activity deleted successfully!');
+                    alert('✅ Activity deleted successfully!');
+                    activeRowId = null; // ← reset tracker after delete
                 })
                 .catch((error) => {
                     console.error('Error deleting activity:', error);
-                    alert('Error deleting activity: ' + error.message);
+                    alert('❌ Error deleting activity: ' + error.message);
                 });
         }
 
-        // Load activities from Firebase
+        // ===================== LOAD ACTIVITIES FROM FIREBASE =====================
         function loadActivities() {
             const tbody = document.getElementById('activityTableBody');
             const activitiesRef = database.ref('activities');
@@ -424,18 +433,19 @@
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align:center;">No activities found</td>
+                            <td colspan="5" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No activities found</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Activity" to create your first entry</div>
+                            </td>
                         </tr>`;
                     return;
                 }
 
                 snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    const docId = childSnapshot.key;
-                    
                     allActivities.push({
-                        docId: docId,
-                        data: data
+                        docId: childSnapshot.key,
+                        data: childSnapshot.val()
                     });
                 });
                 
@@ -444,25 +454,39 @@
                 console.error('Error loading activities:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align:center; color: red;">Error loading activities: ${error.message}</td>
+                        <td colspan="5" style="text-align:center; color: #C62828; padding: 3rem;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">Error loading activities</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">${error.message}</div>
+                        </td>
                     </tr>`;
             });
         }
 
-        // Sort select handler
+        // ===================== SORT SELECT HANDLER =====================
         document.getElementById('sortSelect').addEventListener('change', (e) => {
             sortActivities(e.target.value);
         });
 
-        // Preview button - opens preview page in new window
+        // ===================== PREVIEW BUTTON =====================
         document.getElementById('previewBtn').addEventListener('click', () => {
             window.open('activity-preview.html');
         });
 
-        // Initialize on page load
+        // ===================== INIT =====================
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Activity Library page loaded');
+            console.log('🌾 Activity Library page loaded');
             loadActivities();
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
 </body>

@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Transactions - BSM Dashboard</title>
     <style>
+        /* ==========================================
+           NFA THEME COLORS
+           ========================================== */
+        :root {
+            /* Primary - Deep Rice-Field Green */
+            --primary-green: #1B5E20;
+            --primary-green-light: #2E7D32;
+            --primary-green-dark: #0D3D11;
+            
+            /* Secondary - Warm Grain Beige */
+            --beige-light: #F1E9D2;
+            --beige-main: #E8D8B5;
+            --beige-dark: #D4C4A0;
+            
+            /* Accent - Harvest Gold */
+            --gold-main: #F9A825;
+            --gold-light: #FFB300;
+            --gold-dark: #E89600;
+            
+            /* Neutrals */
+            --white: #FFFFFF;
+            --gray-light: #F5F5F5;
+            --text-primary: #1B1B1B;
+            --text-secondary: #555555;
+            
+            /* Status Colors */
+            --error-red: #D32F2F;
+            --success-green: #10b981;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +43,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+            background-color: var(--beige-light);
             margin-left: 260px;
             overflow-x: hidden;
         }
@@ -45,12 +75,13 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 3px solid var(--primary-green);
         }
 
         .page-title {
             font-size: 2rem;
             font-weight: 700;
-            color: #1a1d2e;
+            color: var(--primary-green);
         }
 
         .user-info {
@@ -66,12 +97,12 @@
         .user-name {
             font-size: 0.95rem;
             font-weight: 600;
-            color: #1a1d2e;
+            color: var(--text-primary);
         }
 
         .user-role {
             font-size: 0.8rem;
-            color: #8b92b0;
+            color: var(--text-secondary);
             text-transform: uppercase;
         }
 
@@ -79,13 +110,14 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: #8b5cf6;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
             font-size: 1.2rem;
+            border: 3px solid var(--beige-main);
         }
 
         .main-content {
@@ -95,7 +127,7 @@
         .section-title {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #8b5cf6;
+            color: var(--primary-green);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -115,30 +147,33 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease;
+            border-top: 4px solid var(--primary-green);
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(27, 94, 32, 0.2);
         }
 
         .stat-card.purple {
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
             color: white;
         }
 
         .stat-card.blue {
-            background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-main) 100%);
             color: white;
         }
 
         .stat-card.green {
-            background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
+            background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
             color: white;
         }
 
         .stat-card.orange {
-            background: linear-gradient(135deg, #ff9a56 0%, #ff7b3d 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--beige-main) 0%, var(--beige-dark) 100%);
+            color: var(--primary-green);
+            border-top-color: var(--gold-main);
         }
 
         .stat-label {
@@ -171,21 +206,23 @@
 
         .sort-label {
             font-weight: 600;
-            color: #1a1d2e;
+            color: var(--primary-green);
         }
 
         .sort-dropdown {
             padding: 0.5rem 1rem;
-            border: 1px solid #e0e4e9;
+            border: 2px solid var(--beige-main);
             border-radius: 8px;
             font-size: 0.9rem;
             background: white;
             cursor: pointer;
+            color: var(--text-primary);
         }
 
         .sort-dropdown:focus {
             outline: none;
-            border-color: #8b5cf6;
+            border-color: var(--primary-green);
+            background: var(--beige-light);
         }
 
         .table-section {
@@ -194,6 +231,7 @@
             padding: 1.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
+            border-top: 4px solid var(--primary-green);
         }
 
         .search-filter {
@@ -205,10 +243,11 @@
 
         .search-input {
             padding: 0.5rem 1rem;
-            border: 1px solid #e0e4e9;
+            border: 2px solid var(--beige-main);
             border-radius: 8px;
             font-size: 0.9rem;
             min-width: 250px;
+            color: var(--text-primary);
         }
 
         .date-filter {
@@ -220,37 +259,40 @@
 
         .date-input {
             padding: 0.5rem 1rem;
-            border: 1px solid #e0e4e9;
+            border: 2px solid var(--beige-main);
             border-radius: 8px;
             font-size: 0.9rem;
             background: white;
             cursor: pointer;
+            color: var(--text-primary);
         }
 
         .date-input:focus {
             outline: none;
-            border-color: #8b5cf6;
+            border-color: var(--primary-green);
+            background: var(--beige-light);
         }
 
         .date-label {
             font-weight: 600;
-            color: #1a1d2e;
+            color: var(--primary-green);
             font-size: 0.9rem;
         }
 
         .btn-clear {
-            background: #ef4444;
+            background: var(--error-red);
             color: white;
         }
 
         .btn-clear:hover {
-            background: #dc2626;
+            background: #c62828;
             transform: translateY(-2px);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #8b5cf6;
+            border-color: var(--primary-green);
+            background: var(--beige-light);
         }
 
         .btn {
@@ -264,22 +306,22 @@
         }
 
         .btn-refresh {
-            background: #8b5cf6;
+            background: var(--primary-green);
             color: white;
         }
 
         .btn-refresh:hover {
-            background: #7c3aed;
+            background: var(--primary-green-dark);
             transform: translateY(-2px);
         }
 
         .btn-export {
-            background: #10b981;
+            background: linear-gradient(135deg, var(--gold-main) 0%, var(--gold-light) 100%);
             color: white;
         }
 
         .btn-export:hover {
-            background: #059669;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-dark) 100%);
             transform: translateY(-2px);
         }
 
@@ -287,7 +329,7 @@
             overflow-x: auto;
             max-height: 600px;
             overflow-y: auto;
-            border: 1px solid #e0e4e9;
+            border: 1px solid var(--beige-main);
             border-radius: 8px;
         }
 
@@ -298,7 +340,7 @@
         }
 
         .data-table thead {
-            background: #8b5cf6;
+            background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
             color: white;
             position: sticky;
             top: 0;
@@ -315,7 +357,7 @@
 
         .data-table td {
             padding: 0.75rem 0.5rem;
-            border-bottom: 1px solid #f0f2f5;
+            border-bottom: 1px solid var(--beige-light);
             white-space: nowrap;
         }
 
@@ -325,21 +367,21 @@
         }
 
         .data-table tbody tr:hover {
-            background-color: #f3f0ff;
+            background-color: rgba(249, 168, 37, 0.1);
         }
 
         .data-table tbody tr:nth-child(even) {
-            background-color: #fafbfc;
+            background-color: var(--beige-light);
         }
 
         .data-table tbody tr:nth-child(even):hover {
-            background-color: #f3f0ff;
+            background-color: rgba(249, 168, 37, 0.15);
         }
 
         .no-data {
             text-align: center;
             padding: 3rem;
-            color: #8b92b0;
+            color: var(--text-secondary);
         }
 
         .no-data-icon {
@@ -350,8 +392,9 @@
         .loading {
             text-align: center;
             padding: 2rem;
-            color: #8b5cf6;
+            color: var(--primary-green);
             font-size: 1.1rem;
+            font-weight: 600;
         }
 
         /* Modal Styles */
@@ -383,10 +426,11 @@
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideInModal 0.3s ease;
+            border-top: 5px solid var(--primary-green);
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
             color: white;
             padding: 1.5rem 2rem;
             border-radius: 16px 16px 0 0;
@@ -431,10 +475,10 @@
         .detail-section-title {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #8b5cf6;
+            color: var(--primary-green);
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #f0f2f5;
+            border-bottom: 2px solid var(--beige-light);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -455,25 +499,25 @@
         .detail-label {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #8b92b0;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .detail-value {
             font-size: 0.95rem;
-            color: #1a1d2e;
+            color: var(--text-primary);
             font-weight: 500;
         }
 
         .detail-value.highlight {
-            color: #8b5cf6;
+            color: var(--gold-main);
             font-weight: 700;
             font-size: 1.1rem;
         }
 
         .detail-value.cancelled {
-            color: #ef4444;
+            color: var(--error-red);
             font-weight: 700;
         }
 
@@ -495,13 +539,17 @@
 
         .menu-toggle {
             display: none;
-            background: #8b5cf6;
+            background: var(--primary-green);
             color: white;
             border: none;
             padding: 0.75rem 1rem;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.2rem;
+        }
+
+        .menu-toggle:hover {
+            background: var(--primary-green-dark);
         }
 
         @media (max-width: 1024px) {
@@ -709,7 +757,7 @@
     </div>
 
     <div class="main-content">
-        <h2 class="section-title">📈 Overall Statistics</h2>
+        <h2 class="section-title">Overall Statistics</h2>
         
         <div class="stats-grid">
             <div class="stat-card purple">
@@ -744,8 +792,8 @@
                 </div>
                 <div class="search-filter">
                     <input type="text" class="search-input" id="searchInput" placeholder="Search transactions...">
-                    <button class="btn btn-refresh" onclick="loadTodayTransactions()">🔄 Refresh</button>
-                    <button class="btn btn-export" onclick="exportTransactions()">📥 Export</button>
+                    <button class="btn btn-refresh" onclick="openPreview()">Preview</button>
+                    <button class="btn btn-export" onclick="exportTransactions()">Export</button>
                 </div>
             </div>
             
@@ -822,13 +870,20 @@
         let todayTransactions = [];
         let allTransactions = [];
         let currentSortOrder = 'newest';
+        let filteredTransactions = [];
 
         function toggleSidebar() {
             document.getElementById('sidebar-container').classList.toggle('open');
         }
 
+        function openPreview() {
+            // Store the currently displayed transactions in sessionStorage
+            sessionStorage.setItem('previewTransactions', JSON.stringify(filteredTransactions));
+            window.open('bsm_all_preview.html', '_blank');
+        }
+
         function showModal(index) {
-            const item = todayTransactions[index];
+            const item = filteredTransactions[index];
             if (!item) return;
 
             const data = item.data;
@@ -976,9 +1031,13 @@
                         </td>
                     </tr>
                 `;
+                filteredTransactions = [];
                 updateStatistics();
                 return;
             }
+
+            // Update filtered transactions for preview
+            filteredTransactions = [...todayTransactions];
 
             tableBody.innerHTML = '';
             
@@ -1040,12 +1099,13 @@
             document.getElementById('avgMC').textContent = avgMC.toFixed(2) + '%';
         }
 
-        function exportTransactions() {
+        async function exportTransactions() {
             if (todayTransactions.length === 0) {
                 alert('No transactions to export');
                 return;
             }
 
+            // Generate CSV content
             let csv = 'Officer ID,Officer Name,Warehouse ID,Warehouse Name,Period From,Period To,Document No,Document Type,OR No,AI No,Ref WSI,Recd From,Date,Activity,Variety,Sack Code,Condition,Sack WT,Age,Pile,Bags,Gross WT,MC%,Net WT,Cancelled\n';
 
             todayTransactions.forEach(item => {
@@ -1053,11 +1113,57 @@
                 csv += `"${d.officerId || ''}","${d.officerName || ''}","${d.warehouseId || ''}","${d.warehouseName || ''}","${d.periodFrom || ''}","${d.periodTo || ''}","${d.documentNo || ''}","${d.documentType || ''}","${d.orNo || ''}","${d.aiNo || ''}","${d.refWSINo || ''}","${d.recdFromIssdTo || ''}","${d.transactionDate || ''}","${d.activityCode || ''}","${d.varietyCode || ''}","${d.sackCode || ''}","${d.sackCondition || ''}","${d.sackWeight || ''}","${d.age || ''}","${d.pileNo || ''}","${d.numberOfBags || ''}","${d.grossWeight || ''}","${d.moistureContent || ''}","${d.netWeight || ''}","${d.cancelled ? 'Yes' : 'No'}"\n`;
             });
 
-            const blob = new Blob([csv], { type: 'text/csv' });
+            const defaultFilename = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+
+            // Check if File System Access API is supported
+            if ('showSaveFilePicker' in window) {
+                try {
+                    // Show native "Save As" dialog with folder selection
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: defaultFilename,
+                        types: [{
+                            description: 'CSV Files',
+                            accept: {
+                                'text/csv': ['.csv']
+                            }
+                        }]
+                    });
+
+                    // Create a writable stream
+                    const writable = await handle.createWritable();
+                    
+                    // Write the CSV content
+                    await writable.write(csv);
+                    
+                    // Close the file
+                    await writable.close();
+
+                    alert('✅ File exported successfully!\n\nYour file has been saved to the selected location.');
+                } catch (error) {
+                    // User cancelled the save dialog
+                    if (error.name === 'AbortError') {
+                        console.log('User cancelled the save operation');
+                        return;
+                    }
+                    console.error('Error saving file:', error);
+                    
+                    // Fallback to traditional download
+                    fallbackExport(csv, defaultFilename);
+                }
+            } else {
+                // Browser doesn't support File System Access API
+                // Use traditional download method
+                alert('ℹ️ Your browser will save the file to your Downloads folder.\n\nFor custom location selection, please use a modern browser like Chrome, Edge, or Opera.');
+                fallbackExport(csv, defaultFilename);
+            }
+        }
+
+        function fallbackExport(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `all_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

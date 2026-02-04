@@ -4,205 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backup & Restore - NFA Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/backup.css" />
-    <style>
-        .date-selector {
-            display: none;
-            margin-top: 0.5rem;
-            margin-left: 1.5rem;
-            padding: 0.75rem;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .date-selector.show {
-            display: block;
-        }
-
-        .date-selector label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 0.5rem;
-        }
-
-        .date-selector select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-family: inherit;
-            background-color: white;
-            cursor: pointer;
-        }
-
-        .date-selector select:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-        }
-
-        .backup-option {
-            margin-bottom: 0.75rem;
-        }
-
-        /* Confirmation Modal Styles */
-        .confirmation-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .confirmation-modal.active {
-            display: flex;
-        }
-
-        .confirmation-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .confirmation-icon {
-            font-size: 3rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .confirmation-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .confirmation-message {
-            text-align: center;
-            color: #666;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .confirmation-details {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-        }
-
-        .confirmation-details-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .confirmation-details-item:last-child {
-            border-bottom: none;
-        }
-
-        .confirmation-details-label {
-            font-weight: 600;
-            color: #555;
-        }
-
-        .confirmation-details-value {
-            color: #333;
-            text-align: right;
-        }
-
-        .confirmation-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .btn-confirm {
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-confirm-yes {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .btn-confirm-yes:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-        }
-
-        .btn-confirm-no {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .btn-confirm-no:hover {
-            background-color: #da190b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-        }
-
-        .warning-text {
-            color: #ff9800;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
+    <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0; z-index: 100;"></iframe>
 
     <div class="main-content">
-        <div class="header">
-            <div class="header-left">
-                <h1>
-                    <span>💾</span>
-                    Backup & Restore
-                </h1>
-                <p>Manage your NFA Inventory Firebase database backups</p>
-            </div>
-            <div class="header-right">
-                <span id="connectionStatus" class="connection-status status-disconnected">⚠️ Not Connected</span>
-                <div class="user-info">
-                    <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+
+        <!-- ===== CONSISTENT HEADER ===== -->
+        <div class="header-sticky-wrapper">
+            <div class="header">
+                <h1 class="page-title">Backup &amp; Restore</h1>
+                <div class="header-right">
+                    <span id="connectionStatus" class="connection-status status-disconnected">Not Connected</span>
+                    <div class="user-info-pill">
+                        <div class="user-details">
+                            <div class="user-greeting" id="displayUsername">Hi, nfa_admin</div>
+                            <div class="user-role">Administrator</div>
+                        </div>
+                        <div class="user-avatar">N</div>
+                    </div>
                 </div>
-                <div class="user-avatar">N</div>
             </div>
         </div>
 
+        <!-- ===== ALERT ===== -->
         <div class="alert alert-info" id="setupAlert">
-            <strong>⚠️ Setup Required:</strong> Configure your Firebase credentials in the script below.
+            <strong>Setup Required:</strong> Configure your Firebase credentials in the script below.
         </div>
 
+        <!-- ===== BACKUP GRID ===== -->
         <div class="backup-grid">
             <!-- Create Backup Card -->
             <div class="backup-card">
                 <div class="card-header">
-                    <span class="card-icon">📤</span>
                     <h2 class="card-title">Create Backup</h2>
                 </div>
                 <p class="card-description">
@@ -304,7 +142,6 @@
                 <div class="success-message" id="backupSuccess"></div>
 
                 <button class="btn-save" onclick="showBackupConfirmation()" id="createBackupBtn">
-                    <span>📥</span>
                     <span>Create Backup</span>
                 </button>
             </div>
@@ -312,7 +149,6 @@
             <!-- Restore Backup Card -->
             <div class="backup-card">
                 <div class="card-header">
-                    <span class="card-icon">📥</span>
                     <h2 class="card-title">Restore Backup</h2>
                 </div>
                 <p class="card-description">
@@ -322,7 +158,7 @@
                 <div class="file-input-wrapper">
                     <input type="file" id="restoreFile" class="file-input" accept=".json" onchange="handleFileSelect(event)">
                     <label for="restoreFile" class="file-input-label">
-                        <span>📁 Click to select JSON file</span>
+                        <span>Click to select JSON file</span>
                         <div class="file-name" id="fileName"></div>
                     </label>
                 </div>
@@ -331,7 +167,6 @@
                 <div class="success-message" id="restoreSuccess"></div>
 
                 <button class="btn-save" onclick="showRestoreConfirmation()" id="restoreBackupBtn">
-                    <span>♻️</span>
                     <span>Restore to Firebase</span>
                 </button>
             </div>
@@ -341,23 +176,22 @@
         <div class="backup-history">
             <div class="history-header">
                 <h2 class="history-title">Backup History</h2>
-                <button class="btn-refresh" onclick="loadBackupHistory()">🔄 Refresh</button>
+                <p style="color: #666; font-size: 14px; margin-top: 5px;">Click on any row to view backup contents</p>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
+                            <th>Date &amp; Time</th>
                             <th>File Name</th>
                             <th>Collections</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: #999;">
                                 No backup history yet. Create your first backup!
                             </td>
                         </tr>
@@ -370,7 +204,7 @@
     <!-- Progress Modal -->
     <div class="modal-overlay" id="progressModal">
         <div class="modal-content">
-            <div class="modal-icon" id="modalIcon">⏳</div>
+            <div class="modal-icon" id="modalIcon"></div>
             <h2 class="modal-title" id="modalTitle">Processing...</h2>
             <p class="modal-message" id="modalMessage">Please wait while we process your request</p>
             <div class="progress-bar">
@@ -382,18 +216,27 @@
     <!-- Confirmation Modal -->
     <div class="confirmation-modal" id="confirmationModal">
         <div class="confirmation-content">
-            <div class="confirmation-icon" id="confirmIcon">❓</div>
+            <div class="confirmation-icon" id="confirmIcon"></div>
             <h2 class="confirmation-title" id="confirmTitle">Confirm Action</h2>
             <p class="confirmation-message" id="confirmMessage">Are you sure you want to proceed?</p>
             <div class="confirmation-details" id="confirmDetails"></div>
             <div class="confirmation-buttons">
-                <button class="btn-confirm btn-confirm-yes" id="confirmYes">
-                    ✓ Yes, Proceed
-                </button>
-                <button class="btn-confirm btn-confirm-no" id="confirmNo">
-                    ✗ No, Cancel
-                </button>
+                <button class="btn-confirm btn-confirm-yes" id="confirmYes">Yes, Proceed</button>
+                <button class="btn-confirm btn-confirm-no" id="confirmNo">No, Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Backup Contents Modal -->
+    <div class="backup-contents-modal" id="backupContentsModal">
+        <div class="backup-contents-wrapper">
+            <div class="backup-contents-header">
+                <h2 id="backupContentsTitle">Backup Contents</h2>
+                <button class="close-modal-btn" onclick="closeBackupContentsModal()">&times;</button>
+            </div>
+            <div class="backup-contents-info" id="backupContentsInfo"></div>
+            <div class="backup-contents-tabs" id="backupContentsTabs"></div>
+            <div class="backup-contents-body" id="backupContentsBody"></div>
         </div>
     </div>
 
@@ -402,7 +245,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -414,45 +256,31 @@
             measurementId: "G-ZEJP0S67SY"
         };
 
-        // Initialize Firebase
         let database;
         try {
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
             database = firebase.database();
-            
-            console.log("✅ Firebase initialized successfully");
-            
-            // Update connection status
-            document.getElementById('connectionStatus').textContent = '✅ Connected';
+            document.getElementById('connectionStatus').textContent = 'Connected';
             document.getElementById('connectionStatus').className = 'connection-status status-connected';
             document.getElementById('setupAlert').style.display = 'none';
         } catch (error) {
-            console.error('❌ Firebase initialization error:', error);
-            showAlert('setupAlert', '❌ Firebase connection failed. Please check your configuration.', 'alert-warning');
+            console.error('Firebase initialization error:', error);
+            showAlert('setupAlert', '<strong>Firebase connection failed.</strong> Please check your configuration.', 'alert-warning');
         }
 
-        // Global variables
         let selectedFile = null;
         let backupHistory = [];
         let collectionDatesCache = {};
-        let pendingBackupData = null;
-        let pendingRestoreData = null;
+        let selectedBackupIndex = null;
 
-        // Handle checkbox changes
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("🚀 Setting up checkbox listeners");
-            
             const checkboxes = document.querySelectorAll('.table-checkbox');
-            
             checkboxes.forEach((checkbox) => {
                 checkbox.addEventListener('change', async function() {
                     const collection = this.dataset.collection;
                     const dateSelector = document.getElementById('date-' + collection);
-                    
-                    console.log(`Checkbox ${collection}: ${this.checked}`);
-                    
                     if (this.checked) {
                         dateSelector.classList.add('show');
                         await loadAvailableDates(collection);
@@ -462,407 +290,202 @@
                     }
                 });
             });
-            
             loadBackupHistory();
         });
 
-        // Load available dates from Firebase
         async function loadAvailableDates(collection) {
-            console.log(`\n📡 Loading dates for: ${collection}`);
             const selectElement = document.getElementById('select-' + collection);
-            
-            if (!selectElement) {
-                console.error(`❌ Select element not found`);
-                return;
-            }
-            
-            // Check cache
+            if (!selectElement) return;
             if (collectionDatesCache[collection]) {
-                console.log(`✅ Using cached dates`);
                 populateDateDropdown(selectElement, collectionDatesCache[collection]);
                 return;
             }
-
             selectElement.innerHTML = '<option value="all">Loading dates...</option>';
-
             try {
                 const snapshot = await database.ref(collection).once('value');
-                
                 if (!snapshot.exists()) {
-                    console.log(`⚠️ No data in ${collection}`);
                     selectElement.innerHTML = '<option value="all">All Data (No records)</option>';
                     return;
                 }
-
                 const data = snapshot.val();
-                console.log(`📊 Records found: ${Object.keys(data).length}`);
-                
                 const yearsSet = new Set();
                 const monthsMap = new Map();
                 const datesMap = new Map();
-                
-                let recordsWithDates = 0;
-                
-                // Check all possible date fields
-                const dateFields = [
-                    'transactionDate', 'date', 'createdAt', 'timestamp', 
-                    'created_at', 'dateCreated', 'fromDate', 'toDate'
-                ];
-                
+                const dateFields = ['transactionDate','date','createdAt','timestamp','created_at','dateCreated','fromDate','toDate'];
                 Object.entries(data).forEach(([key, record]) => {
                     if (!record) return;
-                    
                     for (const field of dateFields) {
                         if (record[field]) {
-                            const dateValue = record[field];
-                            const date = new Date(dateValue);
-                            
+                            const date = new Date(record[field]);
                             if (!isNaN(date.getTime())) {
-                                recordsWithDates++;
-                                
-                                // Year
-                                const year = date.getFullYear();
-                                yearsSet.add(year);
-                                
-                                // Month
-                                const monthKey = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                                const monthLabel = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-                                monthsMap.set(monthKey, monthLabel);
-                                
-                                // Date
-                                const dateKey = date.toISOString().split('T')[0];
-                                const dateLabel = date.toLocaleDateString('en-US', { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                });
-                                datesMap.set(dateKey, dateLabel);
-                                
+                                yearsSet.add(date.getFullYear());
+                                monthsMap.set(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`, date.toLocaleString('default',{month:'long',year:'numeric'}));
+                                const dk = date.toISOString().split('T')[0];
+                                datesMap.set(dk, date.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}));
                                 break;
                             }
                         }
                     }
                 });
-
-                console.log(`✅ Found ${recordsWithDates} records with dates`);
-                console.log(`   Years: ${yearsSet.size}, Months: ${monthsMap.size}, Dates: ${datesMap.size}`);
-
-                // Build options
                 const dateOptions = [];
-                
-                // Add years (sorted newest first)
-                Array.from(yearsSet).sort((a, b) => b - a).forEach(year => {
-                    dateOptions.push({ type: 'year', value: year.toString(), display: year.toString() });
-                });
-                
-                // Add months (sorted newest first)
-                Array.from(monthsMap.entries())
-                    .sort((a, b) => b[0].localeCompare(a[0]))
-                    .forEach(([value, display]) => {
-                        dateOptions.push({ type: 'month', value, display });
-                    });
-                
-                // Add dates (sorted newest first)
-                Array.from(datesMap.entries())
-                    .sort((a, b) => b[0].localeCompare(a[0]))
-                    .forEach(([value, display]) => {
-                        dateOptions.push({ type: 'date', value, display });
-                    });
-
-                if (dateOptions.length === 0) {
-                    console.log(`⚠️ No dates found`);
-                    selectElement.innerHTML = '<option value="all">All Data (No dates found)</option>';
-                    return;
-                }
-
-                // Cache results
+                Array.from(yearsSet).sort((a,b)=>b-a).forEach(y => dateOptions.push({type:'year',value:y.toString(),display:y.toString()}));
+                Array.from(monthsMap.entries()).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([v,d])=>dateOptions.push({type:'month',value:v,display:d}));
+                Array.from(datesMap.entries()).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([v,d])=>dateOptions.push({type:'date',value:v,display:d}));
+                if (dateOptions.length === 0) { selectElement.innerHTML = '<option value="all">All Data (No dates found)</option>'; return; }
                 collectionDatesCache[collection] = dateOptions;
-                
                 populateDateDropdown(selectElement, dateOptions);
-                console.log(`✅ Loaded ${dateOptions.length} date options\n`);
-
             } catch (error) {
-                console.error('❌ Error:', error);
+                console.error('Error:', error);
                 selectElement.innerHTML = '<option value="all">All Data (Error loading)</option>';
             }
         }
 
         function populateDateDropdown(selectElement, dateOptions) {
             let html = '<option value="all">All Data</option>';
-            
-            if (dateOptions.length === 0) {
-                selectElement.innerHTML = html;
-                return;
-            }
-
+            if (dateOptions.length === 0) { selectElement.innerHTML = html; return; }
             let currentType = null;
             dateOptions.forEach(option => {
                 if (currentType !== option.type) {
-                    if (currentType !== null) {
-                        html += '</optgroup>';
-                    }
-                    const label = option.type === 'year' ? 'By Year' : 
-                                 option.type === 'month' ? 'By Month' : 'By Date';
+                    if (currentType !== null) html += '</optgroup>';
+                    const label = option.type === 'year' ? 'By Year' : option.type === 'month' ? 'By Month' : 'By Date';
                     html += `<optgroup label="${label}">`;
                     currentType = option.type;
                 }
                 html += `<option value="${option.type}:${option.value}">${option.display}</option>`;
             });
-            
             html += '</optgroup>';
             selectElement.innerHTML = html;
         }
 
         function filterDataBySelection(data, selection) {
-            if (!selection || selection === 'all') {
-                return data;
-            }
-
+            if (!selection || selection === 'all') return data;
             const [type, value] = selection.split(':');
             const filtered = {};
-
-            const dateFields = [
-                'transactionDate', 'date', 'createdAt', 'timestamp',
-                'created_at', 'dateCreated', 'fromDate', 'toDate'
-            ];
-
+            const dateFields = ['transactionDate','date','createdAt','timestamp','created_at','dateCreated','fromDate','toDate'];
             for (const [key, record] of Object.entries(data)) {
                 if (!record) continue;
-
                 let matches = false;
-                
                 for (const field of dateFields) {
                     if (record[field]) {
                         const date = new Date(record[field]);
-                        
                         if (!isNaN(date.getTime())) {
-                            if (type === 'year') {
-                                if (date.getFullYear().toString() === value) {
-                                    matches = true;
-                                    break;
-                                }
-                            } else if (type === 'month') {
-                                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                                if (monthYear === value) {
-                                    matches = true;
-                                    break;
-                                }
-                            } else if (type === 'date') {
-                                const dateStr = date.toISOString().split('T')[0];
-                                if (dateStr === value) {
-                                    matches = true;
-                                    break;
-                                }
-                            }
+                            if (type === 'year' && date.getFullYear().toString() === value) { matches = true; break; }
+                            else if (type === 'month') { const my = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; if (my === value) { matches = true; break; } }
+                            else if (type === 'date') { if (date.toISOString().split('T')[0] === value) { matches = true; break; } }
                         }
                     }
                 }
-
-                if (matches) {
-                    filtered[key] = record;
-                }
+                if (matches) filtered[key] = record;
             }
-
             return filtered;
         }
 
-        // Confirmation Modal Functions
         function showConfirmationModal(config) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirmationModal');
-                const icon = document.getElementById('confirmIcon');
-                const title = document.getElementById('confirmTitle');
-                const message = document.getElementById('confirmMessage');
+                document.getElementById('confirmIcon').textContent = config.icon || '';
+                document.getElementById('confirmTitle').textContent = config.title || 'Confirm Action';
+                document.getElementById('confirmMessage').textContent = config.message || 'Are you sure?';
                 const details = document.getElementById('confirmDetails');
+                if (config.details) { details.innerHTML = config.details; details.style.display = 'block'; } else { details.style.display = 'none'; }
+                modal.classList.add('active');
                 const yesBtn = document.getElementById('confirmYes');
                 const noBtn = document.getElementById('confirmNo');
-
-                icon.textContent = config.icon || '❓';
-                title.textContent = config.title || 'Confirm Action';
-                message.textContent = config.message || 'Are you sure?';
-                
-                if (config.details) {
-                    details.innerHTML = config.details;
-                    details.style.display = 'block';
-                } else {
-                    details.style.display = 'none';
-                }
-
-                modal.classList.add('active');
-
-                const handleYes = () => {
-                    cleanup();
-                    resolve(true);
-                };
-
-                const handleNo = () => {
-                    cleanup();
-                    resolve(false);
-                };
-
-                const cleanup = () => {
-                    modal.classList.remove('active');
-                    yesBtn.removeEventListener('click', handleYes);
-                    noBtn.removeEventListener('click', handleNo);
-                };
-
+                const cleanup = () => { modal.classList.remove('active'); yesBtn.removeEventListener('click', handleYes); noBtn.removeEventListener('click', handleNo); };
+                const handleYes = () => { cleanup(); resolve(true); };
+                const handleNo = () => { cleanup(); resolve(false); };
                 yesBtn.addEventListener('click', handleYes);
                 noBtn.addEventListener('click', handleNo);
             });
         }
 
         async function showBackupConfirmation() {
-            if (!database) {
-                showError('backupError', 'Firebase not connected');
-                return;
-            }
-
+            if (!database) { showError('backupError', 'Firebase not connected'); return; }
             const checkboxes = document.querySelectorAll('.table-checkbox:checked');
-            if (checkboxes.length === 0) {
-                showError('backupError', 'Please select at least one collection');
-                return;
-            }
-
+            if (checkboxes.length === 0) { showError('backupError', 'Please select at least one collection'); return; }
             const collections = Array.from(checkboxes).map(cb => cb.value);
-            
-            // Build details for confirmation
             let detailsHTML = '';
             collections.forEach(collection => {
-                const selection = document.getElementById('select-' + collection).value;
                 const selectEl = document.getElementById('select-' + collection);
-                const filterText = selectEl.options[selectEl.selectedIndex].text;
-                
-                detailsHTML += `
-                    <div class="confirmation-details-item">
-                        <span class="confirmation-details-label">${collection}</span>
-                        <span class="confirmation-details-value">${filterText}</span>
-                    </div>
-                `;
+                detailsHTML += `<div class="confirmation-details-item"><span class="confirmation-details-label">${collection}</span><span class="confirmation-details-value">${selectEl.options[selectEl.selectedIndex].text}</span></div>`;
             });
-
-            const confirmed = await showConfirmationModal({
-                icon: '📤',
-                title: 'Create Backup?',
-                message: `You are about to create a backup of ${collections.length} collection(s). This will download a JSON file to your computer.`,
-                details: detailsHTML
-            });
-
-            if (confirmed) {
-                await createBackup();
-            }
+            const confirmed = await showConfirmationModal({ icon: '', title: 'Create Backup?', message: `You are about to create a backup of ${collections.length} collection(s). This will download a JSON file to your computer.`, details: detailsHTML });
+            if (confirmed) await createBackup();
         }
 
         async function showRestoreConfirmation() {
-            if (!database) {
-                showError('restoreError', 'Firebase not connected');
-                return;
-            }
-
-            if (!selectedFile) {
-                showError('restoreError', 'Please select a backup file');
-                return;
-            }
-
-            // Parse file to get details
+            if (!database) { showError('restoreError', 'Firebase not connected'); return; }
+            if (!selectedFile) { showError('restoreError', 'Please select a backup file'); return; }
             try {
                 const fileContent = await selectedFile.text();
                 const backupData = JSON.parse(fileContent);
-
-                if (!backupData.metadata || !backupData.data) {
-                    throw new Error('Invalid backup file');
-                }
-
+                if (!backupData.metadata || !backupData.data) throw new Error('Invalid backup file');
                 const collections = Object.keys(backupData.data);
-                let totalRecords = 0;
-                let detailsHTML = '';
-
-                collections.forEach(collection => {
-                    const recordCount = Object.keys(backupData.data[collection]).length;
-                    totalRecords += recordCount;
-                    
-                    detailsHTML += `
-                        <div class="confirmation-details-item">
-                            <span class="confirmation-details-label">${collection}</span>
-                            <span class="confirmation-details-value">${recordCount} records</span>
-                        </div>
-                    `;
-                });
-
-                const confirmed = await showConfirmationModal({
-                    icon: '⚠️',
-                    title: 'Restore Backup?',
-                    message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s) in your Firebase database. This action cannot be undone!`,
-                    details: `
-                        <div class="warning-text">⚠️ THIS WILL REPLACE EXISTING DATA ⚠️</div>
-                        <div class="confirmation-details-item">
-                            <span class="confirmation-details-label">File</span>
-                            <span class="confirmation-details-value">${selectedFile.name}</span>
-                        </div>
-                        <div class="confirmation-details-item">
-                            <span class="confirmation-details-label">Backup Date</span>
-                            <span class="confirmation-details-value">${new Date(backupData.metadata.timestamp).toLocaleString()}</span>
-                        </div>
-                        ${detailsHTML}
-                    `
-                });
-
-                if (confirmed) {
-                    await restoreBackup(backupData);
-                }
-            } catch (error) {
-                showError('restoreError', 'Invalid backup file: ' + error.message);
-            }
+                let totalRecords = 0, detailsHTML = '';
+                collections.forEach(collection => { const rc = Object.keys(backupData.data[collection]).length; totalRecords += rc; detailsHTML += `<div class="confirmation-details-item"><span class="confirmation-details-label">${collection}</span><span class="confirmation-details-value">${rc} records</span></div>`; });
+                const confirmed = await showConfirmationModal({ icon: '', title: 'Restore Backup?', message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s). This action cannot be undone!`, details: `<div class="warning-text">THIS WILL REPLACE EXISTING DATA</div><div class="confirmation-details-item"><span class="confirmation-details-label">File</span><span class="confirmation-details-value">${selectedFile.name}</span></div><div class="confirmation-details-item"><span class="confirmation-details-label">Backup Date</span><span class="confirmation-details-value">${new Date(backupData.metadata.timestamp).toLocaleString()}</span></div>${detailsHTML}` });
+                if (confirmed) await restoreBackup(backupData);
+            } catch (error) { showError('restoreError', 'Invalid backup file: ' + error.message); }
         }
 
         function loadBackupHistory() {
             const saved = localStorage.getItem('nfa_backup_history');
-            if (saved) {
-                backupHistory = JSON.parse(saved);
-                displayBackupHistory();
-            }
+            if (saved) { backupHistory = JSON.parse(saved); displayBackupHistory(); }
         }
-
-        function saveBackupHistory() {
-            localStorage.setItem('nfa_backup_history', JSON.stringify(backupHistory));
-        }
+        function saveBackupHistory() { localStorage.setItem('nfa_backup_history', JSON.stringify(backupHistory)); }
 
         function displayBackupHistory() {
             const tbody = document.getElementById('historyTableBody');
-            
-            if (backupHistory.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #999;">No backup history yet. Create your first backup!</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = backupHistory.map((backup, index) => `
-                <tr>
-                    <td>${backup.datetime}</td>
-                    <td>${backup.filename}</td>
-                    <td>${backup.collections.join(', ')}</td>
-                    <td><span class="status-badge status-success">Success</span></td>
-                    <td class="actions-cell">
-                        <button class="action-btn" data-index="${index}">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" onclick="showQuickRestoreConfirmation(${index})">
-                                <span>♻️</span> Restore
-                            </button>
-                            <button class="dropdown-item delete-item" onclick="deleteBackupRecord(${index})">
-                                <span>🗑️</span> Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).reverse().join('');
+            if (backupHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:#999;">No backup history yet. Create your first backup!</td></tr>'; return; }
+            tbody.innerHTML = backupHistory.map((backup, index) => `<tr data-index="${index}" onclick="viewBackupContents(${index})" style="cursor:pointer;"><td>${backup.datetime}</td><td>${backup.filename}</td><td>${backup.collections.join(', ')}</td><td><span class="status-badge status-success">Success</span></td></tr>`).reverse().join('');
         }
+
+        function viewBackupContents(index) {
+            const backup = backupHistory[index];
+            if (!backup || !backup.data) { alert('Backup data not found'); return; }
+            const modal = document.getElementById('backupContentsModal');
+            document.getElementById('backupContentsTitle').textContent = backup.filename;
+            const metadata = backup.data.metadata || {};
+            const collections = Object.keys(backup.data.data || {});
+            let totalRecords = 0;
+            collections.forEach(col => { totalRecords += Object.keys(backup.data.data[col] || {}).length; });
+            document.getElementById('backupContentsInfo').innerHTML = `<div class="info-grid"><div class="info-item"><span class="info-label">Backup Date</span><span class="info-value">${backup.datetime}</span></div><div class="info-item"><span class="info-label">Collections</span><span class="info-value">${collections.length}</span></div><div class="info-item"><span class="info-label">Total Records</span><span class="info-value">${totalRecords}</span></div><div class="info-item"><span class="info-label">File Name</span><span class="info-value">${backup.filename}</span></div></div>`;
+            let tabsHTML = '';
+            collections.forEach((collection, idx) => { const rc = Object.keys(backup.data.data[collection] || {}).length; tabsHTML += `<button class="tab-button ${idx===0?'active':''}" onclick="switchTab('${collection}', this)">${collection} (${rc})</button>`; });
+            document.getElementById('backupContentsTabs').innerHTML = tabsHTML;
+            let contentHTML = '';
+            collections.forEach((collection, idx) => {
+                const data = backup.data.data[collection] || {};
+                const records = Object.entries(data);
+                contentHTML += `<div class="collection-table-wrapper ${idx===0?'active':''}" id="table-${collection}"><div class="collection-header"><h3 class="collection-title">${collection}</h3><span class="record-count">${records.length} Records</span></div>`;
+                if (records.length === 0) { contentHTML += `<div class="empty-state"><div class="empty-state-text">No records in this collection</div></div>`; }
+                else {
+                    const allKeys = new Set(); records.forEach(([k,r])=>{ Object.keys(r).forEach(k2=>allKeys.add(k2)); });
+                    const keys = Array.from(allKeys);
+                    contentHTML += `<table class="data-table"><thead><tr><th>ID</th>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`;
+                    records.forEach(([id, record]) => { contentHTML += `<tr><td>${id}</td>`; keys.forEach(k => { let v = record[k]; if (typeof v === 'object') v = JSON.stringify(v); contentHTML += `<td>${v !== undefined ? v : '-'}</td>`; }); contentHTML += '</tr>'; });
+                    contentHTML += '</tbody></table>';
+                }
+                contentHTML += '</div>';
+            });
+            document.getElementById('backupContentsBody').innerHTML = contentHTML;
+            modal.classList.add('active');
+        }
+
+        function switchTab(collection, button) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            document.querySelectorAll('.collection-table-wrapper').forEach(w => w.classList.remove('active'));
+            document.getElementById('table-' + collection).classList.add('active');
+        }
+        function closeBackupContentsModal() { document.getElementById('backupContentsModal').classList.remove('active'); }
 
         function handleFileSelect(event) {
             selectedFile = event.target.files[0];
-            if (selectedFile) {
-                document.getElementById('fileName').textContent = selectedFile.name;
-            }
+            if (selectedFile) document.getElementById('fileName').textContent = selectedFile.name;
         }
 
-        function showProgress(title, message, icon = '⏳') {
+        function showProgress(title, message, icon = '') {
             const modal = document.getElementById('progressModal');
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = message;
@@ -871,273 +494,114 @@
             document.getElementById('progressFill').textContent = '0%';
             modal.classList.add('active');
         }
-
-        function updateProgress(percent) {
-            const fill = document.getElementById('progressFill');
-            fill.style.width = percent + '%';
-            fill.textContent = Math.round(percent) + '%';
-        }
-
-        function hideProgress() {
-            setTimeout(() => {
-                document.getElementById('progressModal').classList.remove('active');
-            }, 1500);
-        }
-
-        function showError(elementId, message) {
-            const errorEl = document.getElementById(elementId);
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
-            setTimeout(() => {
-                errorEl.style.display = 'none';
-            }, 5000);
-        }
-
-        function showSuccess(elementId, message) {
-            const successEl = document.getElementById(elementId);
-            successEl.textContent = message;
-            successEl.style.display = 'block';
-            setTimeout(() => {
-                successEl.style.display = 'none';
-            }, 5000);
-        }
-
-        function showAlert(elementId, message, className) {
-            const alert = document.getElementById(elementId);
-            alert.innerHTML = message;
-            alert.className = 'alert ' + className + ' show';
-        }
+        function updateProgress(percent) { const fill = document.getElementById('progressFill'); fill.style.width = percent+'%'; fill.textContent = Math.round(percent)+'%'; }
+        function hideProgress() { setTimeout(() => { document.getElementById('progressModal').classList.remove('active'); }, 1500); }
+        function showError(elementId, message) { const el = document.getElementById(elementId); el.textContent = message; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 5000); }
+        function showSuccess(elementId, message) { const el = document.getElementById(elementId); el.textContent = message; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 5000); }
+        function showAlert(elementId, message, className) { const alert = document.getElementById(elementId); alert.innerHTML = message; alert.className = 'alert ' + className + ' show'; }
 
         async function createBackup() {
             const checkboxes = document.querySelectorAll('.table-checkbox:checked');
             const collections = Array.from(checkboxes).map(cb => cb.value);
-            
-            showProgress('Creating Backup', 'Fetching data from Firebase...', '📤');
+            showProgress('Creating Backup', 'Fetching data from Firebase...');
             document.getElementById('createBackupBtn').disabled = true;
-
             try {
-                const backupData = {
-                    metadata: {
-                        timestamp: new Date().toISOString(),
-                        collections: collections,
-                        version: '1.0',
-                        filters: {}
-                    },
-                    data: {}
-                };
-
-                let progress = 0;
-                const increment = 80 / collections.length;
-
+                const backupData = { metadata: { timestamp: new Date().toISOString(), collections: collections, version: '1.0', filters: {} }, data: {} };
+                let progress = 0; const increment = 80 / collections.length;
                 for (const collection of collections) {
                     updateProgress(Math.min(progress, 80));
-                    
                     const selection = document.getElementById('select-' + collection).value;
-                    
-                    // Store filter
-                    if (selection && selection !== 'all') {
-                        const selectEl = document.getElementById('select-' + collection);
-                        backupData.metadata.filters[collection] = {
-                            selection: selection,
-                            display: selectEl.options[selectEl.selectedIndex].text
-                        };
-                    }
-                    
+                    if (selection && selection !== 'all') { const selectEl = document.getElementById('select-' + collection); backupData.metadata.filters[collection] = { selection, display: selectEl.options[selectEl.selectedIndex].text }; }
                     const snapshot = await database.ref(collection).once('value');
-                    if (snapshot.exists()) {
-                        const fullData = snapshot.val();
-                        const filteredData = filterDataBySelection(fullData, selection);
-                        backupData.data[collection] = filteredData;
-                        
-                        console.log(`${collection}: ${Object.keys(filteredData).length} records`);
-                    } else {
-                        backupData.data[collection] = {};
-                    }
-                    
+                    backupData.data[collection] = snapshot.exists() ? filterDataBySelection(snapshot.val(), selection) : {};
                     progress += increment;
                 }
-
                 updateProgress(90);
-
-                // Download file
                 const jsonString = JSON.stringify(backupData, null, 2);
                 const blob = new Blob([jsonString], { type: 'application/json' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                const timestamp = new Date().toISOString().replace(/[:.]/g,'-').split('T')[0];
                 const filename = `nfa_backup_${timestamp}.json`;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
+                a.download = filename; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); a.remove();
                 updateProgress(100);
-
-                // Save history
-                backupHistory.push({
-                    datetime: new Date().toLocaleString(),
-                    filename: filename,
-                    collections: collections,
-                    data: backupData
-                });
-                saveBackupHistory();
-                displayBackupHistory();
-
-                document.getElementById('modalIcon').textContent = '✅';
+                backupHistory.push({ datetime: new Date().toLocaleString(), filename, collections, data: backupData });
+                saveBackupHistory(); displayBackupHistory();
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Backup Created!';
                 document.getElementById('modalMessage').textContent = 'File downloaded successfully';
-                
-                hideProgress();
-                showSuccess('backupSuccess', '✅ Backup created successfully!');
-
+                hideProgress(); showSuccess('backupSuccess', 'Backup created successfully!');
             } catch (error) {
                 console.error('Backup error:', error);
-                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Backup Failed';
                 document.getElementById('modalMessage').textContent = error.message;
-                hideProgress();
-                showError('backupError', 'Backup failed: ' + error.message);
-            } finally {
-                document.getElementById('createBackupBtn').disabled = false;
-            }
+                hideProgress(); showError('backupError', 'Backup failed: ' + error.message);
+            } finally { document.getElementById('createBackupBtn').disabled = false; }
         }
 
         async function restoreBackup(backupData) {
-            showProgress('Restoring Backup', 'Processing...', '♻️');
+            showProgress('Restoring Backup', 'Processing...');
             document.getElementById('restoreBackupBtn').disabled = true;
-
             try {
                 updateProgress(10);
-
                 const collections = Object.keys(backupData.data);
-                let progress = 10;
-                const increment = 80 / collections.length;
-
+                let progress = 10; const increment = 80 / collections.length;
                 for (const collection of collections) {
                     document.getElementById('modalMessage').textContent = `Restoring ${collection}...`;
                     updateProgress(Math.min(progress, 90));
-
                     const collectionData = backupData.data[collection];
-                    
-                    if (collectionData && Object.keys(collectionData).length > 0) {
-                        await database.ref(collection).set(collectionData);
-                    }
-
+                    if (collectionData && Object.keys(collectionData).length > 0) await database.ref(collection).set(collectionData);
                     progress += increment;
                 }
-
                 updateProgress(100);
-
-                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Restore Complete!';
                 document.getElementById('modalMessage').textContent = 'Data restored successfully';
-                
-                hideProgress();
-                showSuccess('restoreSuccess', '✅ Restore completed!');
-
-                document.getElementById('restoreFile').value = '';
-                document.getElementById('fileName').textContent = '';
-                selectedFile = null;
-
+                hideProgress(); showSuccess('restoreSuccess', 'Restore completed!');
+                document.getElementById('restoreFile').value = ''; document.getElementById('fileName').textContent = ''; selectedFile = null;
             } catch (error) {
                 console.error('Restore error:', error);
-                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Restore Failed';
                 document.getElementById('modalMessage').textContent = error.message;
-                hideProgress();
-                showError('restoreError', 'Restore failed: ' + error.message);
-            } finally {
-                document.getElementById('restoreBackupBtn').disabled = false;
-            }
+                hideProgress(); showError('restoreError', 'Restore failed: ' + error.message);
+            } finally { document.getElementById('restoreBackupBtn').disabled = false; }
         }
 
         async function showQuickRestoreConfirmation(index) {
-            if (!database) {
-                alert('❌ Firebase not connected');
-                return;
-            }
-
+            if (!database) { alert('Firebase not connected'); return; }
             const backup = backupHistory[index];
-            if (!backup || !backup.data) {
-                alert('❌ Backup data not found');
-                return;
-            }
-
+            if (!backup || !backup.data) { alert('Backup data not found'); return; }
             const collections = Object.keys(backup.data.data);
-            let totalRecords = 0;
-            let detailsHTML = '';
-
-            collections.forEach(collection => {
-                const recordCount = Object.keys(backup.data.data[collection]).length;
-                totalRecords += recordCount;
-                
-                detailsHTML += `
-                    <div class="confirmation-details-item">
-                        <span class="confirmation-details-label">${collection}</span>
-                        <span class="confirmation-details-value">${recordCount} records</span>
-                    </div>
-                `;
-            });
-
-            const confirmed = await showConfirmationModal({
-                icon: '⚠️',
-                title: 'Restore from History?',
-                message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s). This action cannot be undone!`,
-                details: `
-                    <div class="warning-text">⚠️ THIS WILL REPLACE EXISTING DATA ⚠️</div>
-                    <div class="confirmation-details-item">
-                        <span class="confirmation-details-label">Backup</span>
-                        <span class="confirmation-details-value">${backup.filename}</span>
-                    </div>
-                    <div class="confirmation-details-item">
-                        <span class="confirmation-details-label">Date</span>
-                        <span class="confirmation-details-value">${backup.datetime}</span>
-                    </div>
-                    ${detailsHTML}
-                `
-            });
-
-            if (confirmed) {
-                await quickRestore(index);
-            }
+            let totalRecords = 0, detailsHTML = '';
+            collections.forEach(c => { const rc = Object.keys(backup.data.data[c]).length; totalRecords += rc; detailsHTML += `<div class="confirmation-details-item"><span class="confirmation-details-label">${c}</span><span class="confirmation-details-value">${rc} records</span></div>`; });
+            const confirmed = await showConfirmationModal({ icon: '', title: 'Restore from History?', message: `WARNING: This will OVERWRITE ${totalRecords} records in ${collections.length} collection(s). This action cannot be undone!`, details: `<div class="warning-text">THIS WILL REPLACE EXISTING DATA</div><div class="confirmation-details-item"><span class="confirmation-details-label">Backup</span><span class="confirmation-details-value">${backup.filename}</span></div><div class="confirmation-details-item"><span class="confirmation-details-label">Date</span><span class="confirmation-details-value">${backup.datetime}</span></div>${detailsHTML}` });
+            if (confirmed) await quickRestore(index);
         }
 
         async function quickRestore(index) {
             const backup = backupHistory[index];
-            
-            showProgress('Restoring', 'Processing...', '♻️');
-
+            showProgress('Restoring', 'Processing...');
             try {
                 const collections = Object.keys(backup.data.data);
-                let progress = 10;
-                const increment = 80 / collections.length;
-
+                let progress = 10; const increment = 80 / collections.length;
                 for (const collection of collections) {
                     document.getElementById('modalMessage').textContent = `Restoring ${collection}...`;
                     updateProgress(Math.min(progress, 90));
-
                     const collectionData = backup.data.data[collection];
-                    
-                    if (collectionData && Object.keys(collectionData).length > 0) {
-                        await database.ref(collection).set(collectionData);
-                    }
-
+                    if (collectionData && Object.keys(collectionData).length > 0) await database.ref(collection).set(collectionData);
                     progress += increment;
                 }
-
                 updateProgress(100);
-
-                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Restore Complete!';
                 document.getElementById('modalMessage').textContent = 'Done';
-                
                 hideProgress();
-
             } catch (error) {
                 console.error('Restore error:', error);
-                document.getElementById('modalIcon').textContent = '❌';
+                document.getElementById('modalIcon').textContent = '';
                 document.getElementById('modalTitle').textContent = 'Failed';
                 document.getElementById('modalMessage').textContent = error.message;
                 hideProgress();
@@ -1146,13 +610,9 @@
 
         function deleteBackupRecord(index) {
             const backup = backupHistory[index];
-            if (!confirm(`Delete: ${backup.filename}?`)) {
-                return;
-            }
-
-            backupHistory.splice(index, 1);
-            saveBackupHistory();
-            displayBackupHistory();
+            if (!confirm(`Delete: ${backup.filename}?`)) return;
+            backupHistory.splice(index, 1); saveBackupHistory(); displayBackupHistory();
+            selectedBackupIndex = null;
         }
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sack Library - NFA Inventory</title>
+    <title>Sack Library - NFA Inventory System</title>
     <link rel="stylesheet" href="css/sack.css" />
 </head>
 <body>
@@ -13,11 +13,12 @@
         <div class="header">
             <div class="header-left">
                 <h1>Sack Library</h1>
+                <p style="color: #6B7C6B; font-size: 0.9rem; margin-top: 0.25rem;">Manage and organize sack weight records</p>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">Administrator</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -35,11 +36,9 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-preview" id="previewBtn">
-                    <span>👁</span>
                     <span>Preview</span>
                 </button>
                 <button class="btn btn-add" id="addSackBtn">
-                    <span>+</span>
                     <span>Add Sack</span>
                 </button>
             </div>
@@ -53,12 +52,14 @@
                         <th>BRAND NEW</th>
                         <th>SECOND HAND</th>
                         <th>MENDABLE</th>
-                        <th>ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody id="sackTableBody">
                     <tr>
-                        <td colspan="5" style="text-align:center;">Loading sacks...</td>
+                        <td colspan="4" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">Loading sacks...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -67,38 +68,38 @@
 
     <!-- Modal Form -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
+        <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF SACK LIBRARY</h2>
+                <h2 class="modal-title">📋 DATA ENTRY OF SACK LIBRARY</h2>
                 <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="sackForm">
                     <div class="form-group">
-                        <label class="form-label">Sack Code:</label>
+                        <label class="form-label">Sack Code: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="sackCode" placeholder="Enter Sack Code" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="section-label">Sack Weight:</label>
+                        <label class="section-label">Sack Weight (kg)</label>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Brand New:</label>
-                        <input type="number" step="0.001" class="form-input" id="brandNew" placeholder="Enter Weight" required>
+                        <input type="number" step="0.001" class="form-input" id="brandNew" placeholder="Enter Weight (e.g., 0.750)" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Second Hand:</label>
-                        <input type="number" step="0.001" class="form-input" id="secondHand" placeholder="Enter Weight" required>
+                        <input type="number" step="0.001" class="form-input" id="secondHand" placeholder="Enter Weight (e.g., 0.500)" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Mendable:</label>
-                        <input type="number" step="0.001" class="form-input" id="mendable" placeholder="Enter Weight" required>
+                        <input type="number" step="0.001" class="form-input" id="mendable" placeholder="Enter Weight (e.g., 0.300)" required>
                     </div>
 
-                    <button type="submit" class="btn-save">Save Sack</button>
+                    <button type="submit" class="btn-save">💾 Save Sack</button>
                 </form>
             </div>
         </div>
@@ -128,6 +129,7 @@
         // ===================== GLOBAL VARIABLES =====================
         let allSacks = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null;
 
         // ===================== MODAL CONTROLS =====================
         const modalOverlay = document.getElementById('modalOverlay');
@@ -168,10 +170,10 @@
             const form = e.target;
             const editId = form.getAttribute('data-edit-id');
 
+            const sackCode = document.getElementById('sackCode').value.trim();
             const brandNew = parseFloat(document.getElementById('brandNew').value) || 0;
             const secondHand = parseFloat(document.getElementById('secondHand').value) || 0;
             const mendable = parseFloat(document.getElementById('mendable').value) || 0;
-            const sackCode = document.getElementById('sackCode').value.trim();
 
             // Clear previous errors
             document.querySelectorAll('input').forEach(field => {
@@ -184,12 +186,12 @@
 
             if (!sackCode) {
                 const element = document.getElementById('sackCode');
-                element.style.border = '2px solid #ff6b6b';
+                element.style.border = '2px solid #C62828';
                 hasEmptyFields = true;
                 
                 const errorMsg = document.createElement('div');
                 errorMsg.className = 'field-error-message';
-                errorMsg.textContent = 'This field is required';
+                errorMsg.textContent = '⚠️ This field is required';
                 element.parentElement.appendChild(errorMsg);
             }
 
@@ -207,31 +209,30 @@
             };
 
             if (editId) {
-                // Update existing sack
                 sackData.updatedAt = new Date().toISOString();
                 database.ref('sacks/' + editId).update(sackData)
                     .then(() => {
-                        alert('Sack updated successfully!');
+                        alert('✅ Sack updated successfully!');
                         form.reset();
                         form.removeAttribute('data-edit-id');
-                        modalOverlay.classList.remove('show');
+                        modalOverlay.classList.remove('active');
+                        activeRowId = null;
                     })
                     .catch((error) => {
                         console.error('Error updating sack:', error);
-                        alert('Error updating sack: ' + error.message);
+                        alert('❌ Error updating sack: ' + error.message);
                     });
             } else {
-                // Create new sack
                 sackData.createdAt = new Date().toISOString();
                 database.ref('sacks').push(sackData)
                     .then(() => {
-                        alert('Sack added successfully!');
+                        alert('✅ Sack added successfully!');
                         form.reset();
-                        modalOverlay.classList.remove('show');
+                        modalOverlay.classList.remove('active');
                     })
                     .catch((error) => {
                         console.error('Error adding sack:', error);
-                        alert('Error adding sack: ' + error.message);
+                        alert('❌ Error adding sack: ' + error.message);
                     });
             }
         });
@@ -247,18 +248,19 @@
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="5" style="text-align:center;">No sacks found</td>
+                            <td colspan="4" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No sacks found</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Sack" to create your first entry</div>
+                            </td>
                         </tr>`;
                     return;
                 }
 
                 snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    const docId = childSnapshot.key;
-                    
                     allSacks.push({
-                        id: docId,
-                        data: data
+                        id: childSnapshot.key,
+                        data: childSnapshot.val()
                     });
                 });
                 
@@ -267,7 +269,11 @@
                 console.error('Error loading sacks:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align:center; color: red;">Error loading sacks: ${error.message}</td>
+                        <td colspan="4" style="text-align:center; color: #C62828; padding: 3rem;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">Error loading sacks</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">${error.message}</div>
+                        </td>
                     </tr>`;
             });
         }
@@ -292,117 +298,125 @@
         }
 
         // ===================== RENDER SACKS =====================
-// ===================== RENDER SACKS =====================
-function renderSacks() {
-    const tbody = document.getElementById('sackTableBody');
-    tbody.innerHTML = '';
+        function renderSacks() {
+            const tbody = document.getElementById('sackTableBody');
+            tbody.innerHTML = '';
 
-    if (allSacks.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align:center;">No sacks found</td>
-            </tr>`;
-        return;
-    }
+            if (allSacks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No sacks found</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Sack" to create your first entry</div>
+                        </td>
+                    </tr>`;
+                return;
+            }
 
-    allSacks.forEach(item => {
-        const d = item.data;
-        const docId = item.id;
-        const tr = document.createElement('tr');
-        
-        // Format numbers to 3 decimal places
-        const formatWeight = (value) => {
-            return value !== undefined && value !== null ? parseFloat(value).toFixed(3) : '-';
-        };
-        
-        tr.innerHTML = `
-            <td>${d.sackCode || '-'}</td>
-            <td>${formatWeight(d.brandNew)}</td>
-            <td>${formatWeight(d.secondHand)}</td>
-            <td>${formatWeight(d.mendable)}</td>
-            <td class="actions-cell">
-                <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
-                        <span>✏️</span> Edit
-                    </button>
-                    <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
-                        <span>🗑️</span> Delete
-                    </button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+            const formatWeight = (value) => {
+                return value !== undefined && value !== null ? parseFloat(value).toFixed(3) : '-';
+            };
 
-    attachDropdownListeners();
-}
-
-        // ===================== DROPDOWN HANDLERS =====================
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
+            allSacks.forEach(item => {
+                const d = item.data;
+                const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.dataset.id = item.id;
+                
+                tr.innerHTML = `
+                    <td>${d.sackCode || '-'}</td>
+                    <td>${formatWeight(d.brandNew)}</td>
+                    <td>${formatWeight(d.secondHand)}</td>
+                    <td>${formatWeight(d.mendable)}</td>
+                `;
+                tbody.appendChild(tr);
             });
+
+            attachRowClickListeners();
         }
 
-        function attachDropdownListeners() {
-    document.querySelectorAll('.action-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeAllDropdowns();
-            const dropdown = btn.nextElementSibling;
-            dropdown.classList.toggle('show');
-        });
-    });
+        // ===================== ROW CLICK → FLOATING BUTTONS =====================
+        function attachRowClickListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const rowId = row.dataset.id;
 
-    document.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = item.dataset.docId; // ✓ Changed from dataset.id
-            const action = item.dataset.action;
-            
-            closeAllDropdowns();
-            
-            if (action === 'edit') {
-                editSack(id);
-            } else if (action === 'delete') {
-                if (confirm('Are you sure you want to delete this sack?')) {
-                    deleteSack(id);
-                }
-            }
-        });
-    });
-}
+                    const existingButtons = document.querySelector('.floating-action-buttons');
 
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
+                    if (activeRowId === rowId) {
+                        // --- Clicking the SAME row → hide buttons (toggle off) ---
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('row-selected');
+                        activeRowId = null;
+                    } else {
+                        // --- Clicking a DIFFERENT row → move buttons there ---
+
+                        // 1. Remove old buttons & highlight
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+                        // 2. Highlight the new row
+                        row.classList.add('row-selected');
+                        activeRowId = rowId;
+
+                        // 3. Create floating Edit / Delete buttons
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+
+                        // Append to body so position:fixed works reliably
+                        document.body.appendChild(buttonContainer);
+
+                        // 4. Wire up Edit
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editSack(rowId);
+                        });
+
+                        // 5. Wire up Delete
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this sack?')) {
+                                deleteSack(rowId);
+                            }
+                        });
+                    }
+                });
+            });
+        }
 
         // ===================== EDIT SACK =====================
         function editSack(id) {
             database.ref('sacks/' + id).once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        alert('Sack not found!');
+                        alert('❌ Sack not found!');
                         return;
                     }
                     
                     const data = snapshot.val();
                     
-                    document.getElementById('sackCode').value = data.sackCode || '';
-                    document.getElementById('brandNew').value = data.brandNew !== undefined ? data.brandNew : '';
+                    document.getElementById('sackCode').value   = data.sackCode || '';
+                    document.getElementById('brandNew').value   = data.brandNew !== undefined ? data.brandNew : '';
                     document.getElementById('secondHand').value = data.secondHand !== undefined ? data.secondHand : '';
-                    document.getElementById('mendable').value = data.mendable !== undefined ? data.mendable : '';
+                    document.getElementById('mendable').value   = data.mendable !== undefined ? data.mendable : '';
                     
                     sackForm.setAttribute('data-edit-id', id);
-                    modalOverlay.classList.add('show');
+                    modalOverlay.classList.add('active');
                 })
                 .catch((error) => {
                     console.error('Error loading sack:', error);
-                    alert('Error loading sack: ' + error.message);
+                    alert('❌ Error loading sack: ' + error.message);
                 });
         }
 
@@ -410,11 +424,12 @@ function renderSacks() {
         function deleteSack(id) {
             database.ref('sacks/' + id).remove()
                 .then(() => {
-                    alert('Sack deleted successfully!');
+                    alert('✅ Sack deleted successfully!');
+                    activeRowId = null;
                 })
                 .catch((error) => {
                     console.error('Error deleting sack:', error);
-                    alert('Error deleting sack: ' + error.message);
+                    alert('❌ Error deleting sack: ' + error.message);
                 });
         }
 
@@ -423,15 +438,25 @@ function renderSacks() {
             sortSacks(e.target.value);
         });
 
-        // Preview button - opens preview page in new window
+        // ===================== PREVIEW BUTTON =====================
         document.getElementById('previewBtn').addEventListener('click', () => {
             window.open('sack_preview.html');
         });
 
         // ===================== INIT =====================
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Sack Library page loaded');
+            console.log('🌾 Sack Library page loaded');
             loadSacks();
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
 </body>

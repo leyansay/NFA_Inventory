@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cereal Library - NFA Inventory</title>
+    <title>Cereal Library - NFA Inventory System</title>
     <link rel="stylesheet" href="css/cereal.css" />
 </head>
 <body>
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0;"></iframe>
 
-<div class="main-content">
+    <div class="main-content">
         <div class="header">
             <div class="header-left">
                 <h1>Cereal Library</h1>
+                <p style="color: #6B7C6B; font-size: 0.9rem; margin-top: 0.25rem;">Manage and organize cereal records</p>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <div class="user-greeting">Hi, nfa_admin</div>
-                    <div class="user-role">User</div>
+                    <div class="user-role">Administrator</div>
                 </div>
                 <div class="user-avatar">N</div>
             </div>
@@ -25,7 +26,7 @@
 
         <div class="controls">
             <div class="sort-section">
-                <label>Sort by:</label>
+                <label>📊 Sort by:</label>
                 <select class="sort-select" id="sortSelect">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -35,11 +36,11 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-preview" id="previewBtn">
-                    <span>👁</span>
+                    <span>👁️</span>
                     <span>Preview</span>
                 </button>
                 <button class="btn btn-add" id="addCerealBtn">
-                    <span>+</span>
+                    <span>➕</span>
                     <span>Add Cereal</span>
                 </button>
             </div>
@@ -49,15 +50,17 @@
             <table>
                 <thead>
                     <tr>
-                        <th>CEREAL CODE</th>
-                        <th>DESCRIPTION</th>
-                        <th>COMPUTE TA FOR</th>
-                        <th>ACTIONS</th>
+                        <th>🔖 CEREAL CODE</th>
+                        <th>📝 DESCRIPTION</th>
+                        <th>📊 COMPUTE TA FOR</th>
                     </tr>
                 </thead>
                 <tbody id="cerealTableBody">
                     <tr>
-                        <td colspan="4" style="text-align:center;">Loading cereals...</td>
+                        <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">Loading cereals...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -68,7 +71,7 @@
     <div class="modal-overlay" id="cerealModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title">DATA ENTRY OF CEREAL LIBRARY</h2>
+                <h2 class="modal-title">📋 DATA ENTRY OF CEREAL LIBRARY</h2>
                 <button class="close-btn" id="closeModalBtn">×</button>
             </div>
 
@@ -76,19 +79,19 @@
                 <form id="cerealForm">
                     <!-- Cereal Code -->
                     <div class="form-group">
-                        <label class="form-label">Cereal Code:</label>
+                        <label class="form-label">🔖 Cereal Code: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="cerealCode" placeholder="Enter Cereal Code" required>
                     </div>
 
                     <!-- Description -->
                     <div class="form-group">
-                        <label class="form-label">Description:</label>
+                        <label class="form-label">📝 Description: <span style="color: #C62828;">*</span></label>
                         <input type="text" class="form-input" id="description" placeholder="Enter Description" required>
                     </div>
 
                     <!-- Compute TA for -->
                     <div class="form-group">
-                        <label class="form-label">Compute TA for:</label>
+                        <label class="form-label">📊 Compute TA for: <span style="color: #C62828;">*</span></label>
                         <select class="form-select" id="computeTAFor" required>
                             <option value="">-- Select Option --</option>
                             <option value="TOTAL WEIGHT LOSS">Total Weight Loss</option>
@@ -101,7 +104,7 @@
                     </div>
 
                     <!-- Save Button -->
-                    <button type="submit" class="btn-save">Save Cereal</button>
+                    <button type="submit" class="btn-save">💾 Save Cereal</button>
                 </form>
             </div>
         </div>
@@ -111,7 +114,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase Configuration
+        // ===================== FIREBASE CONFIGURATION =====================
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
@@ -131,11 +134,12 @@
 
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        // Global variables
+        // ===================== GLOBAL VARIABLES =====================
         let allCereals = [];
         let currentSortOrder = 'newest';
+        let activeRowId = null;
 
-        // Modal controls
+        // ===================== MODAL CONTROLS =====================
         const cerealModal = document.getElementById('cerealModal');
         const addCerealBtn = document.getElementById('addCerealBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
@@ -167,7 +171,7 @@
             }
         });
 
-        // Form submit handler
+        // ===================== FORM SUBMIT (SAVE / UPDATE) =====================
         cerealForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -190,20 +194,20 @@
             // Validate required fields
             let hasEmptyFields = false;
             const requiredFields = [
-                { id: 'cerealCode', value: cerealData.cerealCode },
-                { id: 'description', value: cerealData.description },
-                { id: 'computeTAFor', value: cerealData.computeTAFor }
+                { id: 'cerealCode',    value: cerealData.cerealCode },
+                { id: 'description',   value: cerealData.description },
+                { id: 'computeTAFor',  value: cerealData.computeTAFor }
             ];
             
             requiredFields.forEach(field => {
                 if (!field.value) {
                     const element = document.getElementById(field.id);
-                    element.style.border = '2px solid #ff6b6b';
+                    element.style.border = '2px solid #C62828';
                     hasEmptyFields = true;
                     
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'field-error-message';
-                    errorMsg.textContent = 'This field is required';
+                    errorMsg.textContent = '⚠️ This field is required';
                     element.parentElement.appendChild(errorMsg);
                 }
             });
@@ -220,39 +224,35 @@
             if (editId) {
                 // Update existing cereal
                 cerealData.updatedAt = new Date().toISOString();
-                const cerealRef = database.ref('cereals/' + editId);
-                
-                cerealRef.update(cerealData)
+                database.ref('cereals/' + editId).update(cerealData)
                     .then(() => {
-                        alert('Cereal updated successfully!');
+                        alert('✅ Cereal updated successfully!');
                         cerealModal.classList.remove('active');
                         form.reset();
                         form.removeAttribute('data-edit-id');
+                        activeRowId = null;
                     })
                     .catch((error) => {
                         console.error('Error updating cereal:', error);
-                        alert('Error updating cereal: ' + error.message);
+                        alert('❌ Error updating cereal: ' + error.message);
                     });
             } else {
                 // Create new cereal
                 cerealData.createdAt = new Date().toISOString();
-                const cerealsRef = database.ref('cereals');
-                const newCerealRef = cerealsRef.push();
-                
-                newCerealRef.set(cerealData)
+                database.ref('cereals').push(cerealData)
                     .then(() => {
-                        alert('Cereal saved successfully!');
+                        alert('✅ Cereal saved successfully!');
                         cerealModal.classList.remove('active');
                         form.reset();
                     })
                     .catch((error) => {
                         console.error('Error saving cereal:', error);
-                        alert('Error saving cereal: ' + error.message);
+                        alert('❌ Error saving cereal: ' + error.message);
                     });
             }
         });
 
-        // Sort cereals
+        // ===================== SORT CEREALS =====================
         function sortCereals(order) {
             currentSortOrder = order;
             
@@ -271,7 +271,7 @@
             renderCereals();
         }
 
-        // Render cereals to table
+        // ===================== RENDER CEREALS =====================
         function renderCereals() {
             const tbody = document.getElementById('cerealTableBody');
             tbody.innerHTML = '';
@@ -279,7 +279,11 @@
             if (allCereals.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center;">No cereals found</td>
+                        <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No cereals found</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Cereal" to create your first entry</div>
+                        </td>
                     </tr>`;
                 return;
             }
@@ -289,115 +293,117 @@
                 const docId = item.docId;
                 
                 const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.dataset.id = docId;
                 tr.innerHTML = `
                     <td>${data.cerealCode || '-'}</td>
                     <td>${data.description || '-'}</td>
                     <td>${data.computeTAFor || '-'}</td>
-
-                    <td class="actions-cell">
-                        <button class="action-btn" data-doc-id="${docId}" title="More actions">⋮</button>
-                        <div class="dropdown-menu">
-                            <button class="dropdown-item" data-action="edit" data-doc-id="${docId}">
-                                <span>✏️</span> Edit
-                            </button>
-                            <button class="dropdown-item delete-item" data-action="delete" data-doc-id="${docId}">
-                                <span>🗑️</span> Delete
-                            </button>
-                        </div>
-                    </td>
                 `;
                 
                 tbody.appendChild(tr);
             });
             
-            attachDropdownListeners();
+            attachRowClickListeners();
         }
 
-        // Attach dropdown listeners
-        function attachDropdownListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeAllDropdowns();
-                    const dropdown = btn.nextElementSibling;
-                    dropdown.classList.toggle('show');
-                });
-            });
+        // ===================== ROW CLICK → FLOATING BUTTONS =====================
+        function attachRowClickListeners() {
+            document.querySelectorAll('.data-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const rowId = row.dataset.id;
 
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = item.dataset.docId;
-                    const action = item.dataset.action;
-                    
-                    closeAllDropdowns();
-                    
-                    if (action === 'edit') {
-                        editCereal(docId);
-                    } else if (action === 'delete') {
-                        if (confirm('Are you sure you want to delete this cereal?')) {
-                            deleteCereal(docId);
-                        }
+                    const existingButtons = document.querySelector('.floating-action-buttons');
+
+                    if (activeRowId === rowId) {
+                        // --- Clicking the SAME row → hide buttons (toggle off) ---
+                        if (existingButtons) existingButtons.remove();
+                        row.classList.remove('row-selected');
+                        activeRowId = null;
+                    } else {
+                        // --- Clicking a DIFFERENT row → move buttons there ---
+
+                        // 1. Remove old buttons & highlight
+                        if (existingButtons) existingButtons.remove();
+                        document.querySelectorAll('.data-row.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+                        // 2. Highlight the new row
+                        row.classList.add('row-selected');
+                        activeRowId = rowId;
+
+                        // 3. Create floating Edit / Delete buttons
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.className = 'floating-action-buttons';
+                        buttonContainer.innerHTML = `
+                            <button class="action-btn-edit" data-id="${rowId}">
+                                <span>✏️</span>
+                                <span>Edit Transaction</span>
+                            </button>
+                            <button class="action-btn-delete" data-id="${rowId}">
+                                <span>🗑️</span>
+                                <span>Delete Transaction</span>
+                            </button>
+                        `;
+
+                        // Append to body so position:fixed works reliably
+                        document.body.appendChild(buttonContainer);
+
+                        // 4. Wire up Edit
+                        buttonContainer.querySelector('.action-btn-edit').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            editCereal(rowId);
+                        });
+
+                        // 5. Wire up Delete
+                        buttonContainer.querySelector('.action-btn-delete').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('🗑️ Are you sure you want to delete this cereal?')) {
+                                deleteCereal(rowId);
+                            }
+                        });
                     }
                 });
             });
         }
 
-        // Close all dropdowns
-        function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.action-btn')) {
-                closeAllDropdowns();
-            }
-        });
-
-        // Edit cereal
+        // ===================== EDIT CEREAL =====================
         function editCereal(docId) {
-            const cerealRef = database.ref('cereals/' + docId);
-            
-            cerealRef.once('value')
+            database.ref('cereals/' + docId).once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        alert('Cereal not found!');
+                        alert('❌ Cereal not found!');
                         return;
                     }
                     
                     const data = snapshot.val();
                     
-                    document.getElementById('cerealCode').value = data.cerealCode || '';
-                    document.getElementById('description').value = data.description || '';
-                    document.getElementById('computeTAFor').value = data.computeTAFor || '';
+                    document.getElementById('cerealCode').value    = data.cerealCode || '';
+                    document.getElementById('description').value   = data.description || '';
+                    document.getElementById('computeTAFor').value  = data.computeTAFor || '';
                     
                     cerealForm.setAttribute('data-edit-id', docId);
                     cerealModal.classList.add('active');
                 })
                 .catch((error) => {
                     console.error('Error loading cereal:', error);
-                    alert('Error loading cereal: ' + error.message);
+                    alert('❌ Error loading cereal: ' + error.message);
                 });
         }
 
-        // Delete cereal
+        // ===================== DELETE CEREAL =====================
         function deleteCereal(docId) {
-            const cerealRef = database.ref('cereals/' + docId);
-            
-            cerealRef.remove()
+            database.ref('cereals/' + docId).remove()
                 .then(() => {
-                    alert('Cereal deleted successfully!');
+                    alert('✅ Cereal deleted successfully!');
+                    activeRowId = null;
                 })
                 .catch((error) => {
                     console.error('Error deleting cereal:', error);
-                    alert('Error deleting cereal: ' + error.message);
+                    alert('❌ Error deleting cereal: ' + error.message);
                 });
         }
 
-        // Load cereals from Firebase
+        // ===================== LOAD CEREALS FROM FIREBASE =====================
         function loadCereals() {
             const tbody = document.getElementById('cerealTableBody');
             const cerealsRef = database.ref('cereals');
@@ -408,18 +414,19 @@
                 if (!snapshot.exists()) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align:center;">No cereals found</td>
+                            <td colspan="3" style="text-align:center; padding: 3rem; color: #6B7C6B;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🌾</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #1B5E20;">No cereals found</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Click "Add Cereal" to create your first entry</div>
+                            </td>
                         </tr>`;
                     return;
                 }
 
                 snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    const docId = childSnapshot.key;
-                    
                     allCereals.push({
-                        docId: docId,
-                        data: data
+                        docId: childSnapshot.key,
+                        data: childSnapshot.val()
                     });
                 });
                 
@@ -428,25 +435,39 @@
                 console.error('Error loading cereals:', error);
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center; color: red;">Error loading cereals: ${error.message}</td>
+                        <td colspan="3" style="text-align:center; color: #C62828; padding: 3rem;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">Error loading cereals</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">${error.message}</div>
+                        </td>
                     </tr>`;
             });
         }
 
-        // Sort select handler
+        // ===================== SORT SELECT HANDLER =====================
         document.getElementById('sortSelect').addEventListener('change', (e) => {
             sortCereals(e.target.value);
         });
 
-        // Preview button
+        // ===================== PREVIEW BUTTON =====================
         document.getElementById('previewBtn').addEventListener('click', () => {
-            alert('Opening Preview mode...');
+            window.open('cereal-preview.html');
         });
 
-        // Initialize on page load
+        // ===================== INIT =====================
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Cereal Library page loaded');
+            console.log('🌾 Cereal Library page loaded');
             loadCereals();
+        });
+
+        // ===================== HEADER SCROLL EFFECT =====================
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
 </body>

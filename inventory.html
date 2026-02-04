@@ -10,165 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <style>
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background-color: #fff;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            animation: slideDown 0.3s;
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            padding: 24px 30px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            font-size: 24px;
-            color: #1f2937;
-        }
-        
-        .close {
-            color: #9ca3af;
-            font-size: 32px;
-            font-weight: 300;
-            cursor: pointer;
-            transition: color 0.2s;
-            line-height: 1;
-        }
-        
-        .close:hover {
-            color: #374151;
-        }
-        
-        .modal-body {
-            padding: 30px;
-        }
-        
-        .print-option {
-            padding: 16px 20px;
-            margin-bottom: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .print-option:hover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        
-        .print-option input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        
-        .print-option label {
-            cursor: pointer;
-            flex: 1;
-            font-size: 16px;
-            color: #374151;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .option-icon {
-            font-size: 20px;
-        }
-        
-        .modal-footer {
-            padding: 20px 30px;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-cancel {
-            background-color: #f3f4f6;
-            color: #374151;
-        }
-        
-        .btn-cancel:hover {
-            background-color: #e5e7eb;
-        }
-        
-        .btn-print {
-            background-color: #3b82f6;
-            color: white;
-        }
-        
-        .btn-print:hover {
-            background-color: #2563eb;
-        }
-        
-        .btn-print:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-        
-        .preview-btn {
-            background-color: #8b5cf6;
-            color: white;
-        }
-        
-        .preview-btn:hover {
-            background-color: #7c3aed;
-        }
-    </style>
+    
 </head>
 <body>
     <!-- Load Sidebar from separate file -->
@@ -196,18 +38,10 @@
                 <input type="text" placeholder="Search inventory..." id="searchInput">
             </div>
             <div class="filter-buttons">
-                <button class="filter-btn rice-btn" id="riceBtn" onclick="showDetails('rice')">
-                    🌾 Rice
-                </button>
-                <button class="filter-btn palay-btn" id="palayBtn" onclick="showDetails('palay')">
-                    🌱 Palay
-                </button>
-                <button class="filter-btn back-btn" id="backBtn" onclick="showSummary()" style="display: none;">
-                    ← Back
-                </button>
-                <button class="filter-btn preview-btn" id="previewBtn" onclick="openPrintModal()">
-                    🖨️ Print Preview
-                </button>
+                <button class="filter-btn rice-btn" id="riceBtn" onclick="showDetails('rice')">Rice</button>
+                <button class="filter-btn palay-btn" id="palayBtn" onclick="showDetails('palay')">Palay</button>
+                <button class="filter-btn back-btn" id="backBtn" onclick="showSummary()" style="display: none;">← Back</button>
+                <button class="filter-btn preview-btn" id="previewBtn" onclick="openPrintModal()">Print Preview</button>
             </div>
         </div>
 
@@ -220,7 +54,6 @@
                 <!-- GID 1 - Rice Summary -->
                 <div class="summary-card rice-card">
                     <div class="summary-header">
-                        <div class="summary-icon">🌾</div>
                         <div class="summary-label">
                             <div class="summary-warehouse">GID 1 - Rice</div>
                             <div class="summary-type">WD1</div>
@@ -242,7 +75,6 @@
                 <!-- GID 2 - Rice Summary -->
                 <div class="summary-card rice-card">
                     <div class="summary-header">
-                        <div class="summary-icon">🌾</div>
                         <div class="summary-label">
                             <div class="summary-warehouse">GID 2 - Rice</div>
                             <div class="summary-type">WD1</div>
@@ -264,7 +96,6 @@
                 <!-- GID 1 - Palay Summary -->
                 <div class="summary-card palay-card">
                     <div class="summary-header">
-                        <div class="summary-icon">🌱</div>
                         <div class="summary-label">
                             <div class="summary-warehouse">GID 1 - Palay</div>
                             <div class="summary-type">PD</div>
@@ -286,7 +117,6 @@
                 <!-- GID 2 - Palay Summary -->
                 <div class="summary-card palay-card">
                     <div class="summary-header">
-                        <div class="summary-icon">🌱</div>
                         <div class="summary-label">
                             <div class="summary-warehouse">GID 2 - Palay</div>
                             <div class="summary-type">PD</div>
@@ -470,7 +300,7 @@
         const database = firebase.database();
         console.log("Firebase initialized:", firebase.apps.length > 0);
 
-        let currentView = 'summary'; // 'summary', 'rice', or 'palay'
+        let currentView = 'summary';
         let allInventoryData = {
             'gid1-rice': [],
             'gid2-rice': [],
@@ -478,8 +308,9 @@
             'gid2-palay': []
         };
 
-        // Cache for varieties data
+        // Cache for varieties and warehouses data
         let varietiesCache = {};
+        let warehousesCache = {};
 
         // Modal Functions
         function openPrintModal() {
@@ -495,7 +326,6 @@
             checkbox.checked = !checkbox.checked;
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('printModal');
             if (event.target === modal) {
@@ -511,22 +341,19 @@
                 gid2Palay: document.getElementById('printGid2Palay').checked
             };
 
-            // Check if at least one option is selected
             if (!Object.values(selections).some(v => v)) {
                 alert('Please select at least one table to print.');
                 return;
             }
 
-            // Store selections in sessionStorage
             sessionStorage.setItem('printSelections', JSON.stringify(selections));
             sessionStorage.setItem('inventoryData', JSON.stringify(allInventoryData));
 
-            // Open print preview in new window
             window.open('inventory-preview.html', '_blank');
             closePrintModal();
         }
 
-        // Load varieties data first
+        // Load varieties data
         function loadVarietiesData() {
             return database.ref('varieties').once('value').then((snapshot) => {
                 varietiesCache = {};
@@ -545,19 +372,71 @@
             });
         }
 
-        // Extract GID number from warehouse name or ID
-        function extractGID(warehouseName, warehouseId) {
-            const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
-            
-            if (combined.includes('GID 1') || combined.includes('GID1')) {
-                return 'gid1';
-            }
-            if (combined.includes('GID 2') || combined.includes('GID2')) {
-                return 'gid2';
-            }
-            
-            return null;
+        // Load warehouses data to get location information
+        function loadWarehousesData() {
+            return database.ref('warehouses').once('value').then((snapshot) => {
+                warehousesCache = {};
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const warehouseData = child.val();
+                        if (warehouseData.warehouseCode) {
+                            warehousesCache[warehouseData.warehouseCode] = {
+                                name: warehouseData.warehouseName || '',
+                                location: warehouseData.location || ''
+                            };
+                        }
+                    });
+                }
+                console.log('Warehouses loaded:', warehousesCache);
+            });
         }
+
+       // Extract GID number from warehouse name AND location
+// BOTH conditions must be met:
+// 1. Warehouse name must contain "GID" + number (1 or 2) - handles special characters
+// 2. Location must contain "DDN" or "DAVAO DEL NORTE" or "MAGDUM"
+function extractGID(warehouseCode, warehouseName) {
+    // Check warehouse name for GID - remove all special characters first
+    const combinedName = `${warehouseName}`.toUpperCase();
+    
+    // Remove special characters but keep letters and numbers
+    const cleanedName = combinedName.replace(/[^A-Z0-9]/g, '');
+    
+    let gidNumber = null;
+    
+    // Check for GID1 pattern (with or without special characters)
+    if (cleanedName.includes('GID1') || combinedName.match(/GID[\s\-_.*]*1/)) {
+        gidNumber = 'gid1';
+    } 
+    // Check for GID2 pattern (with or without special characters)
+    else if (cleanedName.includes('GID2') || combinedName.match(/GID[\s\-_.*]*2/)) {
+        gidNumber = 'gid2';
+    }
+    
+    // If no GID found in name, return null
+    if (!gidNumber) {
+        return null;
+    }
+    
+    // Now check if location matches required keywords
+    if (warehouseCode && warehousesCache[warehouseCode]) {
+        const location = warehousesCache[warehouseCode].location.toUpperCase();
+        
+        // Check if location contains any of the required keywords
+        const hasValidLocation = 
+            location.includes('DDN') || 
+            location.includes('DAVAO DEL NORTE') || 
+            location.includes('MAGDUM');
+        
+        // Return GID only if location is valid
+        if (hasValidLocation) {
+            return gidNumber;
+        }
+    }
+    
+    // If location doesn't match, return null
+    return null;
+}
 
         // Determine cereal type from variety code
         function getCerealType(varietyCode) {
@@ -601,15 +480,13 @@
             });
         }
 
-        // Show details view (rice or palay)
+        // Show details view
         function showDetails(type) {
             currentView = type;
             
-            // Hide summary, show details
             document.getElementById('summarySection').style.display = 'none';
             document.getElementById('detailsSection').style.display = 'block';
             
-            // Update buttons
             const riceBtn = document.getElementById('riceBtn');
             const palayBtn = document.getElementById('palayBtn');
             const backBtn = document.getElementById('backBtn');
@@ -618,7 +495,6 @@
             palayBtn.classList.toggle('active', type === 'palay');
             backBtn.style.display = 'flex';
             
-            // Show/hide appropriate sections
             const riceSections = document.querySelectorAll('.rice-section');
             const palaySections = document.querySelectorAll('.palay-section');
             
@@ -635,11 +511,9 @@
         function showSummary() {
             currentView = 'summary';
             
-            // Show summary, hide details
             document.getElementById('summarySection').style.display = 'block';
             document.getElementById('detailsSection').style.display = 'none';
             
-            // Update buttons
             document.getElementById('riceBtn').classList.remove('active');
             document.getElementById('palayBtn').classList.remove('active');
             document.getElementById('backBtn').style.display = 'none';
@@ -647,7 +521,7 @@
 
         // Load inventory data from Firebase
         function loadInventoryData() {
-            loadVarietiesData().then(() => {
+            Promise.all([loadVarietiesData(), loadWarehousesData()]).then(() => {
                 database.ref('transactions').on('value', (snapshot) => {
                     allInventoryData = {
                         'gid1-rice': [],
@@ -667,8 +541,17 @@
                         
                         if (data.cancelled) return;
 
-                        const gid = extractGID(data.warehouseName || '', data.warehouseId || '');
-                        if (!gid) return;
+                        // Extract GID using warehouse code and name
+                        // Both conditions required: GID in name AND valid location
+                        const gid = extractGID(data.warehouseId || '', data.warehouseName || '');
+                        if (!gid) {
+                            console.log('Transaction skipped - requirements not met:', {
+                                warehouseId: data.warehouseId,
+                                warehouseName: data.warehouseName,
+                                location: warehousesCache[data.warehouseId]?.location || 'Not found'
+                            });
+                            return;
+                        }
 
                         const cerealType = getCerealType(data.varietyCode);
                         if (!cerealType) return;
@@ -755,14 +638,12 @@
             const searchTerm = e.target.value.toLowerCase();
             
             if (currentView === 'summary') {
-                // Search in summary cards
                 const cards = document.querySelectorAll('.summary-card');
                 cards.forEach(card => {
                     const text = card.textContent.toLowerCase();
                     card.style.display = text.includes(searchTerm) ? '' : 'none';
                 });
             } else {
-                // Search in table rows
                 const sections = document.querySelectorAll('.warehouse-section');
                 sections.forEach(section => {
                     if (section.style.display === 'none') return;

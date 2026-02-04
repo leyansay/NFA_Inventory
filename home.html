@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFA Inventory - Dashboard</title>
+    <title>NFA Inventory - Home</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+            background-color: #F1E9D2;
             margin-left: 260px;
             overflow-x: hidden;
         }
@@ -36,52 +36,42 @@
             display: block;
         }
 
-        .top-bar {
-            background: white;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        /* ===== STICKY HEADER WRAPPER ===== */
+        .header-sticky-wrapper {
             position: sticky;
             top: 0;
             z-index: 100;
+            padding: 1rem 1.5rem 0 1.5rem;
+            background-color: #F1E9D2;
+        }
+
+        /* ===== TOP BAR (matching the screenshot style) ===== */
+        .top-bar {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            padding: 1.4rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 16px;
+            border-left: 5px solid #F9A825;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.25);
         }
 
         .page-title {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            color: #1a1d2e;
+            color: #FFFFFF;
+            letter-spacing: 0.5px;
         }
 
-        .search-bar {
-            flex: 1;
-            max-width: 500px;
-            margin: 0 2rem;
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border: 1px solid #e0e4e9;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .search-bar input:focus {
-            border-color: #5b8dee;
-        }
-
-        .search-bar input::placeholder {
-            color: #a0a7b8;
-        }
-
+        /* ===== USER INFO PILL ===== */
         .user-info {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 0.5rem 0.75rem 0.5rem 1rem;
+            border-radius: 12px;
         }
 
         .user-details {
@@ -89,341 +79,342 @@
         }
 
         .user-name {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #1a1d2e;
+            color: #FFFFFF;
         }
 
         .user-role {
-            font-size: 0.8rem;
-            color: #8b92b0;
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.75);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #5b8dee;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #F9A825, #FFB300);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: #F9A825;
+            color: white;
+            border: none;
+            padding: 0.6rem 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(249, 168, 37, 0.3);
         }
 
+        /* ===== MAIN CONTENT ===== */
         .main-content {
-            padding: 2rem;
+            padding: 1.5rem 2rem 2rem 2rem;
         }
 
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1657ba;
-            margin-bottom: 1.5rem;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+        .welcome-banner {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            color: white;
             margin-bottom: 2rem;
-        }
-
-        .summary-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2);
             position: relative;
             overflow: hidden;
         }
 
-        .summary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        .welcome-banner::before {
+            content: '🌾';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 180px;
+            opacity: 0.1;
         }
 
-        .summary-card.wheat {
-            background: linear-gradient(135deg, #f5c469 0%, #e9b855 100%);
-            color: white;
-        }
-
-        .summary-card.rice {
-            background: linear-gradient(135deg, #5dd39e 0%, #4bc085 100%);
-            color: white;
-        }
-
-        .summary-card.available {
-            background: linear-gradient(135deg, #5b8dee 0%, #4a7bd9 100%);
-            color: white;
-        }
-
-        .summary-card.warning {
-            background: linear-gradient(135deg, #ee7c92 0%, #e5677e 100%);
-            color: white;
-        }
-
-        .summary-card.capacity {
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            color: white;
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.9;
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            opacity: 0.95;
-        }
-
-        .card-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            line-height: 1.2;
+        .welcome-banner h1 {
+            font-size: 2.2rem;
             margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
 
-        .card-subtitle {
+        .welcome-banner p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(180deg, #F9A825, #FFB300);
+            border-radius: 3px;
+        }
+
+        /* Quick Stats Grid */
+        .quick-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.1);
+            border-left: 5px solid #F9A825;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-label {
             font-size: 0.85rem;
-            opacity: 0.9;
-            margin-top: 0.5rem;
+            color: #6B7280;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        .progress-container {
-            margin-top: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            height: 8px;
-            overflow: hidden;
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            transition: width 1s ease-out;
+        .stat-value.updating {
+            transform: scale(1.1);
+            color: #F9A825;
         }
 
+        .stat-subtitle {
+            font-size: 0.85rem;
+            color: #9CA3AF;
+        }
+
+        /* System Overview Cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .overview-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.1);
+            border: 2px solid #E8D8B5;
+        }
+
+        .overview-card h3 {
+            color: #2E7D32;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #F9A825;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .overview-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #F1E9D2;
+        }
+
+        .overview-item:last-child {
+            border-bottom: none;
+        }
+
+        .overview-item-label {
+            font-size: 0.9rem;
+            color: #4B5563;
+        }
+
+        .overview-item-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #F9A825;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+            background: linear-gradient(135deg, #1B5E20, #2E7D32);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #F9A825, #FFB300);
+        }
+
+        .action-btn.secondary:hover {
+            background: linear-gradient(135deg, #FFB300, #F9A825);
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Charts Grid */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 1.5rem;
-            margin-top: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .chart-card {
             background: white;
             padding: 1.5rem;
             border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.1);
+            border: 2px solid #E8D8B5;
         }
 
         .chart-card h3 {
-            color: #1a1d2e;
-            font-size: 1.2rem;
-            font-weight: 600;
+            color: #2E7D32;
+            font-size: 1.1rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
             padding-bottom: 0.75rem;
-            border-bottom: 2px solid #f0f2f5;
+            border-bottom: 3px solid #F9A825;
         }
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 250px;
         }
 
-        .stats-section {
-            margin-top: 2rem;
-        }
-
-        .stat-item {
+        /* Recent Activity */
+        .recent-activity {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .stat-label {
-            font-weight: 600;
-            color: #1a1d2e;
-            font-size: 1rem;
-        }
-
-        .stat-value {
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #5b8dee;
-        }
-
-        .stat-bar {
-            height: 30px;
-            background: #e8eef5;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .stat-bar-fill {
-            height: 100%;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 1rem;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: width 1.5s ease-out;
-        }
-
-        .stat-bar-fill.wheat {
-            background: linear-gradient(90deg, #f5c469, #e9b855);
-        }
-
-        .stat-bar-fill.rice {
-            background: linear-gradient(90deg, #5dd39e, #4bc085);
-        }
-
-        .stat-bar-fill.available {
-            background: linear-gradient(90deg, #5b8dee, #4a7bd9);
-        }
-
-        .stat-bar-fill.warning {
-            background: linear-gradient(90deg, #ee7c92, #e5677e);
-        }
-
-        .stat-bar-fill.capacity {
-            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
-        }
-
-        .menu-toggle {
-            display: none;
-            background: #5b8dee;
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .trend-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            opacity: 0.9;
-        }
-
-        /* Recent Transactions Section */
-        .recent-transactions {
-            background: white;
             border-radius: 16px;
-            padding: 1.5rem;
-            margin-top: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.1);
+            border: 2px solid #E8D8B5;
         }
 
-        .recent-transactions h3 {
-            color: #1a1d2e;
-            font-size: 1.2rem;
-            font-weight: 600;
+        .recent-activity h3 {
+            color: #2E7D32;
+            font-size: 1.1rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
             padding-bottom: 0.75rem;
-            border-bottom: 2px solid #f0f2f5;
+            border-bottom: 3px solid #F9A825;
+        }
+
+        .activity-item {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .transactions-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .transactions-table thead {
-            background: #f8f9fa;
-        }
-
-        .transactions-table th {
+            align-items: start;
+            gap: 1rem;
             padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #1a1d2e;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .transactions-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #f0f2f5;
-            font-size: 0.9rem;
-            color: #333;
-        }
-
-        .transactions-table tbody tr {
+            border-bottom: 1px solid #F1E9D2;
             transition: background-color 0.2s;
         }
 
-        .transactions-table tbody tr:hover {
-            background-color: #f8f9fa;
+        .activity-item:hover {
+            background-color: #F9FAFB;
         }
 
-        .transaction-type {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            font-size: 1.5rem;
+            background: #F1E9D2;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
             font-weight: 600;
-            text-transform: uppercase;
+            color: #1F2937;
+            margin-bottom: 0.25rem;
         }
 
-        .transaction-type.palay {
-            background: #fef3c7;
-            color: #92400e;
+        .activity-meta {
+            font-size: 0.85rem;
+            color: #6B7280;
         }
 
-        .transaction-type.rice {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .transaction-type.unknown {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .no-transactions {
-            text-align: center;
-            padding: 3rem;
-            color: #8b92b0;
-        }
-
-        .no-transactions-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             body {
                 margin-left: 0;
@@ -442,48 +433,33 @@
                 display: block;
             }
 
-            .summary-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-
-            .charts-grid {
+            .quick-stats-grid,
+            .overview-grid,
+            .charts-grid,
+            .quick-actions {
                 grid-template-columns: 1fr;
-            }
-
-            .transactions-table {
-                font-size: 0.8rem;
-            }
-
-            .transactions-table th,
-            .transactions-table td {
-                padding: 0.75rem 0.5rem;
             }
         }
 
         @media (max-width: 768px) {
-            .top-bar {
-                flex-wrap: wrap;
-                gap: 1rem;
+            .header-sticky-wrapper {
+                padding: 0.75rem 0.75rem 0 0.75rem;
             }
 
-            .search-bar {
-                order: 3;
-                margin: 0;
-                max-width: 100%;
-                width: 100%;
+            .main-content {
+                padding: 1rem;
             }
 
-            .page-title {
+            .welcome-banner h1 {
                 font-size: 1.5rem;
             }
 
-            .summary-grid {
-                grid-template-columns: 1fr;
+            .welcome-banner p {
+                font-size: 0.95rem;
             }
 
-            .transactions-table {
-                display: block;
-                overflow-x: auto;
+            .stat-value {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -493,202 +469,193 @@
         <iframe id="sidebar-frame" src="sidebar.html"></iframe>
     </div>
 
-    <div class="top-bar">
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-        <h1 class="page-title">DASHBOARD</h1>
-        
-        <div class="search-bar">
-            <input type="text" placeholder="Search item, warehouse or report...">
-        </div>
-        
-        <div class="user-info">
-            <div class="user-details">
-                <div class="user-name" id="displayUsername">Hi, User</div>
-                <div class="user-role" id="displayUserRole">USER</div>
+    <!-- STICKY HEADER: rounded green bar with gold left border, same as screenshot -->
+    <div class="header-sticky-wrapper">
+        <div class="top-bar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h1 class="page-title">Home</h1>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name" id="displayUsername">Hi, User</div>
+                    <div class="user-role" id="displayUserRole">USER</div>
+                </div>
+                <div class="user-avatar" id="displayAvatar">U</div>
             </div>
-            <div class="user-avatar" id="displayAvatar">U</div>
         </div>
     </div>
 
     <div class="main-content">
-        <h2 class="section-title">Inventory Summary</h2>
-        
-        <div class="summary-grid">
-            <div class="summary-card wheat">
-                <div class="card-icon">🌾</div>
-                <div class="card-title">TOTAL PALAY STOCK</div>
-                <div class="card-value">125,450 kg</div>
-                <div class="card-subtitle">125.45 MT (Metric Tons)</div>
-                <div class="trend-indicator">
-                    <span>↗</span> <span>+8% from last month</span>
+
+        <!-- Quick Stats -->
+        <h2 class="section-title">System Overview</h2>
+        <div class="quick-stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Total Palay</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 80%;"></div>
+                <div class="stat-value" id="totalPalay">0</div>
+                <div class="stat-subtitle">bags in inventory</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Total Rice</span>
+                </div>
+                <div class="stat-value" id="totalRice">0</div>
+                <div class="stat-subtitle">bags in inventory</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Warehouses</span>
+                </div>
+                <div class="stat-value" id="totalWarehouses">0</div>
+                <div class="stat-subtitle">active locations</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Officers</span>
+                </div>
+                <div class="stat-value" id="totalOfficers">0</div>
+                <div class="stat-subtitle">accountable officers</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Transactions</span>
+                </div>
+                <div class="stat-value" id="totalTransactions">0</div>
+                <div class="stat-subtitle">recorded today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Reports</span>
+                </div>
+                <div class="stat-value" id="totalReports">0</div>
+                <div class="stat-subtitle">generated this month</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="quick-actions">
+            <a href="transaction.html" class="action-btn">
+                <span>Add Transaction</span>
+            </a>
+            <a href="inventory.html" class="action-btn">
+                <span>View Inventory</span>
+            </a>
+            <a href="report.html" class="action-btn secondary">
+                <span>Generate Report</span>
+            </a>
+            <a href="accountable.html" class="action-btn">
+                <span>Manage Officers</span>
+            </a>
+        </div>
+
+        <!-- Detailed Overview -->
+        <h2 class="section-title">Detailed Summary</h2>
+        <div class="overview-grid">
+            <div class="overview-card">
+                <h3>📦 Inventory Status</h3>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 1 - Rice</span>
+                    <span class="overview-item-value" id="gid1Rice">0 bags</span>
+                </div>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 2 - Rice</span>
+                    <span class="overview-item-value" id="gid2Rice">0 bags</span>
+                </div>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 1 - Palay</span>
+                    <span class="overview-item-value" id="gid1Palay">0 bags</span>
+                </div>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 2 - Palay</span>
+                    <span class="overview-item-value" id="gid2Palay">0 bags</span>
                 </div>
             </div>
-            
-            <div class="summary-card rice">
-                <div class="card-icon">🍚</div>
-                <div class="card-title">TOTAL RICE STOCK</div>
-                <div class="card-value">79,195 kg</div>
-                <div class="card-subtitle">1,584 sacks (50kg/sack)</div>
-                <div class="trend-indicator">
-                    <span>↗</span> <span>+12% from last month</span>
+
+            <div class="overview-card">
+                <h3>🏚 Warehouse Capacity</h3>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 1 Usage</span>
+                    <span class="overview-item-value" id="gid1Capacity">0%</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 75%;"></div>
+                <div class="overview-item">
+                    <span class="overview-item-label">GID 2 Usage</span>
+                    <span class="overview-item-value" id="gid2Capacity">0%</span>
                 </div>
-            </div>
-            
-            <div class="summary-card available">
-                <div class="card-icon">🏪</div>
-                <div class="card-title">AVAILABLE STOCK</div>
-                <div class="card-value">1,420</div>
-                <div class="card-subtitle">sacks ready for distribution</div>
-                <div class="trend-indicator">
-                    <span>↗</span> <span>+5% availability</span>
+                <div class="overview-item">
+                    <span class="overview-item-label">Total Capacity Used</span>
+                    <span class="overview-item-value" id="totalCapacity">0%</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 90%;"></div>
+                <div class="overview-item">
+                    <span class="overview-item-label">Available Space</span>
+                    <span class="overview-item-value" id="availableSpace">0 bags</span>
                 </div>
             </div>
-            
-            <div class="summary-card warning">
-                <div class="card-icon">⚠️</div>
-                <div class="card-title">LOW STOCK ALERT</div>
-                <div class="card-value">3</div>
-                <div class="card-subtitle">items below minimum level</div>
-                <div class="trend-indicator">
-                    <span>↘</span> <span>Requires attention</span>
+
+            <div class="overview-card">
+                <h3>📊 Activity Summary</h3>
+                <div class="overview-item">
+                    <span class="overview-item-label">Cereal Types</span>
+                    <span class="overview-item-value" id="cerealTypes">0</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 30%;"></div>
+                <div class="overview-item">
+                    <span class="overview-item-label">Variety Codes</span>
+                    <span class="overview-item-value" id="varietyCodes">0</span>
                 </div>
-            </div>
-            
-            <div class="summary-card capacity">
-                <div class="card-icon">🏚</div>
-                <div class="card-title">WAREHOUSE CAPACITY USED</div>
-                <div class="card-value">68.5%</div>
-                <div class="card-subtitle">1,370 / 2,000 sacks capacity</div>
-                <div class="trend-indicator">
-                    <span>↗</span> <span>Optimal usage</span>
+                <div class="overview-item">
+                    <span class="overview-item-label">Activity Codes</span>
+                    <span class="overview-item-value" id="activityCodes">0</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 68.5%;"></div>
+                <div class="overview-item">
+                    <span class="overview-item-label">Signatories</span>
+                    <span class="overview-item-value" id="signatories">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Today's Transactions Section -->
-        <div class="recent-transactions">
-            <h3>📋 Today's Transactions</h3>
-            <div id="recentTransactionsContainer">
-                <table class="transactions-table" id="transactionsTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Officer</th>
-                            <th>Warehouse</th>
-                            <th>Type</th>
-                            <th>Document No</th>
-                            <th>Variety</th>
-                            <th>Bags</th>
-                            <th>Net Weight (kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionsTableBody">
-                        <tr>
-                            <td colspan="8" class="no-transactions">
-                                <div class="no-transactions-icon">📦</div>
-                                <div>Loading transactions...</div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <h2 class="section-title">Detailed Statistics</h2>
-        <div class="stats-section">
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">🌾 Palay Stock by Warehouse</span>
-                    <span class="stat-value">125,450 kg</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill wheat" style="width: 80%;">80%</div>
-                </div>
-            </div>
-
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">🍚 Rice Stock Distribution</span>
-                    <span class="stat-value">1,584 sacks</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill rice" style="width: 75%;">75%</div>
-                </div>
-            </div>
-
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">🏪 Stock Availability Rate</span>
-                    <span class="stat-value">89.7%</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill available" style="width: 89.7%;">90%</div>
-                </div>
-            </div>
-
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">⚠️ Low Stock Items</span>
-                    <span class="stat-value">3 items</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill warning" style="width: 30%;">Low</div>
-                </div>
-            </div>
-
-            <div class="stat-item">
-                <div class="stat-header">
-                    <span class="stat-label">🏚 Total Warehouse Capacity</span>
-                    <span class="stat-value">1,370 / 2,000</span>
-                </div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill capacity" style="width: 68.5%;">68.5%</div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Charts -->
         <h2 class="section-title">Visual Analytics</h2>
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>📊 Stock Levels Overview</h3>
+                <h3>📊 Inventory Distribution</h3>
                 <div class="chart-container">
-                    <canvas id="stockChart"></canvas>
+                    <canvas id="inventoryChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3>📈 Monthly Inventory Trend</h3>
+                <h3>📈 Monthly Trend</h3>
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3>🏪 Warehouse Distribution</h3>
+                <h3>🏪 Warehouse Occupancy</h3>
                 <div class="chart-container">
                     <canvas id="warehouseChart"></canvas>
                 </div>
             </div>
+        </div>
 
-            <div class="chart-card">
-                <h3>🌾 Palay vs Rice Stock</h3>
-                <div class="chart-container">
-                    <canvas id="comparisonChart"></canvas>
+        <!-- Recent Activity -->
+        <h2 class="section-title">Recent Activity</h2>
+        <div class="recent-activity">
+            <h3>⚡ Latest Updates</h3>
+            <div id="recentActivityList">
+                <div class="activity-item">
+                    <div class="activity-icon">📦</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Loading recent activities...</div>
+                        <div class="activity-meta">Please wait</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -714,95 +681,77 @@
             firebase.initializeApp(firebaseConfig);
         }
         const database = firebase.database();
-        console.log("Firebase initialized:", firebase.apps.length > 0);
 
         let transactionsData = [];
         let varietiesCache = {};
         let warehousesData = {};
-
-        function extractGID(warehouseName, warehouseId) {
-            const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
-            
-            if (combined.includes('GID 1') || combined.includes('GID1') || combined.includes('GID-1')) {
-                return 'gid1';
-            }
-            if (combined.includes('GID 2') || combined.includes('GID2') || combined.includes('GID-2')) {
-                return 'gid2';
-            }
-            
-            return null;
-        }
+        let officersData = [];
+        let reportsData = [];
+        let libraryData = {};
 
         function getCerealType(varietyCode) {
             if (!varietyCode) return null;
-            
             const code = varietyCode.toUpperCase();
-            
-            if (code.startsWith('PD')) {
-                return 'palay';
-            }
-            if (code.startsWith('WD1')) {
-                return 'rice';
-            }
-            
+            if (code.startsWith('PD')) return 'palay';
+            if (code.startsWith('WD1')) return 'rice';
             if (varietiesCache[varietyCode]) {
                 const cerealType = varietiesCache[varietyCode].cerealType.toLowerCase();
                 if (cerealType.includes('palay')) return 'palay';
                 if (cerealType.includes('rice')) return 'rice';
             }
-            
             return null;
         }
 
-        function loadVarietiesData() {
-            return database.ref('varieties').once('value').then((snapshot) => {
+        function extractGID(warehouseName, warehouseId) {
+            const combined = `${warehouseName} ${warehouseId}`.toUpperCase();
+            if (combined.includes('GID 1') || combined.includes('GID1') || combined.includes('GID-1')) return 'gid1';
+            if (combined.includes('GID 2') || combined.includes('GID2') || combined.includes('GID-2')) return 'gid2';
+            return null;
+        }
+
+        function loadAllData() {
+            database.ref('varieties').on('value', (varietiesSnap) => {
                 varietiesCache = {};
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const varietyData = child.val();
-                        if (varietyData.varietyCode) {
-                            varietiesCache[varietyData.varietyCode] = {
-                                cerealType: (varietyData.cerealType || '').toLowerCase(),
-                                description: varietyData.description || varietyData.varietyDescription || '-'
+                if (varietiesSnap.exists()) {
+                    varietiesSnap.forEach((child) => {
+                        const data = child.val();
+                        if (data.varietyCode) {
+                            varietiesCache[data.varietyCode] = {
+                                cerealType: (data.cerealType || '').toLowerCase(),
+                                description: data.description || '-'
                             };
                         }
                     });
                 }
-                console.log('Varieties loaded:', Object.keys(varietiesCache).length);
+                libraryData.varieties = Object.keys(varietiesCache).length;
+                updateLibraryUI();
             });
-        }
 
-        function loadDashboardData() {
-            Promise.all([
-                loadVarietiesData(),
-                database.ref('transactions').once('value'),
-                database.ref('warehouses').once('value')
-            ]).then(([_, transactionsSnapshot, warehousesSnapshot]) => {
-                
+            database.ref('transactions').on('value', (transactionsSnap) => {
                 transactionsData = [];
-                if (transactionsSnapshot.exists()) {
-                    transactionsSnapshot.forEach((child) => {
+                if (transactionsSnap.exists()) {
+                    transactionsSnap.forEach((child) => {
                         const data = child.val();
                         if (!data.cancelled) {
                             transactionsData.push(data);
                         }
                     });
                 }
-                console.log('Transactions loaded:', transactionsData.length);
+                calculateAndDisplay();
+                initializeCharts();
+                displayRecentActivity();
+            });
 
+            database.ref('warehouses').on('value', (warehousesSnap) => {
                 warehousesData = {};
-                if (warehousesSnapshot.exists()) {
-                    warehousesSnapshot.forEach((child) => {
+                if (warehousesSnap.exists()) {
+                    warehousesSnap.forEach((child) => {
                         const data = child.val();
                         if (data.warehouseId) {
                             const gid = extractGID(data.location || data.warehouseName || '', data.warehouseId);
                             let capacity = 2000;
-                            
-                            if (gid === 'gid1') {
-                                capacity = 100000;
-                            } else if (gid === 'gid2') {
-                                capacity = 50000;
-                            }
+                            if (gid === 'gid1') capacity = 100000;
+                            else if (gid === 'gid2') capacity = 50000;
                             
                             warehousesData[data.warehouseId] = {
                                 name: data.location || data.warehouseName || 'Unknown',
@@ -812,236 +761,259 @@
                         }
                     });
                 }
-                console.log('Warehouses loaded:', Object.keys(warehousesData).length);
+                document.getElementById('totalWarehouses').textContent = Object.keys(warehousesData).length;
+                calculateAndDisplay();
+            });
 
-                calculateMetrics();
-                displayRecentTransactions();
-                initializeCharts();
-            }).catch((error) => {
-                console.error('Error loading dashboard data:', error);
+            database.ref('accountableOfficers').on('value', (officersSnap) => {
+                officersData = [];
+                if (officersSnap.exists()) {
+                    officersSnap.forEach((child) => {
+                        officersData.push(child.val());
+                    });
+                }
+                document.getElementById('totalOfficers').textContent = officersData.length;
+            });
+
+            database.ref('reports').on('value', (reportsSnap) => {
+                reportsData = [];
+                if (reportsSnap.exists()) {
+                    reportsSnap.forEach((child) => {
+                        reportsData.push(child.val());
+                    });
+                }
+                updateReportsCount();
+            });
+
+            database.ref('cereal').on('value', (cerealSnap) => {
+                libraryData.cereal = cerealSnap.exists() ? cerealSnap.numChildren() : 0;
+                updateLibraryUI();
+            });
+
+            database.ref('activity').on('value', (activitySnap) => {
+                libraryData.activity = activitySnap.exists() ? activitySnap.numChildren() : 0;
+                updateLibraryUI();
+            });
+
+            database.ref('signatories').on('value', (signatoriesSnap) => {
+                libraryData.signatories = signatoriesSnap.exists() ? signatoriesSnap.numChildren() : 0;
+                updateLibraryUI();
             });
         }
 
-        function displayRecentTransactions() {
-            const tableBody = document.getElementById('transactionsTableBody');
-            
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date();
-            const todayString = today.toISOString().split('T')[0];
-            
-            // Filter transactions for today only
-            const todayTransactions = transactionsData.filter(transaction => {
-                return transaction.transactionDate === todayString;
+        function updateLibraryUI() {
+            if (libraryData.cereal !== undefined) animateCounterUpdate('cerealTypes', libraryData.cereal);
+            if (libraryData.varieties !== undefined) animateCounterUpdate('varietyCodes', libraryData.varieties);
+            if (libraryData.activity !== undefined) animateCounterUpdate('activityCodes', libraryData.activity);
+            if (libraryData.signatories !== undefined) animateCounterUpdate('signatories', libraryData.signatories);
+        }
+
+        function updateReportsCount() {
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            const monthReports = reportsData.filter(r => {
+                if (r.reportDate) return r.reportDate.startsWith(thisMonth);
+                return false;
+            }).length;
+            animateCounterUpdate('totalReports', monthReports);
+        }
+
+        function animateCounterUpdate(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            const currentValue = element.textContent;
+            const formattedNewValue = typeof newValue === 'number' ? newValue.toLocaleString() : newValue;
+            if (currentValue !== formattedNewValue) {
+                element.classList.add('updating');
+                element.textContent = formattedNewValue;
+                setTimeout(() => { element.classList.remove('updating'); }, 300);
+            }
+        }
+
+        function calculateAndDisplay() {
+            let totalPalay = 0, totalRice = 0;
+            let gid1Rice = 0, gid2Rice = 0, gid1Palay = 0, gid2Palay = 0;
+            let gid1Usage = 0, gid2Usage = 0;
+
+            transactionsData.forEach(transaction => {
+                const bags = parseFloat(transaction.numberOfBags) || 0;
+                const cerealType = getCerealType(transaction.varietyCode);
+                const warehouseId = transaction.warehouseId;
+                const warehouse = warehousesData[warehouseId];
+                const gid = warehouse?.gid;
+
+                if (cerealType === 'palay') {
+                    totalPalay += bags;
+                    if (gid === 'gid1') gid1Palay += bags;
+                    if (gid === 'gid2') gid2Palay += bags;
+                } else if (cerealType === 'rice') {
+                    totalRice += bags;
+                    if (gid === 'gid1') gid1Rice += bags;
+                    if (gid === 'gid2') gid2Rice += bags;
+                }
+
+                if (gid === 'gid1') gid1Usage += bags;
+                if (gid === 'gid2') gid2Usage += bags;
             });
-            
-            if (todayTransactions.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="no-transactions">
-                            <div class="no-transactions-icon">📭</div>
-                            <div>No transactions recorded for today (${todayString})</div>
-                        </td>
-                    </tr>
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayTransactions = transactionsData.filter(t => t.transactionDate === today).length;
+
+            animateCounterUpdate('totalPalay', Math.round(totalPalay));
+            animateCounterUpdate('totalRice', Math.round(totalRice));
+            animateCounterUpdate('totalWarehouses', Object.keys(warehousesData).length);
+            animateCounterUpdate('totalOfficers', officersData.length);
+            animateCounterUpdate('totalTransactions', todayTransactions);
+
+            animateCounterUpdate('gid1Rice', Math.round(gid1Rice).toLocaleString() + ' bags');
+            animateCounterUpdate('gid2Rice', Math.round(gid2Rice).toLocaleString() + ' bags');
+            animateCounterUpdate('gid1Palay', Math.round(gid1Palay).toLocaleString() + ' bags');
+            animateCounterUpdate('gid2Palay', Math.round(gid2Palay).toLocaleString() + ' bags');
+
+            const gid1Cap = ((gid1Usage / 100000) * 100).toFixed(1);
+            const gid2Cap = ((gid2Usage / 50000) * 100).toFixed(1);
+            const totalCap = (((gid1Usage + gid2Usage) / 150000) * 100).toFixed(1);
+            const availableSpace = 150000 - (gid1Usage + gid2Usage);
+
+            animateCounterUpdate('gid1Capacity', gid1Cap + '%');
+            animateCounterUpdate('gid2Capacity', gid2Cap + '%');
+            animateCounterUpdate('totalCapacity', totalCap + '%');
+            animateCounterUpdate('availableSpace', Math.round(availableSpace).toLocaleString() + ' bags');
+        }
+
+        let inventoryChartInstance = null;
+        let trendChartInstance = null;
+        let warehouseChartInstance = null;
+
+        function initializeCharts() {
+            if (inventoryChartInstance) inventoryChartInstance.destroy();
+            if (trendChartInstance) trendChartInstance.destroy();
+            if (warehouseChartInstance) warehouseChartInstance.destroy();
+
+            const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+            inventoryChartInstance = new Chart(inventoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Palay', 'Rice'],
+                    datasets: [{
+                        data: [
+                            transactionsData.filter(t => getCerealType(t.varietyCode) === 'palay').reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0),
+                            transactionsData.filter(t => getCerealType(t.varietyCode) === 'rice').reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0)
+                        ],
+                        backgroundColor: ['#F9A825', '#2E7D32']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+            const monthlyData = months.map((_, index) => {
+                return transactionsData.filter(t => {
+                    if (!t.transactionDate) return false;
+                    const date = new Date(t.transactionDate);
+                    return date.getMonth() === index;
+                }).reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0);
+            });
+
+            trendChartInstance = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Total Bags',
+                        data: monthlyData,
+                        borderColor: '#2E7D32',
+                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const warehouseCtx = document.getElementById('warehouseChart').getContext('2d');
+            const gid1Usage = transactionsData.filter(t => {
+                const warehouse = warehousesData[t.warehouseId];
+                return warehouse?.gid === 'gid1';
+            }).reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0);
+
+            const gid2Usage = transactionsData.filter(t => {
+                const warehouse = warehousesData[t.warehouseId];
+                return warehouse?.gid === 'gid2';
+            }).reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0);
+
+            warehouseChartInstance = new Chart(warehouseCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['GID 1', 'GID 2'],
+                    datasets: [{
+                        label: 'Used',
+                        data: [gid1Usage, gid2Usage],
+                        backgroundColor: '#F9A825'
+                    }, {
+                        label: 'Available',
+                        data: [100000 - gid1Usage, 50000 - gid2Usage],
+                        backgroundColor: '#E8D8B5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function displayRecentActivity() {
+            const activityList = document.getElementById('recentActivityList');
+            const recentTransactions = [...transactionsData]
+                .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                .slice(0, 5);
+
+            if (recentTransactions.length === 0) {
+                activityList.innerHTML = `
+                    <div class="activity-item">
+                        <div class="activity-icon">📭</div>
+                        <div class="activity-content">
+                            <div class="activity-title">No recent activity</div>
+                            <div class="activity-meta">Start by adding a transaction</div>
+                        </div>
+                    </div>
                 `;
                 return;
             }
 
-            // Sort by most recent first (if there's a timestamp)
-            const sortedTransactions = [...todayTransactions]
-                .sort((a, b) => {
-                    const timeA = a.timestamp || 0;
-                    const timeB = b.timestamp || 0;
-                    return timeB - timeA;
-                });
-
-            tableBody.innerHTML = '';
-            
-            sortedTransactions.forEach(transaction => {
+            activityList.innerHTML = recentTransactions.map(transaction => {
                 const cerealType = getCerealType(transaction.varietyCode);
-                const typeClass = cerealType || 'unknown';
-                const typeLabel = cerealType ? cerealType.toUpperCase() : 'UNKNOWN';
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${transaction.transactionDate || '-'}</td>
-                    <td>${transaction.officerName || '-'}</td>
-                    <td>${transaction.warehouseName || '-'}</td>
-                    <td><span class="transaction-type ${typeClass}">${typeLabel}</span></td>
-                    <td>${transaction.documentNo || '-'}</td>
-                    <td>${transaction.varietyCode || '-'}</td>
-                    <td>${transaction.numberOfBags || '-'}</td>
-                    <td>${parseFloat(transaction.netWeight || 0).toLocaleString()}</td>
+                const icon = cerealType === 'palay' ? '🌾' : cerealType === 'rice' ? '🍚' : '📦';
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${transaction.officerName || 'Unknown'} - ${transaction.warehouseName || 'Unknown Warehouse'}</div>
+                            <div class="activity-meta">${transaction.numberOfBags || 0} bags | ${transaction.transactionDate || 'No date'} | ${transaction.documentNo || 'No doc'}</div>
+                        </div>
+                    </div>
                 `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        function calculateMetrics() {
-            let totalPalayKg = 0;
-            let totalPalayBags = 0;
-            let totalRiceKg = 0;
-            let totalRiceBags = 0;
-            let totalAvailableBags = 0;
-            let warehouseUsage = {};
-            let lowStockItems = [];
-
-            transactionsData.forEach(transaction => {
-                const netWeight = parseFloat(transaction.netWeight) || 0;
-                const bags = parseFloat(transaction.numberOfBags) || 0;
-                const varietyCode = transaction.varietyCode;
-                const warehouseId = transaction.warehouseId;
-                
-                const cerealType = getCerealType(varietyCode);
-
-                if (cerealType === 'palay') {
-                    totalPalayKg += netWeight;
-                    totalPalayBags += bags;
-                } else if (cerealType === 'rice') {
-                    totalRiceKg += netWeight;
-                    totalRiceBags += bags;
-                }
-
-                totalAvailableBags += bags;
-
-                if (warehouseId) {
-                    if (!warehouseUsage[warehouseId]) {
-                        warehouseUsage[warehouseId] = 0;
-                    }
-                    warehouseUsage[warehouseId] += bags;
-                }
-            });
-
-            if (totalPalayBags < 1000) {
-                lowStockItems.push(`Palay: ${totalPalayBags.toFixed(0)} bags`);
-            }
-            if (totalRiceBags < 1000) {
-                lowStockItems.push(`Rice: ${totalRiceBags.toFixed(0)} bags`);
-            }
-
-            let totalWarehouseCapacity = 150000;
-            let totalWarehouseUsed = 0;
-
-            Object.keys(warehouseUsage).forEach(warehouseId => {
-                totalWarehouseUsed += warehouseUsage[warehouseId] || 0;
-            });
-
-            const capacityPercentage = totalWarehouseCapacity > 0 
-                ? ((totalWarehouseUsed / totalWarehouseCapacity) * 100).toFixed(1)
-                : 0;
-
-            console.log('Metrics calculated:', {
-                totalPalayKg,
-                totalPalayBags,
-                totalRiceKg,
-                totalRiceBags,
-                totalAvailableBags,
-                lowStockItems,
-                capacityPercentage
-            });
-
-            updateDashboardUI({
-                totalPalayKg: totalPalayKg.toFixed(2),
-                totalPalayMT: (totalPalayKg / 1000).toFixed(2),
-                totalPalayBags: Math.round(totalPalayBags),
-                totalRiceKg: totalRiceKg.toFixed(2),
-                totalRiceBags: Math.round(totalRiceBags),
-                availableStock: Math.round(totalAvailableBags),
-                lowStockItems: lowStockItems,
-                lowStockCount: lowStockItems.length,
-                capacityPercentage: capacityPercentage,
-                warehouseCapacityUsed: Math.round(totalWarehouseUsed),
-                totalWarehouseCapacity: totalWarehouseCapacity
-            });
-        }
-
-        function updateDashboardUI(metrics) {
-            document.querySelector('.summary-card.wheat .card-value').textContent = 
-                `${metrics.totalPalayBags.toLocaleString()} bags`;
-            document.querySelector('.summary-card.wheat .card-subtitle').textContent = 
-                `${parseFloat(metrics.totalPalayKg).toLocaleString()} kg / ${metrics.totalPalayMT} MT`;
-
-            document.querySelector('.summary-card.rice .card-value').textContent = 
-                `${metrics.totalRiceBags.toLocaleString()} bags`;
-            document.querySelector('.summary-card.rice .card-subtitle').textContent = 
-                `${parseFloat(metrics.totalRiceKg).toLocaleString()} kg`;
-
-            document.querySelector('.summary-card.available .card-value').textContent = 
-                metrics.availableStock.toLocaleString();
-            document.querySelector('.summary-card.available .card-subtitle').textContent = 
-                'bags ready for distribution';
-
-            document.querySelector('.summary-card.warning .card-value').textContent = 
-                metrics.lowStockCount;
-            
-            let lowStockSubtitle = '';
-            if (metrics.lowStockCount === 0) {
-                lowStockSubtitle = 'All items above 1000 bags';
-            } else {
-                lowStockSubtitle = metrics.lowStockItems.join(' | ');
-            }
-            document.querySelector('.summary-card.warning .card-subtitle').textContent = lowStockSubtitle;
-
-            document.querySelector('.summary-card.capacity .card-value').textContent = 
-                `${metrics.capacityPercentage}%`;
-            document.querySelector('.summary-card.capacity .card-subtitle').textContent = 
-                `${metrics.warehouseCapacityUsed.toLocaleString()} / ${metrics.totalWarehouseCapacity.toLocaleString()} bags (GID1: 100K, GID2: 50K)`;
-
-            const palayProgress = (metrics.totalPalayBags / 150000) * 100;
-            document.querySelector('.summary-card.wheat .progress-bar').style.width = 
-                `${Math.min(palayProgress, 100)}%`;
-            
-            const riceProgress = (metrics.totalRiceBags / 150000) * 100;
-            document.querySelector('.summary-card.rice .progress-bar').style.width = 
-                `${Math.min(riceProgress, 100)}%`;
-            
-            const availableProgress = (metrics.availableStock / 150000) * 100;
-            document.querySelector('.summary-card.available .progress-bar').style.width = 
-                `${Math.min(availableProgress, 100)}%`;
-            
-            document.querySelector('.summary-card.warning .progress-bar').style.width = 
-                `${metrics.lowStockCount > 0 ? 30 : 100}%`;
-            
-            document.querySelector('.summary-card.capacity .progress-bar').style.width = 
-                `${metrics.capacityPercentage}%`;
-
-            document.querySelector('.stats-section .stat-item:nth-child(1) .stat-value').textContent = 
-                `${metrics.totalPalayBags.toLocaleString()} bags (${parseFloat(metrics.totalPalayKg).toLocaleString()} kg)`;
-            document.querySelector('.stats-section .stat-item:nth-child(1) .stat-bar-fill').style.width = 
-                `${Math.min(palayProgress, 100)}%`;
-
-            document.querySelector('.stats-section .stat-item:nth-child(2) .stat-value').textContent = 
-                `${metrics.totalRiceBags.toLocaleString()} bags (${parseFloat(metrics.totalRiceKg).toLocaleString()} kg)`;
-            document.querySelector('.stats-section .stat-item:nth-child(2) .stat-bar-fill').style.width = 
-                `${Math.min(riceProgress, 100)}%`;
-
-            const availabilityRate = metrics.totalWarehouseCapacity > 0 
-                ? ((metrics.availableStock / metrics.totalWarehouseCapacity) * 100).toFixed(1)
-                : 0;
-            document.querySelector('.stats-section .stat-item:nth-child(3) .stat-value').textContent = 
-                `${availabilityRate}%`;
-            document.querySelector('.stats-section .stat-item:nth-child(3) .stat-bar-fill').style.width = 
-                `${availabilityRate}%`;
-
-            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-value').textContent = 
-                metrics.lowStockCount > 0 ? metrics.lowStockItems.join(', ') : 'None';
-            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-bar-fill').style.width = 
-                `${metrics.lowStockCount > 0 ? 30 : 100}%`;
-            document.querySelector('.stats-section .stat-item:nth-child(4) .stat-bar-fill').textContent = 
-                metrics.lowStockCount > 0 ? 'Low Stock' : 'Good';
-
-            document.querySelector('.stats-section .stat-item:nth-child(5) .stat-value').textContent = 
-                `${metrics.warehouseCapacityUsed.toLocaleString()} / ${metrics.totalWarehouseCapacity.toLocaleString()}`;
-            document.querySelector('.stats-section .stat-item:nth-child(5) .stat-bar-fill').style.width = 
-                `${metrics.capacityPercentage}%`;
+            }).join('');
         }
 
         function toggleSidebar() {
             document.getElementById('sidebar-container').classList.toggle('open');
         }
-
-        document.querySelector('.search-bar input').addEventListener('input', function(e) {
-            console.log('Searching for:', e.target.value);
-        });
 
         window.addEventListener('DOMContentLoaded', function() {
             const currentUser = sessionStorage.getItem('currentUser');
@@ -1055,189 +1027,10 @@
                     console.error('Error parsing user data:', e);
                 }
             }
-
-            loadDashboardData();
+            loadAllData();
         });
 
-        function initializeCharts() {
-            const palayData = [];
-            const riceData = [];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-            
-            months.forEach((month, index) => {
-                const monthTransactions = transactionsData.filter(t => {
-                    if (!t.transactionDate || t.cancelled) return false;
-                    const transDate = new Date(t.transactionDate);
-                    return transDate.getMonth() === index;
-                });
-
-                let monthPalay = 0;
-                let monthRice = 0;
-                
-                monthTransactions.forEach(t => {
-                    const netWeight = parseFloat(t.netWeight) || 0;
-                    const cerealType = getCerealType(t.varietyCode);
-                    
-                    if (cerealType === 'palay') {
-                        monthPalay += netWeight;
-                    } else if (cerealType === 'rice') {
-                        monthRice += netWeight;
-                    }
-                });
-
-                palayData.push(monthPalay);
-                riceData.push(monthRice);
-            });
-
-            const warehouseDistribution = {};
-            transactionsData.forEach(t => {
-                if (t.cancelled) return;
-                const warehouseId = t.warehouseId;
-                if (!warehouseDistribution[warehouseId]) {
-                    warehouseDistribution[warehouseId] = 0;
-                }
-                warehouseDistribution[warehouseId] += parseFloat(t.numberOfBags) || 0;
-            });
-
-            const warehouseLabels = Object.keys(warehouseDistribution).map(id => 
-                warehousesData[id]?.name || `Warehouse ${id}`
-            );
-            const warehouseValues = Object.values(warehouseDistribution);
-
-            const totalPalay = palayData.reduce((a, b) => a + b, 0);
-            const totalRice = riceData.reduce((a, b) => a + b, 0);
-            const totalAvailable = transactionsData
-                .filter(t => !t.cancelled)
-                .reduce((sum, t) => sum + (parseFloat(t.numberOfBags) || 0), 0);
-
-            const stockCtx = document.getElementById('stockChart').getContext('2d');
-            new Chart(stockCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Palay Stock (kg)', 'Rice Stock (kg)', 'Available (sacks)', 'Capacity Used (%)'],
-                    datasets: [{
-                        label: 'Inventory Metrics',
-                        data: [totalPalay, totalRice, totalAvailable, 68.5],
-                        backgroundColor: [
-                            '#f5c469',
-                            '#5dd39e',
-                            '#5b8dee',
-                            '#a78bfa'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            const trendCtx = document.getElementById('trendChart').getContext('2d');
-            new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Palay (kg)',
-                        data: palayData,
-                        borderColor: '#f5c469',
-                        backgroundColor: 'rgba(245, 196, 105, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'Rice (kg)',
-                        data: riceData,
-                        borderColor: '#5dd39e',
-                        backgroundColor: 'rgba(93, 211, 158, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            const warehouseCtx = document.getElementById('warehouseChart').getContext('2d');
-            new Chart(warehouseCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: warehouseLabels.length > 0 ? warehouseLabels : ['No Data'],
-                    datasets: [{
-                        data: warehouseValues.length > 0 ? warehouseValues : [1],
-                        backgroundColor: [
-                            '#5b8dee',
-                            '#5dd39e',
-                            '#f5c469',
-                            '#ee7c92',
-                            '#a78bfa'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        }
-                    }
-                }
-            });
-
-            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
-            new Chart(comparisonCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Palay Stock', 'Rice Stock', 'Available Stock', 'Reserved'],
-                    datasets: [{
-                        data: [
-                            totalPalay,
-                            totalRice,
-                            totalAvailable,
-                            totalAvailable * 0.1
-                        ],
-                        backgroundColor: [
-                            '#f5c469',
-                            '#5dd39e',
-                            '#5b8dee',
-                            '#a78bfa'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        }
-                    }
-                }
-            });
-        }
-
+        // Scroll-in animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1247,23 +1040,11 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.summary-card, .stat-item, .chart-card, .recent-transactions').forEach((element) => {
+        document.querySelectorAll('.stat-card, .overview-card, .chart-card, .recent-activity').forEach((element) => {
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
             element.style.transition = 'all 0.5s ease-out';
             observer.observe(element);
-        });
-
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                document.querySelectorAll('.stat-bar-fill').forEach(bar => {
-                    const width = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(() => {
-                        bar.style.width = width;
-                    }, 100);
-                });
-            }, 500);
         });
     </script>
 </body>

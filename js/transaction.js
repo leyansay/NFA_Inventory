@@ -27,6 +27,84 @@ let sacksData = [];
 let varietiesData = [];
 
 // ===================================================================
+// ROW SELECTION FUNCTIONALITY
+// ===================================================================
+
+let selectedRow = null;
+let selectedDocId = null;
+
+function attachRowSelectionListeners() {
+    const tbody = document.getElementById('inventoryBody');
+    if (!tbody) return;
+    
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach(row => {
+        // Skip loading/empty rows
+        if (row.querySelector('.loading') || !row.hasAttribute('data-doc-id')) return;
+        
+        row.addEventListener('click', function() {
+            const docId = this.getAttribute('data-doc-id');
+            
+            // If clicking the same row, deselect it
+            if (selectedDocId === docId) {
+                deselectRow();
+                return;
+            }
+            
+            // Deselect previous row
+            if (selectedRow) {
+                selectedRow.classList.remove('selected');
+            }
+            
+            // Select this row
+            this.classList.add('selected');
+            selectedRow = this;
+            selectedDocId = docId;
+            
+            // Show action buttons
+            document.getElementById('rowActions').classList.add('active');
+        });
+    });
+}
+
+// Edit button handler
+document.getElementById('editRowBtn').addEventListener('click', function() {
+    if (selectedDocId) {
+        editTransaction(selectedDocId);
+        deselectRow();
+    }
+});
+
+// Delete button handler
+document.getElementById('deleteRowBtn').addEventListener('click', function() {
+    if (selectedDocId) {
+        if (confirm('Are you sure you want to delete this transaction?')) {
+            deleteTransaction(selectedDocId);
+            deselectRow();
+        }
+    }
+});
+
+function deselectRow() {
+    if (selectedRow) {
+        selectedRow.classList.remove('selected');
+    }
+    selectedRow = null;
+    selectedDocId = null;
+    document.getElementById('rowActions').classList.remove('active');
+}
+
+// Deselect when clicking outside table
+document.addEventListener('click', function(e) {
+    const table = document.querySelector('.table-container');
+    const rowActions = document.getElementById('rowActions');
+    
+    if (!table.contains(e.target) && !rowActions.contains(e.target)) {
+        deselectRow();
+    }
+});
+
+// ===================================================================
 // DATE FILTER EVENT LISTENERS
 // ===================================================================
 
@@ -122,10 +200,6 @@ function clearDateFilter() {
     
     // Render all transactions with current sort
     sortTransactions(currentSortOrder, false);
-}
-
-function closeAllDropdowns() {
-    document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
 }
 
 /* LOAD DROPDOWN OPTIONS */
@@ -256,7 +330,7 @@ function createSelectionModal(title, columns, data, onSelect) {
             modal.remove();
         });
         row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = '#f0f0f0';
+            this.style.backgroundColor = 'rgba(249, 168, 37, 0.12)';
         });
         row.addEventListener('mouseleave', function() {
             this.style.backgroundColor = '';
@@ -317,7 +391,6 @@ function showVarietySelection() {
         }
     );
 }
-
 /* LOAD OFFICERS */
 function loadOfficersFromFirebase() {
     const officersRef = database.ref('accountableOfficers');
@@ -681,7 +754,7 @@ if (transactionForm) {
         document.querySelectorAll('input, select').forEach(field => field.style.border = '');
         
         if (!transactionData.refWSINo) {
-            const requiredFieldIds = ['documentNo', 'documentType', 'orNo', 'aiNo', 'recdFromIssdTo',
+            const requiredFieldIds = ['documentNo', 'documentType', 'aiNo', 'recdFromIssdTo',
                 'transactionDate', 'activityCode', 'varietyCode', 'sackCode', 'sackCondition',
                 'sackWeight', 'age', 'pileNo', 'numberOfBags', 'grossWeight', 'moistureContent', 'netWeight'];
             
@@ -689,7 +762,7 @@ if (transactionForm) {
             requiredFieldIds.forEach(fieldId => {
                 const element = document.getElementById(fieldId);
                 if (!transactionData[fieldId]) {
-                    element.style.border = '2px solid #ff6b6b';
+                    element.style.border = '2px solid #D84315';
                     hasEmptyFields = true;
                 }
             });
@@ -751,12 +824,13 @@ function renderTransactions(transactionsToRender = allTransactions) {
     }
     
     tbody.innerHTML = "";
+    deselectRow(); // Clear selection when re-rendering
     
     if (transactionsToRender.length === 0) {
         const message = currentDateFilter 
             ? 'No transactions found for the selected date' 
             : 'No transactions found';
-        tbody.innerHTML = `<tr><td colspan="26" style="text-align:center;">${message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="25" style="text-align:center;">${message}</td></tr>`;
         return;
     }
     
@@ -765,9 +839,10 @@ function renderTransactions(transactionsToRender = allTransactions) {
         const docId = item.docId;
         
         // Highlight the DATE column if filter is active
-        const dateStyle = currentDateFilter ? 'style="background-color: #e7f3ff; font-weight: bold;"' : '';
+        const dateStyle = currentDateFilter ? 'style="background-color: rgba(249, 168, 37, 0.15); font-weight: bold;"' : '';
         
         const tr = document.createElement("tr");
+        tr.setAttribute('data-doc-id', docId);
         tr.innerHTML = `
             <td>${data.officerId || "-"}</td>
             <td>${data.officerName || "-"}</td>
@@ -794,63 +869,13 @@ function renderTransactions(transactionsToRender = allTransactions) {
             <td>${data.moistureContent || "-"}</td>
             <td>${data.netWeight || "-"}</td>
             <td>${data.cancelled ? "Yes" : "No"}</td>
-            <td class="action-cell">
-                <div class="dropdown">
-                    <span class="dot-menu">&#8942;</span>
-                    <div class="dropdown-content">
-                        <button class="edit-btn" data-doc-id="${docId}">
-                            <span style="color: #2196F3;">✏️</span> Edit
-                        </button>
-                        <button class="delete-btn" data-doc-id="${docId}">
-                            <span style="color: #f44336;">🗑️</span> Delete
-                        </button>
-                    </div>
-                </div>
-            </td>
         `;
         tbody.appendChild(tr);
     });
     
-    attachDropdownListeners();
+    attachRowSelectionListeners();
     console.log("Transactions rendered successfully");
 }
-
-function attachDropdownListeners() {
-    document.querySelectorAll('.dot-menu').forEach(dot => {
-        dot.addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.querySelectorAll('.dropdown-content').forEach(d => {
-                if (d !== dot.nextElementSibling) d.style.display = 'none';
-            });
-            const dropdown = dot.nextElementSibling;
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeAllDropdowns();
-            editTransaction(btn.dataset.docId);
-        });
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeAllDropdowns();
-            if (confirm("Are you sure you want to delete this transaction?")) {
-                deleteTransaction(btn.dataset.docId);
-            }
-        });
-    });
-}
-
-window.addEventListener('click', (e) => {
-    if (!e.target.closest('.dropdown')) closeAllDropdowns();
-});
-
-window.addEventListener('scroll', closeAllDropdowns, true);
 
 /* LOAD TRANSACTIONS */
 function loadTransactions() {
@@ -862,7 +887,7 @@ function loadTransactions() {
         return;
     }
     
-    tbody.innerHTML = '<tr><td colspan="26" class="loading">Loading data...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="25" class="loading">Loading data...</td></tr>';
     
     database.ref("transactions").on("value", (snapshot) => {
         console.log("Firebase snapshot received");
@@ -891,7 +916,7 @@ function loadTransactions() {
         }
     }, (error) => {
         console.error("Firebase error:", error);
-        tbody.innerHTML = '<tr><td colspan="26" style="text-align:center; color:red;">Error loading data: ' + error.message + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="25" style="text-align:center; color:#D84315;">Error loading data: ' + error.message + '</td></tr>';
     });
 }
 
