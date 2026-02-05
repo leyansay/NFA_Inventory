@@ -19,12 +19,28 @@ console.log("Firebase initialized:", firebase.apps.length > 0);
 let allTransactions = [];
 let filteredTransactions = [];
 let currentSortOrder = 'newest';
-let currentDateFilter = null;
+let dateFilterFrom = null;
+let dateFilterTo = null;
+let selectedColumns = ['grosswt', 'mc', 'netwt'];
 
 // Store all data for table modals
 let activitiesData = [];
 let sacksData = [];
 let varietiesData = [];
+
+// Store data for preview
+let officersData = {};
+let transactionsData = {};
+let warehousesData = {};
+
+// Column Labels Map
+const columnLabels = {
+    'grosswt': 'GROSS WT',
+    'mc': 'MC%',
+    'netwt': 'NET WT',
+    'bags': 'BAGS',
+    'sackwt': 'SACK WT'
+};
 
 // ===================================================================
 // ROW SELECTION FUNCTIONALITY
@@ -39,35 +55,29 @@ function attachRowSelectionListeners() {
     
     const rows = tbody.querySelectorAll('tr');
     rows.forEach(row => {
-        // Skip loading/empty rows
         if (row.querySelector('.loading') || !row.hasAttribute('data-doc-id')) return;
         
         row.addEventListener('click', function() {
             const docId = this.getAttribute('data-doc-id');
             
-            // If clicking the same row, deselect it
             if (selectedDocId === docId) {
                 deselectRow();
                 return;
             }
             
-            // Deselect previous row
             if (selectedRow) {
                 selectedRow.classList.remove('selected');
             }
             
-            // Select this row
             this.classList.add('selected');
             selectedRow = this;
             selectedDocId = docId;
             
-            // Show action buttons
             document.getElementById('rowActions').classList.add('active');
         });
     });
 }
 
-// Edit button handler
 document.getElementById('editRowBtn').addEventListener('click', function() {
     if (selectedDocId) {
         editTransaction(selectedDocId);
@@ -75,7 +85,6 @@ document.getElementById('editRowBtn').addEventListener('click', function() {
     }
 });
 
-// Delete button handler
 document.getElementById('deleteRowBtn').addEventListener('click', function() {
     if (selectedDocId) {
         if (confirm('Are you sure you want to delete this transaction?')) {
@@ -94,7 +103,6 @@ function deselectRow() {
     document.getElementById('rowActions').classList.remove('active');
 }
 
-// Deselect when clicking outside table
 document.addEventListener('click', function(e) {
     const table = document.querySelector('.table-container');
     const rowActions = document.getElementById('rowActions');
@@ -105,108 +113,337 @@ document.addEventListener('click', function(e) {
 });
 
 // ===================================================================
-// DATE FILTER EVENT LISTENERS
+// DATE RANGE FILTER FUNCTIONALITY
 // ===================================================================
 
-// Event listener for date picker
-const dateFilterElement = document.getElementById('dateFilter');
+const dateFromInput = document.getElementById('dateFrom');
+const dateToInput = document.getElementById('dateTo');
 const clearDateFilterBtn = document.getElementById('clearDateFilter');
 
-if (dateFilterElement) {
-    dateFilterElement.addEventListener('change', function(e) {
-        const selectedDate = e.target.value;
-        if (selectedDate) {
-            filterTransactionsByDate(selectedDate);
-            // Enable clear button
-            if (clearDateFilterBtn) {
-                clearDateFilterBtn.disabled = false;
-            }
-        }
-    });
+if (dateFromInput) {
+    dateFromInput.addEventListener('change', handleDateRangeFilter);
 }
 
-// Event listener for clear filter button
+if (dateToInput) {
+    dateToInput.addEventListener('change', handleDateRangeFilter);
+}
+
 if (clearDateFilterBtn) {
-    clearDateFilterBtn.addEventListener('click', function() {
-        clearDateFilter();
-    });
+    clearDateFilterBtn.addEventListener('click', clearDateFilter);
 }
 
-// ===================================================================
-// FILTER TRANSACTIONS BY DATE
-// ===================================================================
-
-function filterTransactionsByDate(selectedDate) {
-    console.log("Filtering by date:", selectedDate);
+function handleDateRangeFilter() {
+    dateFilterFrom = dateFromInput.value;
+    dateFilterTo = dateToInput.value;
     
-    // Store the current filter
-    currentDateFilter = selectedDate;
-    
-    // Filter transactions that match the selected date
-    filteredTransactions = allTransactions.filter(transaction => {
-        const transactionDate = transaction.data.transactionDate || '';
-        return transactionDate === selectedDate;
-    });
-    
-    console.log("Filtered transactions:", filteredTransactions.length);
-    
-    // Show the filter info banner
-    const dateFilterInfo = document.getElementById('dateFilterInfo');
-    const dateFilterText = document.getElementById('dateFilterText');
-    
-    if (dateFilterInfo && dateFilterText) {
-        // Format the date for display
-        const formattedDate = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        
-        dateFilterText.textContent = `Showing ${filteredTransactions.length} transaction(s) for: ${formattedDate}`;
-        dateFilterInfo.classList.add('active');
-    }
-    
-    // Apply current sort to filtered data
-    sortTransactions(currentSortOrder, true);
-}
-
-// ===================================================================
-// CLEAR DATE FILTER
-// ===================================================================
-
-function clearDateFilter() {
-    console.log("Clearing date filter");
-    
-    // Reset the filter
-    currentDateFilter = null;
-    filteredTransactions = [];
-    
-    // Clear the date input
-    const dateFilterInput = document.getElementById('dateFilter');
-    if (dateFilterInput) {
-        dateFilterInput.value = '';
-    }
-    
-    // Disable clear button
-    if (clearDateFilterBtn) {
+    if (dateFilterFrom || dateFilterTo) {
+        clearDateFilterBtn.disabled = false;
+    } else {
         clearDateFilterBtn.disabled = true;
     }
     
-    // Hide the filter info banner
-    const dateFilterInfo = document.getElementById('dateFilterInfo');
-    if (dateFilterInfo) {
-        dateFilterInfo.classList.remove('active');
+    filterAndDisplayTransactions();
+    updateSummaryCards();
+}
+
+function clearDateFilter() {
+    dateFromInput.value = '';
+    dateToInput.value = '';
+    dateFilterFrom = null;
+    dateFilterTo = null;
+    clearDateFilterBtn.disabled = true;
+    
+    filterAndDisplayTransactions();
+    updateSummaryCards();
+}
+
+// ===================================================================
+// COLUMN SELECTION FUNCTIONALITY
+// ===================================================================
+
+const columnTags = document.querySelectorAll('.column-tag');
+const addColumnBtn = document.getElementById('addColumnBtn');
+const columnModal = document.getElementById('columnModal');
+const closeColumnModal = document.getElementById('closeColumnModal');
+const columnOptions = document.querySelectorAll('.column-option');
+
+// Initialize active tags
+columnTags.forEach(tag => {
+    tag.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tag-close')) {
+            tag.classList.remove('active');
+            updateSelectedColumns();
+        } else {
+            tag.classList.toggle('active');
+            updateSelectedColumns();
+        }
+    });
+});
+
+addColumnBtn.addEventListener('click', () => {
+    columnModal.classList.add('active');
+});
+
+closeColumnModal.addEventListener('click', () => {
+    columnModal.classList.remove('active');
+});
+
+columnOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        const column = option.dataset.column;
+        const label = option.dataset.label;
+        addColumnTag(column, label);
+        columnModal.classList.remove('active');
+    });
+});
+
+function addColumnTag(column, label) {
+    const existingTag = Array.from(columnTags).find(tag => tag.dataset.column === column);
+    if (existingTag) {
+        existingTag.classList.add('active');
+        updateSelectedColumns();
+        return;
     }
     
-    // Render all transactions with current sort
-    sortTransactions(currentSortOrder, false);
+    const newTag = document.createElement('button');
+    newTag.className = 'column-tag active';
+    newTag.dataset.column = column;
+    newTag.innerHTML = `
+        <span class="tag-dot"></span>
+        <span class="tag-text">${label}</span>
+        <span class="tag-close">×</span>
+    `;
+    
+    newTag.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tag-close')) {
+            newTag.remove();
+            updateSelectedColumns();
+        }
+    });
+    
+    document.getElementById('columnTags').insertBefore(newTag, addColumnBtn);
+    updateSelectedColumns();
+}
+
+function updateSelectedColumns() {
+    selectedColumns = [];
+    document.querySelectorAll('.column-tag.active').forEach(tag => {
+        selectedColumns.push(tag.dataset.column);
+    });
+    updateSummaryCards();
+}
+
+// ===================================================================
+// SUMMARY CARDS
+// ===================================================================
+
+function updateSummaryCards() {
+    const summarySection = document.getElementById('summarySection');
+    summarySection.innerHTML = '';
+    
+    if (selectedColumns.length === 0) {
+        return;
+    }
+    
+    const dataToSummarize = getFilteredTransactions();
+    
+    selectedColumns.forEach(column => {
+        const card = createSummaryCard(column, dataToSummarize);
+        summarySection.appendChild(card);
+    });
+}
+
+function createSummaryCard(column, data) {
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    
+    let total = 0;
+    let unit = '';
+    
+    switch(column) {
+        case 'grosswt':
+            total = data.reduce((sum, t) => sum + (parseFloat(t.data.grossWeight) || 0), 0);
+            unit = 'kg';
+            break;
+        case 'mc':
+            const validMC = data.filter(t => t.data.moistureContent);
+            total = validMC.length > 0 
+                ? validMC.reduce((sum, t) => sum + (parseFloat(t.data.moistureContent) || 0), 0) / validMC.length
+                : 0;
+            unit = '%';
+            break;
+        case 'netwt':
+            total = data.reduce((sum, t) => sum + (parseFloat(t.data.netWeight) || 0), 0);
+            unit = 'kg';
+            break;
+        case 'bags':
+            total = data.reduce((sum, t) => sum + (parseInt(t.data.numberOfBags) || 0), 0);
+            unit = 'bags';
+            break;
+        case 'sackwt':
+            total = data.reduce((sum, t) => sum + (parseFloat(t.data.sackWeight) || 0), 0);
+            unit = 'kg';
+            break;
+    }
+    
+    const formattedTotal = column === 'mc' 
+        ? total.toFixed(2) 
+        : total.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    
+    let periodText = 'All periods';
+    if (dateFilterFrom && dateFilterTo) {
+        periodText = `Date Range: ${formatDateForDisplay(dateFilterFrom)} - ${formatDateForDisplay(dateFilterTo)}`;
+    } else if (dateFilterFrom) {
+        periodText = `Date from ${formatDateForDisplay(dateFilterFrom)}`;
+    } else if (dateFilterTo) {
+        periodText = `Date until ${formatDateForDisplay(dateFilterTo)}`;
+    }
+    
+    card.innerHTML = `
+        <div class="summary-label">${columnLabels[column]}</div>
+        <div class="summary-value">${formattedTotal}</div>
+        <div class="summary-subtitle">${unit}</div>
+        <div class="summary-period">${periodText} • ${data.length} transaction(s)</div>
+    `;
+    
+    return card;
+}
+
+function formatDateForDisplay(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+    });
+}
+
+// ===================================================================
+// FILTER AND DISPLAY TRANSACTIONS
+// ===================================================================
+
+function getFilteredTransactions() {
+    let filtered = [...allTransactions];
+    
+    // Filter based on DATE (transactionDate) column
+    if (dateFilterFrom || dateFilterTo) {
+        filtered = filtered.filter(t => {
+            const transactionDate = t.data.transactionDate ? new Date(t.data.transactionDate) : null;
+            const filterFrom = dateFilterFrom ? new Date(dateFilterFrom) : null;
+            const filterTo = dateFilterTo ? new Date(dateFilterTo) : null;
+            
+            // Skip transactions without date
+            if (!transactionDate) return false;
+            
+            // Check if the transaction date is within the filter range
+            if (filterFrom && filterTo) {
+                // Both dates selected: date must be between FROM and TO (inclusive)
+                return (transactionDate >= filterFrom && transactionDate <= filterTo);
+            } else if (filterFrom) {
+                // Only FROM date: date must be on or after filter FROM
+                return transactionDate >= filterFrom;
+            } else if (filterTo) {
+                // Only TO date: date must be on or before filter TO
+                return transactionDate <= filterTo;
+            }
+            
+            return true;
+        });
+    }
+    
+    return filtered;
+}
+
+function filterAndDisplayTransactions() {
+    filteredTransactions = getFilteredTransactions();
+    sortTransactions(currentSortOrder, true);
+}
+
+function sortTransactions(order, keepFiltered = false) {
+    currentSortOrder = order;
+    console.log("Sorting by:", order, "keepFiltered:", keepFiltered);
+    
+    const dataToSort = keepFiltered && (dateFilterFrom || dateFilterTo) ? filteredTransactions : allTransactions;
+    
+    dataToSort.sort((a, b) => {
+        const dateA = new Date(a.data.transactionDate || '1900-01-01');
+        const dateB = new Date(b.data.transactionDate || '1900-01-01');
+        return order === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
+    renderTransactions(dataToSort);
+}
+
+function renderTransactions(transactionsToRender = allTransactions) {
+    console.log("Rendering transactions:", transactionsToRender.length);
+    const tbody = document.getElementById("inventoryBody");
+    
+    if (!tbody) {
+        console.error("inventoryBody element not found!");
+        return;
+    }
+    
+    tbody.innerHTML = "";
+    deselectRow();
+    
+    if (transactionsToRender.length === 0) {
+        const message = (dateFilterFrom || dateFilterTo)
+            ? 'No transactions found for the selected date range' 
+            : 'No transactions found';
+        tbody.innerHTML = `<tr><td colspan="25" style="text-align:center;">${message}</td></tr>`;
+        return;
+    }
+    
+    transactionsToRender.forEach(item => {
+        const data = item.data;
+        const docId = item.docId;
+        
+        // Highlight DATE column if filter is active
+        const dateStyle = (dateFilterFrom || dateFilterTo) 
+            ? 'style="background-color: rgba(249, 168, 37, 0.15); font-weight: bold;"' 
+            : '';
+        
+        const tr = document.createElement("tr");
+        tr.setAttribute('data-doc-id', docId);
+        tr.innerHTML = `
+            <td>${data.officerId || "-"}</td>
+            <td>${data.officerName || "-"}</td>
+            <td>${data.warehouseId || "-"}</td>
+            <td>${data.warehouseName || "-"}</td>
+            <td>${data.periodFrom || "-"}</td>
+            <td>${data.periodTo || "-"}</td>
+            <td>${data.documentNo || "-"}</td>
+            <td>${data.documentType || "-"}</td>
+            <td>${data.orNo || "-"}</td>
+            <td>${data.aiNo || "-"}</td>
+            <td>${data.refWSINo || "-"}</td>
+            <td>${data.recdFromIssdTo || "-"}</td>
+            <td ${dateStyle}>${data.transactionDate || "-"}</td>
+            <td>${data.activityCode || "-"}</td>
+            <td>${data.varietyCode || "-"}</td>
+            <td>${data.sackCode || "-"}</td>
+            <td>${data.sackCondition || "-"}</td>
+            <td>${data.sackWeight || "-"}</td>
+            <td>${data.age || "-"}</td>
+            <td>${data.pileNo || "-"}</td>
+            <td>${data.numberOfBags || "-"}</td>
+            <td>${data.grossWeight || "-"}</td>
+            <td>${data.moistureContent || "-"}</td>
+            <td>${data.netWeight || "-"}</td>
+            <td>${data.cancelled ? "Yes" : "No"}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    attachRowSelectionListeners();
+    console.log("Transactions rendered successfully");
 }
 
 /* LOAD DROPDOWN OPTIONS */
 function loadDropdownOptions() {
     console.log("Loading dropdown options...");
     
-    // Load activities
     database.ref('activities').once('value').then((snapshot) => {
         activitiesData = [];
         if (snapshot.exists()) {
@@ -227,7 +464,6 @@ function loadDropdownOptions() {
         }
     }).catch(error => console.error("Error loading activities:", error));
 
-    // Load sacks
     database.ref('sacks').once('value').then((snapshot) => {
         sacksData = [];
         if (snapshot.exists()) {
@@ -247,7 +483,6 @@ function loadDropdownOptions() {
         }
     }).catch(error => console.error("Error loading sacks:", error));
 
-    // Load varieties
     database.ref('varieties').once('value').then((snapshot) => {
         varietiesData = [];
         if (snapshot.exists()) {
@@ -269,7 +504,6 @@ function loadDropdownOptions() {
 
 /* CREATE SELECTION MODALS */
 function createSelectionModal(title, columns, data, onSelect) {
-    // Remove existing modal if any
     const existingModal = document.getElementById('selectionModal');
     if (existingModal) existingModal.remove();
 
@@ -307,10 +541,8 @@ function createSelectionModal(title, columns, data, onSelect) {
 
     document.body.appendChild(modal);
 
-    // Close button
     document.getElementById('closeSelectionModal').onclick = () => modal.remove();
 
-    // Search functionality
     const searchInput = document.getElementById('selectionSearch');
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
@@ -321,7 +553,6 @@ function createSelectionModal(title, columns, data, onSelect) {
         });
     });
 
-    // Row selection
     document.querySelectorAll('.selectable-row').forEach(row => {
         row.style.cursor = 'pointer';
         row.addEventListener('click', function() {
@@ -338,7 +569,6 @@ function createSelectionModal(title, columns, data, onSelect) {
     });
 }
 
-/* SHOW ACTIVITY SELECTION */
 function showActivitySelection() {
     createSelectionModal(
         'Select Activity Code',
@@ -356,7 +586,6 @@ function showActivitySelection() {
     );
 }
 
-/* SHOW SACK SELECTION */
 function showSackSelection() {
     createSelectionModal(
         'Select Sack Code',
@@ -376,7 +605,6 @@ function showSackSelection() {
     );
 }
 
-/* SHOW VARIETY SELECTION */
 function showVarietySelection() {
     createSelectionModal(
         'Select Variety Code',
@@ -391,6 +619,7 @@ function showVarietySelection() {
         }
     );
 }
+
 /* LOAD OFFICERS */
 function loadOfficersFromFirebase() {
     const officersRef = database.ref('accountableOfficers');
@@ -433,11 +662,7 @@ function loadOfficersFromFirebase() {
     });
 }
 
-/* LOAD OFFICERS FOR PREVIEW */
-let officersData = {};
-let transactionsData = {};
-let warehousesData = {};
-
+/* LOAD PREVIEW DATA */
 function loadPreviewData() {
     Promise.all([
         database.ref('accountableOfficers').once('value'),
@@ -513,7 +738,6 @@ function setupPreviewForm() {
     });
 }
 
-/* HANDLE PREVIEW FORM SUBMISSION */
 const previewForm = document.getElementById('previewForm');
 if (previewForm) {
     previewForm.addEventListener('submit', function(e) {
@@ -537,7 +761,6 @@ if (previewForm) {
             return;
         }
 
-        // Validate if transactions exist within the selected date range
         const fromDate = new Date(periodFrom);
         const toDate = new Date(periodTo);
         
@@ -572,7 +795,7 @@ if (previewForm) {
     });
 }
 
-/* OPEN MODALS */
+/* MODAL CONTROLS */
 const addTransactionBtn = document.getElementById("addTransaction");
 if (addTransactionBtn) {
     addTransactionBtn.onclick = () => {
@@ -611,7 +834,6 @@ if (closeTransactionBtn) {
     };
 }
 
-/* SELECT OFFICER */
 function attachOfficerSelectListeners() {
     document.querySelectorAll(".selectOfficer").forEach(btn => {
         btn.addEventListener("click", function () {
@@ -633,34 +855,28 @@ function attachOfficerSelectListeners() {
     });
 }
 
-/* SETUP FIELD CLICK HANDLERS */
 function setupFieldClickHandlers() {
-    // Activity Code
     const activityInput = document.getElementById('activityCode');
     activityInput.style.cursor = 'pointer';
     activityInput.readOnly = true;
     activityInput.onclick = () => showActivitySelection();
 
-    // Sack Code
     const sackInput = document.getElementById('sackCode');
     sackInput.style.cursor = 'pointer';
     sackInput.readOnly = true;
     sackInput.onclick = () => showSackSelection();
 
-    // Variety Code
     const varietyInput = document.getElementById('varietyCode');
     varietyInput.style.cursor = 'pointer';
     varietyInput.readOnly = true;
     varietyInput.onclick = () => showVarietySelection();
     
-    // Recd From / Issd To - Make it a regular text input
     const locationInput = document.getElementById('recdFromIssdTo');
     locationInput.style.cursor = 'text';
     locationInput.readOnly = false;
     locationInput.onclick = null;
 }
 
-/* SACK INTERACTION */
 function setupSackInteraction() {
     const sackConditionSelect = document.getElementById('sackCondition');
     const sackWeightInput = document.getElementById('sackWeight');
@@ -688,7 +904,6 @@ function setupSackInteraction() {
     });
 }
 
-/* NET WEIGHT COMPUTATION */
 function computeNetWeight() {
     const gross = parseFloat(document.getElementById("grossWeight").value) || 0;
     const sack = parseFloat(document.getElementById("sackWeight").value) || 0;
@@ -796,87 +1011,6 @@ if (transactionForm) {
     });
 }
 
-/* SORT TRANSACTIONS */
-function sortTransactions(order, keepFiltered = false) {
-    currentSortOrder = order;
-    console.log("Sorting by:", order, "keepFiltered:", keepFiltered);
-    
-    // Determine which dataset to sort
-    const dataToSort = (keepFiltered && currentDateFilter) ? filteredTransactions : allTransactions;
-    
-    dataToSort.sort((a, b) => {
-        const dateA = new Date(a.data.transactionDate || '1900-01-01');
-        const dateB = new Date(b.data.transactionDate || '1900-01-01');
-        return order === 'newest' ? dateB - dateA : dateA - dateB;
-    });
-    
-    renderTransactions(dataToSort);
-}
-
-/* RENDER TRANSACTIONS */
-function renderTransactions(transactionsToRender = allTransactions) {
-    console.log("Rendering transactions:", transactionsToRender.length);
-    const tbody = document.getElementById("inventoryBody");
-    
-    if (!tbody) {
-        console.error("inventoryBody element not found!");
-        return;
-    }
-    
-    tbody.innerHTML = "";
-    deselectRow(); // Clear selection when re-rendering
-    
-    if (transactionsToRender.length === 0) {
-        const message = currentDateFilter 
-            ? 'No transactions found for the selected date' 
-            : 'No transactions found';
-        tbody.innerHTML = `<tr><td colspan="25" style="text-align:center;">${message}</td></tr>`;
-        return;
-    }
-    
-    transactionsToRender.forEach(item => {
-        const data = item.data;
-        const docId = item.docId;
-        
-        // Highlight the DATE column if filter is active
-        const dateStyle = currentDateFilter ? 'style="background-color: rgba(249, 168, 37, 0.15); font-weight: bold;"' : '';
-        
-        const tr = document.createElement("tr");
-        tr.setAttribute('data-doc-id', docId);
-        tr.innerHTML = `
-            <td>${data.officerId || "-"}</td>
-            <td>${data.officerName || "-"}</td>
-            <td>${data.warehouseId || "-"}</td>
-            <td>${data.warehouseName || "-"}</td>
-            <td>${data.periodFrom || "-"}</td>
-            <td>${data.periodTo || "-"}</td>
-            <td>${data.documentNo || "-"}</td>
-            <td>${data.documentType || "-"}</td>
-            <td>${data.orNo || "-"}</td>
-            <td>${data.aiNo || "-"}</td>
-            <td>${data.refWSINo || "-"}</td>
-            <td>${data.recdFromIssdTo || "-"}</td>
-            <td ${dateStyle}>${data.transactionDate || "-"}</td>
-            <td>${data.activityCode || "-"}</td>
-            <td>${data.varietyCode || "-"}</td>
-            <td>${data.sackCode || "-"}</td>
-            <td>${data.sackCondition || "-"}</td>
-            <td>${data.sackWeight || "-"}</td>
-            <td>${data.age || "-"}</td>
-            <td>${data.pileNo || "-"}</td>
-            <td>${data.numberOfBags || "-"}</td>
-            <td>${data.grossWeight || "-"}</td>
-            <td>${data.moistureContent || "-"}</td>
-            <td>${data.netWeight || "-"}</td>
-            <td>${data.cancelled ? "Yes" : "No"}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-    
-    attachRowSelectionListeners();
-    console.log("Transactions rendered successfully");
-}
-
 /* LOAD TRANSACTIONS */
 function loadTransactions() {
     console.log("Loading transactions from Firebase...");
@@ -896,6 +1030,7 @@ function loadTransactions() {
         if (!snapshot.exists()) {
             console.log("No transactions found in database");
             renderTransactions();
+            updateSummaryCards();
             return;
         }
         
@@ -908,26 +1043,25 @@ function loadTransactions() {
         
         console.log("Total transactions loaded:", allTransactions.length);
         
-        // If there's an active date filter, reapply it
-        if (currentDateFilter) {
-            filterTransactionsByDate(currentDateFilter);
+        if (dateFilterFrom || dateFilterTo) {
+            filterAndDisplayTransactions();
         } else {
             sortTransactions(currentSortOrder, false);
         }
+        
+        updateSummaryCards();
     }, (error) => {
         console.error("Firebase error:", error);
         tbody.innerHTML = '<tr><td colspan="25" style="text-align:center; color:#D84315;">Error loading data: ' + error.message + '</td></tr>';
     });
 }
 
-/* DELETE TRANSACTION */
 function deleteTransaction(docId) {
     database.ref('transactions/' + docId).remove()
         .then(() => alert('Transaction deleted successfully!'))
         .catch((error) => alert('Error: ' + error.message));
 }
 
-/* EDIT TRANSACTION */
 function editTransaction(docId) {
     loadDropdownOptions();
     
@@ -984,11 +1118,10 @@ window.addEventListener("DOMContentLoaded", () => {
     
     loadTransactions();
     
-    // Sort dropdown listener
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
         sortSelect.addEventListener('change', (e) => {
-            sortTransactions(e.target.value, currentDateFilter !== null);
+            sortTransactions(e.target.value, (dateFilterFrom || dateFilterTo) !== null);
         });
     }
     

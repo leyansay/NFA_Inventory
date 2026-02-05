@@ -12,7 +12,7 @@
         <iframe id="sidebar-frame" src="sidebar.html"></iframe>
     </div>
 
-     <div class="main-content">
+    <div class="main-content">
         <div class="page-header">
             <h1 class="page-title">Transaction</h1>
             <div class="user-info">
@@ -25,30 +25,60 @@
         </div>
 
         <div class="controls-section">
-            <div class="sort-section">
-                <label class="sort-label">Sort by:</label>
-                <select class="sort-dropdown" id="sortSelect">
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                </select>
+            <div class="filter-section">
+                <!-- Sort Dropdown -->
+                <div class="sort-wrapper">
+                    <label class="filter-label">Sort by:</label>
+                    <select class="filter-dropdown" id="sortSelect">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
                 
-                <div class="date-filter-wrapper">
-                    <label class="sort-label">Filter by Date:</label>
-                    <div class="date-input-wrapper">
-                        <input type="date" id="dateFilter" class="date-input">
+                <!-- Date Range Filter -->
+                <div class="date-range-wrapper">
+                    <label class="filter-label">Filter by Period:</label>
+                    <div class="date-inputs">
+                        <input type="date" id="dateFrom" class="date-input" placeholder="Period From">
+                        <span class="date-separator">to</span>
+                        <input type="date" id="dateTo" class="date-input" placeholder="Period To">
                     </div>
-                    <button class="clear-date-btn" id="clearDateFilter" disabled>Clear Filter</button>
+                    <button class="clear-filter-btn" id="clearDateFilter" disabled>Clear Filter</button>
+                </div>
+
+                <!-- Column Selection Tags -->
+                <div class="column-filter-wrapper">
+                    <label class="filter-label">Select Columns:</label>
+                    <div class="column-tags" id="columnTags">
+                        <button class="column-tag active" data-column="grosswt">
+                            <span class="tag-dot"></span>
+                            <span class="tag-text">GROSS WT</span>
+                            <span class="tag-close">×</span>
+                        </button>
+                        <button class="column-tag active" data-column="mc">
+                            <span class="tag-dot"></span>
+                            <span class="tag-text">MC%</span>
+                            <span class="tag-close">×</span>
+                        </button>
+                        <button class="column-tag active" data-column="netwt">
+                            <span class="tag-dot"></span>
+                            <span class="tag-text">NET WT</span>
+                            <span class="tag-close">×</span>
+                        </button>
+                        <button class="add-column-btn" id="addColumnBtn">+ Add column</button>
+                    </div>
                 </div>
             </div>
+
             <div class="action-buttons">
                 <button class="preview-btn" id="previewTransaction">Preview</button>
                 <button class="add-btn" id="addTransaction">+ Add Transaction</button>
             </div>
         </div>
 
-        <!-- Date Filter Info Banner -->
-        <div class="date-filter-info" id="dateFilterInfo">
-            <span id="dateFilterText">Showing transactions for: </span>
+        <!-- Summarization Cards -->
+        <div class="summary-section" id="summarySection">
+            <!-- Summary cards will be dynamically added here -->
         </div>
 
         <div class="table-container">
@@ -72,13 +102,30 @@
 
     <!-- Row Action Buttons (Floating) -->
     <div class="row-actions" id="rowActions">
-        <button class="row-action-btn edit-row-btn" id="editRowBtn">Edit Transaction
-        </button>
-        <button class="row-action-btn delete-row-btn" id="deleteRowBtn">Delete Transaction
-        </button>
+        <button class="row-action-btn edit-row-btn" id="editRowBtn">Edit Transaction</button>
+        <button class="row-action-btn delete-row-btn" id="deleteRowBtn">Delete Transaction</button>
     </div>
 
-    <!-- Modals remain the same -->
+    <!-- Column Selection Modal -->
+    <div id="columnModal" class="modal">
+        <div class="modal-content small-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Column</h2>
+                <button class="close-btn" id="closeColumnModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="column-selection-grid">
+                    <button class="column-option" data-column="grosswt" data-label="GROSS WT">GROSS WT</button>
+                    <button class="column-option" data-column="mc" data-label="MC%">MC%</button>
+                    <button class="column-option" data-column="netwt" data-label="NET WT">NET WT</button>
+                    <button class="column-option" data-column="bags" data-label="BAGS">BAGS</button>
+                    <button class="column-option" data-column="sackwt" data-label="SACK WT">SACK WT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Officer Modal -->
     <div id="officerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -102,6 +149,7 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -142,6 +190,7 @@
         </div>
     </div>
 
+    <!-- Transaction Modal -->
     <div id="transactionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -187,8 +236,9 @@
                             <label class="form-label">Document Type</label>
                             <select class="form-select" id="documentType">
                                 <option value="">Select</option>
-                                <option value="DR">DR</option>
-                                <option value="Issue">Issue</option>
+                                <option value="DR">WSR</option>
+                                <option value="Issue">ESR</option>
+                                <option value="Issue">ESI</option>
                                 <option value="WSI">WSI</option>
                             </select>
                         </div>
