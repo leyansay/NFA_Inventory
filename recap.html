@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECAPITULATION - Print Ready</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: white;
+            padding: 20px;
+            color: #000;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .recap-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .header .date-range {
+            font-size: 12px;
+            margin: 5px 0 15px 0;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+            font-size: 11px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 3px;
+        }
+
+        .info-label {
+            width: 220px;
+            font-weight: normal;
+        }
+
+        .info-value {
+            flex: 1;
+            border-bottom: 1px solid #000;
+            padding-left: 5px;
+        }
+
+        .page-info {
+            text-align: right;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .recap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 10px;
+        }
+
+        .recap-table th {
+            padding: 5px 8px;
+            text-align: left;
+            font-weight: normal;
+            border-bottom: 1px solid #000;
+            border-top: 1px solid #000;
+        }
+
+        .recap-table td {
+            padding: 4px 8px;
+            border-bottom: 1px solid #000;
+        }
+
+        .recap-table .center {
+            text-align: center;
+        }
+
+        .recap-table .right {
+            text-align: right;
+        }
+
+        .recap-table .indent {
+            padding-left: 30px;
+        }
+
+        .recap-table .indent2 {
+            padding-left: 60px;
+        }
+
+        .recap-table .total-row {
+            font-weight: bold;
+        }
+
+        .recap-table .dotted-line {
+            border-bottom: 1px dotted #000 !important;
+        }
+
+        .print-buttons {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            margin: 0 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-print {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: #0052a3;
+        }
+
+        .btn-close {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-close:hover {
+            background-color: #5a6268;
+        }
+
+        @media print {
+            body {
+                padding: 10px;
+            }
+
+            .print-buttons {
+                display: none;
+            }
+
+            @page {
+                margin: 1cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="recap-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>RECAPITULATION</h1>
+            <div class="date-range" id="dateRange">February 05, 2026 TO February 05, 2026</div>
+        </div>
+
+        <!-- Officer and Warehouse Info -->
+        <div class="info-section">
+            <div class="info-row">
+                <div class="info-label">NAME OF ACCOUNTABLE OFFICER :</div>
+                <div class="info-value" id="officerName">SENEN T. CARCOSIA</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">WHSE CODE/WHSE NAME</div>
+                <div class="info-value" id="warehouseInfo">1123011    GID 1 I</div>
+            </div>
+        </div>
+
+        <!-- Page Info -->
+        <div class="page-info">
+            <div>Rundate: <span id="runDate">02/06/2026</span></div>
+            <div>Page: 1</div>
+        </div>
+
+        <!-- Main Table -->
+        <table class="recap-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Cereal Type</th>
+                    <th style="width: 35%;">Activity</th>
+                    <th style="width: 10%;">Variety</th>
+                    <th style="width: 10%;">Sack</th>
+                    <th style="width: 10%;" class="center">No. of Bags</th>
+                    <th style="width: 10%;" class="right">Gross Wt.</th>
+                    <th style="width: 10%;" class="right">Net Wt.</th>
+                </tr>
+            </thead>
+            <tbody id="recapTableBody">
+                <!-- RECEIPTS Section will be inserted here -->
+            </tbody>
+        </table>
+
+        <div class="print-buttons">
+            <button class="btn btn-print" onclick="window.print()">🖨️ Print Recap</button>
+            <button class="btn btn-close" onclick="window.close()">✖ Close</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Format number with commas
+        function formatNumber(num) {
+            if (num === '-' || num === null || num === undefined || num === '') return '-';
+            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+        }
+
+        // Get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                officerId: params.get('officerId'),
+                officerName: params.get('officerName'),
+                warehouseId: params.get('warehouseId'),
+                warehouseName: params.get('warehouseName'),
+                warehouseLocation: params.get('warehouseLocation'),
+                periodFrom: params.get('periodFrom'),
+                periodTo: params.get('periodTo')
+            };
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            return `${months[date.getMonth()]} ${String(date.getDate()).padStart(2, '0')}, ${date.getFullYear()}`;
+        }
+
+        function formatDateShort(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        // Fetch cereal type from varieties collection
+        async function getCerealTypeFromVariety(varietyCode) {
+            if (!varietyCode) return 'UNKNOWN';
+            
+            try {
+                const snapshot = await database.ref('varieties').once('value');
+                
+                if (!snapshot.exists()) {
+                    return 'UNKNOWN';
+                }
+                
+                let cerealType = 'UNKNOWN';
+                
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    if (data.varietyCode === varietyCode) {
+                        cerealType = data.cerealType || 'UNKNOWN';
+                    }
+                });
+                
+                return cerealType;
+            } catch (error) {
+                console.error('Error fetching cereal type:', error);
+                return 'UNKNOWN';
+            }
+        }
+
+        // Load and process data
+        async function loadRecapData() {
+            const params = getUrlParams();
+
+            if (!params.officerId || !params.periodFrom || !params.periodTo) {
+                alert('Missing required parameters');
+                return;
+            }
+
+            // Populate header information
+            document.getElementById('dateRange').textContent = 
+                `${formatDate(params.periodFrom)} TO ${formatDate(params.periodTo)}`;
+            document.getElementById('officerName').textContent = params.officerName || '-';
+            document.getElementById('warehouseInfo').textContent = 
+                `${params.warehouseId}    ${params.warehouseName}`;
+            
+            const today = new Date();
+            document.getElementById('runDate').textContent = formatDateShort(today.toISOString().split('T')[0]);
+
+            try {
+                const snapshot = await database.ref('transactions').once('value');
+                
+                if (!snapshot.exists()) {
+                    console.log('No transactions found');
+                    populateEmptyTable();
+                    return;
+                }
+
+                const fromDate = new Date(params.periodFrom);
+                const toDate = new Date(params.periodTo);
+
+                const transactions = [];
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    if (data.officerId === params.officerId && 
+                        data.warehouseId === params.warehouseId &&
+                        data.transactionDate) {
+                        const transactionDate = new Date(data.transactionDate);
+                        if (transactionDate >= fromDate && transactionDate <= toDate) {
+                            transactions.push(data);
+                        }
+                    }
+                });
+
+                await processRecapData(transactions);
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading recap data');
+            }
+        }
+
+        async function processRecapData(transactions) {
+            const tbody = document.getElementById('recapTableBody');
+            tbody.innerHTML = '';
+
+            // Separate RECEIPTS and ISSUES based on document type
+            const receipts = [];
+            const issues = [];
+
+            transactions.forEach(t => {
+                const docType = (t.documentType || '').toUpperCase();
+                
+                // WSR = RECEIPTS, WSI = ISSUES, ESR = RECEIPTS, ESI = ISSUES
+                if (docType === 'WSR' || docType === 'ESR') {
+                    receipts.push(t);
+                } else if (docType === 'WSI' || docType === 'ESI') {
+                    issues.push(t);
+                }
+            });
+
+            // Process RECEIPTS
+            if (receipts.length > 0) {
+                const groupedReceipts = await groupTransactions(receipts);
+                addReceiptsSection(tbody, groupedReceipts);
+            }
+
+            // Process ISSUES
+            if (issues.length > 0) {
+                const groupedIssues = await groupTransactions(issues);
+                addIssuesSection(tbody, groupedIssues);
+            }
+
+            if (receipts.length === 0 && issues.length === 0) {
+                populateEmptyTable();
+            }
+        }
+
+        function addReceiptsSection(tbody, grouped) {
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<td colspan="7" style="font-weight: bold; padding-top: 10px;">R E C E I P T S :</td>';
+            tbody.appendChild(headerRow);
+
+            let sectionTotalBags = 0, sectionTotalGross = 0, sectionTotalNet = 0;
+
+            Object.keys(grouped).forEach(cerealType => {
+                const activities = grouped[cerealType];
+                let cerealTotalBags = 0, cerealTotalGross = 0, cerealTotalNet = 0;
+
+                Object.keys(activities).forEach((activity, index) => {
+                    const items = activities[activity];
+                    
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index === 0 ? cerealType : ''}</td>
+                            <td class="indent">${item.activity}</td>
+                            <td class="center">${item.variety}</td>
+                            <td class="center">${item.sack}</td>
+                            <td class="right">${formatNumber(item.bags)}</td>
+                            <td class="right">${formatNumber(item.grossWeight)}</td>
+                            <td class="right">${formatNumber(item.netWeight)}</td>
+                        `;
+                        tbody.appendChild(row);
+
+                        cerealTotalBags += item.bags;
+                        cerealTotalGross += item.grossWeight;
+                        cerealTotalNet += item.netWeight;
+                    });
+                });
+
+                sectionTotalBags += cerealTotalBags;
+                sectionTotalGross += cerealTotalGross;
+                sectionTotalNet += cerealTotalNet;
+            });
+
+            // TOTAL RECEIPTS/ISSUES
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = `
+                <td></td>
+                <td class="indent2">TOTAL RECEIPTS/ISSUES ............></td>
+                <td></td>
+                <td></td>
+                <td class="right">${formatNumber(sectionTotalBags)}</td>
+                <td class="right">${formatNumber(sectionTotalGross)}</td>
+                <td class="right">${formatNumber(sectionTotalNet)}</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+
+        function addIssuesSection(tbody, grouped) {
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<td colspan="7" style="font-weight: bold; padding-top: 15px;">I S S U E S :</td>';
+            tbody.appendChild(headerRow);
+
+            let sectionTotalBags = 0, sectionTotalGross = 0, sectionTotalNet = 0;
+
+            Object.keys(grouped).forEach(cerealType => {
+                const activities = grouped[cerealType];
+                let cerealTotalBags = 0, cerealTotalGross = 0, cerealTotalNet = 0;
+
+                Object.keys(activities).forEach((activity, index) => {
+                    const items = activities[activity];
+                    
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index === 0 ? cerealType : ''}</td>
+                            <td class="indent">${item.activity}</td>
+                            <td class="center">${item.variety}</td>
+                            <td class="center">${item.sack}</td>
+                            <td class="right">${formatNumber(item.bags)}</td>
+                            <td class="right">${formatNumber(item.grossWeight)}</td>
+                            <td class="right">${formatNumber(item.netWeight)}</td>
+                        `;
+                        tbody.appendChild(row);
+
+                        cerealTotalBags += item.bags;
+                        cerealTotalGross += item.grossWeight;
+                        cerealTotalNet += item.netWeight;
+                    });
+                });
+
+                sectionTotalBags += cerealTotalBags;
+                sectionTotalGross += cerealTotalGross;
+                sectionTotalNet += cerealTotalNet;
+            });
+
+            // TOTAL RECEIPTS/ISSUES
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = `
+                <td></td>
+                <td class="indent2">TOTAL RECEIPTS/ISSUES ............></td>
+                <td></td>
+                <td></td>
+                <td class="right">${formatNumber(sectionTotalBags)}</td>
+                <td class="right">${formatNumber(sectionTotalGross)}</td>
+                <td class="right">${formatNumber(sectionTotalNet)}</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+
+        async function groupTransactions(transactions) {
+            const grouped = {};
+
+            // Process each transaction and fetch cereal type
+            for (const t of transactions) {
+                const varietyCode = t.varietyCode || '';
+                
+                // Fetch cereal type from varieties collection
+                const cerealType = await getCerealTypeFromVariety(varietyCode);
+                
+                const activity = t.activityCode || 'UNKNOWN';
+                const variety = t.varietyCode || '-';
+                const sack = t.sackCode || '-';
+
+                if (!grouped[cerealType]) {
+                    grouped[cerealType] = {};
+                }
+
+                if (!grouped[cerealType][activity]) {
+                    grouped[cerealType][activity] = [];
+                }
+
+                grouped[cerealType][activity].push({
+                    activity: activity,
+                    variety: variety,
+                    sack: sack,
+                    bags: parseInt(t.numberOfBags) || 0,
+                    grossWeight: parseFloat(t.grossWeight) || 0,
+                    netWeight: parseFloat(t.netWeight) || 0
+                });
+            }
+
+            return grouped;
+        }
+
+        function populateEmptyTable() {
+            const tbody = document.getElementById('recapTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No transactions found for the selected period</td></tr>';
+        }
+
+        // Load data when page loads
+        window.addEventListener('DOMContentLoaded', loadRecapData);
+    </script>
+</body>
+</html>

@@ -52,6 +52,59 @@
             background: #218838;
         }
 
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .filter-btn {
+            padding: 10px 25px;
+            font-size: 13px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            background: white;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .filter-btn.wsr.active {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .filter-btn.wsi.active {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .filter-btn.esr.active {
+            background: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .filter-btn.esi.active {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+
         .print-paper {
             background: white;
             width: 297mm;
@@ -212,6 +265,10 @@
                 display: none;
             }
 
+            .filter-container {
+                display: none;
+            }
+
             .print-paper {
                 box-shadow: none;
                 width: 100%;
@@ -265,6 +322,25 @@
     <div class="button-container">
         <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
         <button class="back-btn" onclick="window.location.href='transaction.html'">← Back to Transactions</button>
+    </div>
+
+    <!-- Filter Container -->
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterTransactions('ALL')" id="btnALL">
+            📊 Show All
+        </button>
+        <button class="filter-btn wsr" onclick="filterTransactions('WSR')" id="btnWSR">
+            📥 WSR Only
+        </button>
+        <button class="filter-btn wsi" onclick="filterTransactions('WSI')" id="btnWSI">
+            📤 WSI Only
+        </button>
+        <button class="filter-btn esr" onclick="filterTransactions('ESR')" id="btnESR">
+            📥 ESR Only
+        </button>
+        <button class="filter-btn esi" onclick="filterTransactions('ESI')" id="btnESI">
+            📤 ESI Only
+        </button>
     </div>
 
     <div class="print-paper">
@@ -384,6 +460,10 @@
         const periodFrom = urlParams.get('periodFrom');
         const periodTo = urlParams.get('periodTo');
 
+        // Global variables to store all transactions
+        let allTransactions = [];
+        let currentFilter = 'ALL';
+
         // Set report date with real-time update
         function updateDateTime() {
             const now = new Date();
@@ -447,6 +527,68 @@
             });
         }
 
+        function filterTransactions(filter) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn' + filter).classList.add('active');
+            
+            // Filter and display transactions
+            displayFilteredTransactions();
+        }
+
+        function displayFilteredTransactions() {
+            const tbody = document.getElementById('previewBody');
+            tbody.innerHTML = '';
+            
+            let filteredTransactions = allTransactions;
+            
+            // Apply filter
+            if (currentFilter !== 'ALL') {
+                filteredTransactions = allTransactions.filter(item => {
+                    const docType = (item.data.documentType || '').toUpperCase();
+                    return docType === currentFilter;
+                });
+            }
+            
+            // Update transaction count
+            document.getElementById('totalTransactions').textContent = filteredTransactions.length;
+            
+            if (filteredTransactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No ${currentFilter === 'ALL' ? '' : currentFilter} transactions found for the selected period</td></tr>`;
+                return;
+            }
+            
+            // Sort by date
+            filteredTransactions.sort((a, b) => {
+                const dateA = new Date(a.data.transactionDate || '1900-01-01');
+                const dateB = new Date(b.data.transactionDate || '1900-01-01');
+                return dateA - dateB;
+            });
+            
+            // Display transactions
+            filteredTransactions.forEach((item) => {
+                const data = item.data;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${data.transactionDate || '-'}</td>
+                    <td>${data.recdFromIssdTo || '-'}</td>
+                    <td>${data.varietyCode || '-'}</td>
+                    <td>${data.refWSINo || data.documentNo || '-'}</td>
+                    <td>${data.aiNo || '-'}</td>
+                    <td>${data.orNo || '-'}</td>
+                    <td>${data.documentType || '-'}</td>
+                    <td>${data.numberOfBags || '-'}</td>
+                    <td>${data.grossWeight || '-'}</td>
+                    <td>${data.netWeight || '-'}</td>
+                    <td>${data.moistureContent || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
         function loadTransactionsForPreview() {
             const tbody = document.getElementById('previewBody');
             
@@ -474,7 +616,7 @@
                     return;
                 }
 
-                const transactions = [];
+                allTransactions = []; // Clear previous data
                 const fromDate = periodFrom ? new Date(periodFrom) : null;
                 const toDate = periodTo ? new Date(periodTo) : null;
 
@@ -491,46 +633,20 @@
                         if (transDate < fromDate || transDate > toDate) return;
                     }
                     
-                    transactions.push({
+                    allTransactions.push({
                         id: childSnapshot.key,
                         data: data
                     });
                 });
 
-                // Update transaction count
-                document.getElementById('totalTransactions').textContent = transactions.length;
-
-                if (transactions.length === 0) {
+                if (allTransactions.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No transactions found for the selected period</td></tr>';
                     return;
                 }
 
-                // Sort by date
-                transactions.sort((a, b) => {
-                    const dateA = new Date(a.data.transactionDate || '1900-01-01');
-                    const dateB = new Date(b.data.transactionDate || '1900-01-01');
-                    return dateA - dateB; // Oldest first for reports
-                });
-
-                transactions.forEach((item) => {
-                    const data = item.data;
-                    
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${data.transactionDate || '-'}</td>
-                        <td>${data.recdFromIssdTo || '-'}</td>
-                        <td>${data.varietyCode || '-'}</td>
-                        <td>${data.refWSINo || data.documentNo || '-'}</td>
-                        <td>${data.aiNo || '-'}</td>
-                        <td>${data.orNo || '-'}</td>
-                        <td>${data.documentType || '-'}</td>
-                        <td>${data.numberOfBags || '-'}</td>
-                        <td>${data.grossWeight || '-'}</td>
-                        <td>${data.netWeight || '-'}</td>
-                        <td>${data.moistureContent || '-'}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+                // Display all transactions initially
+                displayFilteredTransactions();
+                
             }).catch((error) => {
                 tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Error loading transactions</td></tr>';
             });

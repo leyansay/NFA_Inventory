@@ -13,7 +13,7 @@
     <iframe src="sidebar.html" style="width: 250px; height: 100vh; border: none; position: fixed; left: 0; top: 0; z-index: 100;"></iframe>
 
     <div class="main-content">
-
+        
         <!-- ===== CONSISTENT HEADER ===== -->
         <div class="header-sticky-wrapper">
             <div class="header">
@@ -46,6 +46,15 @@
                 <p class="card-description">
                     Select the collections you want to backup from Firebase Realtime Database. The backup will be saved as a JSON file.
                 </p>
+
+                <!-- Add this Select All button section -->
+    <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;">
+        <button class="btn-select-all" id="selectAllBtn" onclick="toggleSelectAll()">
+            <span>✓</span>
+            <span>Select All</span>
+        </button>
+    </div>
+
                 
                 <div class="backup-option">
                     <label class="checkbox-label">
@@ -275,23 +284,72 @@
         let collectionDatesCache = {};
         let selectedBackupIndex = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('.table-checkbox');
-            checkboxes.forEach((checkbox) => {
-                checkbox.addEventListener('change', async function() {
-                    const collection = this.dataset.collection;
-                    const dateSelector = document.getElementById('date-' + collection);
-                    if (this.checked) {
-                        dateSelector.classList.add('show');
-                        await loadAvailableDates(collection);
-                    } else {
-                        dateSelector.classList.remove('show');
-                        document.getElementById('select-' + collection).value = 'all';
-                    }
-                });
-            });
-            loadBackupHistory();
+        function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.table-checkbox');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    
+    // Check if all are currently selected
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    if (allChecked) {
+        // Deselect all
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                checkbox.checked = false;
+                const collection = checkbox.dataset.collection;
+                const dateSelector = document.getElementById('date-' + collection);
+                dateSelector.classList.remove('show');
+                document.getElementById('select-' + collection).value = 'all';
+            }
         });
+        selectAllBtn.innerHTML = '<span>✓</span><span>Select All</span>';
+        selectAllBtn.classList.remove('deselect');
+    } else {
+        // Select all
+        checkboxes.forEach(async (checkbox) => {
+            if (!checkbox.checked) {
+                checkbox.checked = true;
+                const collection = checkbox.dataset.collection;
+                const dateSelector = document.getElementById('date-' + collection);
+                dateSelector.classList.add('show');
+                await loadAvailableDates(collection);
+            }
+        });
+        selectAllBtn.innerHTML = '<span>✗</span><span>Deselect All</span>';
+        selectAllBtn.classList.add('deselect');
+    }
+}
+
+// Update the button text dynamically when individual checkboxes change
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.table-checkbox');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', async function() {
+            const collection = this.dataset.collection;
+            const dateSelector = document.getElementById('date-' + collection);
+            if (this.checked) {
+                dateSelector.classList.add('show');
+                await loadAvailableDates(collection);
+            } else {
+                dateSelector.classList.remove('show');
+                document.getElementById('select-' + collection).value = 'all';
+            }
+            
+            // Update Select All button state
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            if (allChecked) {
+                selectAllBtn.innerHTML = '<span>✗</span><span>Deselect All</span>';
+                selectAllBtn.classList.add('deselect');
+            } else {
+                selectAllBtn.innerHTML = '<span>✓</span><span>Select All</span>';
+                selectAllBtn.classList.remove('deselect');
+            }
+        });
+    });
+    loadBackupHistory();
+});
 
         async function loadAvailableDates(collection) {
             const selectElement = document.getElementById('select-' + collection);
@@ -501,45 +559,136 @@
         function showAlert(elementId, message, className) { const alert = document.getElementById(elementId); alert.innerHTML = message; alert.className = 'alert ' + className + ' show'; }
 
         async function createBackup() {
-            const checkboxes = document.querySelectorAll('.table-checkbox:checked');
-            const collections = Array.from(checkboxes).map(cb => cb.value);
-            showProgress('Creating Backup', 'Fetching data from Firebase...');
-            document.getElementById('createBackupBtn').disabled = true;
-            try {
-                const backupData = { metadata: { timestamp: new Date().toISOString(), collections: collections, version: '1.0', filters: {} }, data: {} };
-                let progress = 0; const increment = 80 / collections.length;
-                for (const collection of collections) {
-                    updateProgress(Math.min(progress, 80));
-                    const selection = document.getElementById('select-' + collection).value;
-                    if (selection && selection !== 'all') { const selectEl = document.getElementById('select-' + collection); backupData.metadata.filters[collection] = { selection, display: selectEl.options[selectEl.selectedIndex].text }; }
-                    const snapshot = await database.ref(collection).once('value');
-                    backupData.data[collection] = snapshot.exists() ? filterDataBySelection(snapshot.val(), selection) : {};
-                    progress += increment;
-                }
-                updateProgress(90);
-                const jsonString = JSON.stringify(backupData, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const timestamp = new Date().toISOString().replace(/[:.]/g,'-').split('T')[0];
-                const filename = `nfa_backup_${timestamp}.json`;
-                a.download = filename; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); a.remove();
-                updateProgress(100);
-                backupHistory.push({ datetime: new Date().toLocaleString(), filename, collections, data: backupData });
-                saveBackupHistory(); displayBackupHistory();
-                document.getElementById('modalIcon').textContent = '';
-                document.getElementById('modalTitle').textContent = 'Backup Created!';
-                document.getElementById('modalMessage').textContent = 'File downloaded successfully';
-                hideProgress(); showSuccess('backupSuccess', 'Backup created successfully!');
-            } catch (error) {
-                console.error('Backup error:', error);
-                document.getElementById('modalIcon').textContent = '';
-                document.getElementById('modalTitle').textContent = 'Backup Failed';
-                document.getElementById('modalMessage').textContent = error.message;
-                hideProgress(); showError('backupError', 'Backup failed: ' + error.message);
-            } finally { document.getElementById('createBackupBtn').disabled = false; }
+    const checkboxes = document.querySelectorAll('.table-checkbox:checked');
+    const collections = Array.from(checkboxes).map(cb => cb.value);
+    
+    // Generate filename first
+    const timestamp = new Date().toISOString().replace(/[:.]/g,'-').split('T')[0];
+    const filename = `nfa_backup_${timestamp}.json`;
+    
+    showProgress('Creating Backup', 'Fetching data from Firebase...');
+    document.getElementById('createBackupBtn').disabled = true;
+    
+    try {
+        const backupData = { 
+            metadata: { 
+                timestamp: new Date().toISOString(), 
+                collections: collections, 
+                version: '1.0', 
+                filters: {} 
+            }, 
+            data: {} 
+        };
+        
+        let progress = 0; 
+        const increment = 80 / collections.length;
+        
+        for (const collection of collections) {
+            updateProgress(Math.min(progress, 80));
+            const selection = document.getElementById('select-' + collection).value;
+            
+            if (selection && selection !== 'all') { 
+                const selectEl = document.getElementById('select-' + collection); 
+                backupData.metadata.filters[collection] = { 
+                    selection, 
+                    display: selectEl.options[selectEl.selectedIndex].text 
+                }; 
+            }
+            
+            const snapshot = await database.ref(collection).once('value');
+            backupData.data[collection] = snapshot.exists() ? filterDataBySelection(snapshot.val(), selection) : {};
+            progress += increment;
         }
+        
+        updateProgress(90);
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        
+        // Check if File System Access API is supported (modern browsers)
+        if ('showSaveFilePicker' in window) {
+            try {
+                // Show save file dialog
+                const fileHandle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                        description: 'JSON Files',
+                        accept: { 'application/json': ['.json'] }
+                    }]
+                });
+                
+                // Write the file
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                
+                updateProgress(100);
+                
+                // Save to history
+                backupHistory.push({ 
+                    datetime: new Date().toLocaleString(), 
+                    filename, 
+                    collections, 
+                    data: backupData 
+                });
+                saveBackupHistory(); 
+                displayBackupHistory();
+                
+                document.getElementById('modalIcon').textContent = '✅';
+                document.getElementById('modalTitle').textContent = 'Backup Created!';
+                document.getElementById('modalMessage').textContent = `File saved successfully`;
+                hideProgress(); 
+                showSuccess('backupSuccess', 'Backup created successfully!');
+                
+            } catch (saveError) {
+                // User cancelled the save dialog
+                if (saveError.name === 'AbortError') {
+                    console.log('User cancelled the save operation');
+                    // Close the modal immediately
+                    document.getElementById('progressModal').classList.remove('active');
+                } else {
+                    throw saveError;
+                }
+            }
+        } else {
+            // Fallback for older browsers - automatic download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename; 
+            document.body.appendChild(a); 
+            a.click(); 
+            window.URL.revokeObjectURL(url); 
+            a.remove();
+            
+            updateProgress(100);
+            
+            backupHistory.push({ 
+                datetime: new Date().toLocaleString(), 
+                filename, 
+                collections, 
+                data: backupData 
+            });
+            saveBackupHistory(); 
+            displayBackupHistory();
+            
+            document.getElementById('modalIcon').textContent = '✅';
+            document.getElementById('modalTitle').textContent = 'Backup Created!';
+            document.getElementById('modalMessage').textContent = 'File downloaded successfully (check your Downloads folder)';
+            hideProgress(); 
+            showSuccess('backupSuccess', 'Backup created successfully!');
+        }
+        
+    } catch (error) {
+        console.error('Backup error:', error);
+        document.getElementById('modalIcon').textContent = '❌';
+        document.getElementById('modalTitle').textContent = 'Backup Failed';
+        document.getElementById('modalMessage').textContent = error.message;
+        hideProgress(); 
+        showError('backupError', 'Backup failed: ' + error.message);
+    } finally { 
+        document.getElementById('createBackupBtn').disabled = false; 
+    }
+}
 
         async function restoreBackup(backupData) {
             showProgress('Restoring Backup', 'Processing...');

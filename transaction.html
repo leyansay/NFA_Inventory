@@ -50,21 +50,6 @@
                 <div class="column-filter-wrapper">
                     <label class="filter-label">Select Columns:</label>
                     <div class="column-tags" id="columnTags">
-                        <button class="column-tag active" data-column="grosswt">
-                            <span class="tag-dot"></span>
-                            <span class="tag-text">GROSS WT</span>
-                            <span class="tag-close">×</span>
-                        </button>
-                        <button class="column-tag active" data-column="mc">
-                            <span class="tag-dot"></span>
-                            <span class="tag-text">MC%</span>
-                            <span class="tag-close">×</span>
-                        </button>
-                        <button class="column-tag active" data-column="netwt">
-                            <span class="tag-dot"></span>
-                            <span class="tag-text">NET WT</span>
-                            <span class="tag-close">×</span>
-                        </button>
                         <button class="add-column-btn" id="addColumnBtn">+ Add column</button>
                     </div>
                 </div>
@@ -184,7 +169,10 @@
                             <input type="date" class="form-input" id="previewPeriodTo" required>
                         </div>
                     </div>
-                    <button type="submit" class="save-btn">🖨️ Print Report</button>
+                    <div class="button-group" style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="save-btn" id="recapBtn" style="flex: 1; background-color: #28a745;">RECAP</button>
+                        <button type="submit" class="save-btn" style="flex: 1;">PRINT TRANSACTION</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -236,9 +224,9 @@
                             <label class="form-label">Document Type</label>
                             <select class="form-select" id="documentType">
                                 <option value="">Select</option>
-                                <option value="DR">WSR</option>
-                                <option value="Issue">ESR</option>
-                                <option value="Issue">ESI</option>
+                                <option value="WSR">WSR</option>
+                                <option value="ESR">ESR</option>
+                                <option value="ESI">ESI</option>
                                 <option value="WSI">WSI</option>
                             </select>
                         </div>

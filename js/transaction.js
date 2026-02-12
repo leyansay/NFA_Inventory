@@ -904,6 +904,68 @@ function setupSackInteraction() {
     });
 }
 
+// Add RECAP button handler
+const recapBtn = document.getElementById('recapBtn');
+if (recapBtn) {
+    recapBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const officerId = document.getElementById('previewOfficerId').value.trim();
+        const officerName = document.getElementById('previewOfficerName').value;
+        const warehouseName = document.getElementById('previewWarehouseName').value;
+        const warehouseLocation = document.getElementById('previewWarehouseLocation').value;
+        const periodFrom = document.getElementById('previewPeriodFrom').value;
+        const periodTo = document.getElementById('previewPeriodTo').value;
+        
+        if (!officerId || !officerName || !periodFrom || !periodTo) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        const officer = officersData[officerId];
+        if (!officer) {
+            alert('Officer not found. Please enter a valid Officer ID.');
+            return;
+        }
+
+        const fromDate = new Date(periodFrom);
+        const toDate = new Date(periodTo);
+        
+        const key = `${officerId}_${officer.warehouse}`;
+        const officerTransactions = transactionsData[key] || [];
+        
+        const transactionsInRange = officerTransactions.filter(transaction => {
+            if (!transaction.transactionDate) return false;
+            const transactionDate = new Date(transaction.transactionDate);
+            return transactionDate >= fromDate && transactionDate <= toDate;
+        });
+        
+        if (transactionsInRange.length === 0) {
+            alert(`No transactions found for Officer ID "${officerId}" between ${periodFrom} and ${periodTo}.\n\nPlease select a different date range or verify the officer has transactions in this period.`);
+            return;
+        }
+
+        const params = new URLSearchParams({
+            officerId: officerId,
+            officerName: officerName,
+            warehouseId: officer.warehouse,
+            warehouseName: warehouseName,
+            warehouseLocation: warehouseLocation,
+            periodFrom: periodFrom,
+            periodTo: periodTo
+        });
+        
+        // Open recap.html in a new window
+        window.open(`recap.html?${params.toString()}`, '_blank');
+        
+        // Close the preview modal
+        document.getElementById('previewModal').classList.remove('active');
+        
+        // Reset the form
+        document.getElementById('previewForm').reset();
+    });
+}
+
 function computeNetWeight() {
     const gross = parseFloat(document.getElementById("grossWeight").value) || 0;
     const sack = parseFloat(document.getElementById("sackWeight").value) || 0;
