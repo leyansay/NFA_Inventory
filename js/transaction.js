@@ -21,7 +21,6 @@ let filteredTransactions = [];
 let currentSortOrder = 'newest';
 let dateFilterFrom = null;
 let dateFilterTo = null;
-let selectedColumns = ['grosswt', 'mc', 'netwt'];
 
 // Store all data for table modals
 let activitiesData = [];
@@ -181,6 +180,7 @@ columnTags.forEach(tag => {
 });
 
 addColumnBtn.addEventListener('click', () => {
+    updateColumnModalOptions();
     columnModal.classList.add('active');
 });
 
@@ -190,12 +190,35 @@ closeColumnModal.addEventListener('click', () => {
 
 columnOptions.forEach(option => {
     option.addEventListener('click', () => {
+        if (option.classList.contains('disabled')) {
+            return;
+        }
         const column = option.dataset.column;
         const label = option.dataset.label;
         addColumnTag(column, label);
         columnModal.classList.remove('active');
     });
 });
+
+function updateColumnModalOptions() {
+    const activeTags = document.querySelectorAll('.column-tag.active');
+    const activeColumns = Array.from(activeTags).map(tag => tag.dataset.column);
+    
+    columnOptions.forEach(option => {
+        const column = option.dataset.column;
+        if (activeColumns.includes(column)) {
+            option.classList.add('disabled');
+            option.style.opacity = '0.5';
+            option.style.cursor = 'not-allowed';
+            option.style.backgroundColor = '#f5f5f5';
+        } else {
+            option.classList.remove('disabled');
+            option.style.opacity = '1';
+            option.style.cursor = 'pointer';
+            option.style.backgroundColor = '';
+        }
+    });
+}
 
 function addColumnTag(column, label) {
     const existingTag = Array.from(columnTags).find(tag => tag.dataset.column === column);

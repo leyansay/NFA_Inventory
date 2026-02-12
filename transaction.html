@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA Inventory - Transaction</title>
     <link rel="stylesheet" href="css/transaction.css" />
+    <style>
+        /* Force uppercase for all text inputs in the transaction modal */
+        #transactionModal input[type="text"]:not([readonly]):not([disabled]),
+        #transactionModal select:not([disabled]) {
+            text-transform: uppercase;
+        }
+        
+        /* Also uppercase for table display */
+        .table-container table tbody td {
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
     <!-- Load Sidebar from separate file -->

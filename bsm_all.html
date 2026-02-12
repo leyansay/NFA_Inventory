@@ -748,12 +748,12 @@
         </div>
         
         <div class="user-info">
-            <div class="user-details">
-                <div class="user-name" id="displayUsername">Hi, BSM User</div>
-                <div class="user-role" id="displayUserRole">BRANCH SUPPLY MANAGER</div>
+                <div class="user-details">
+                    <div class="user-name" id="displayUsername">Hi, User</div>
+                    <div class="user-role" id="displayUserRole">USER</div>
+                </div>
+                <div class="user-avatar" id="displayAvatar">U</div>
             </div>
-            <div class="user-avatar" id="displayAvatar">B</div>
-        </div>
     </div>
 
     <div class="main-content">
@@ -982,6 +982,21 @@
                 `;
             });
         }
+
+         window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            loadAllData();
+        });
 
         function applyDateFilter() {
             const filterDate = document.getElementById('filterDate').value;
