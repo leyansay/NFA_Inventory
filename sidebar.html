@@ -540,7 +540,7 @@
                 <span>Backup Data</span>
             </li>
             
-            <li class="menu-item dropdown-item" onclick="toggleDropdown()">
+            <li class="menu-item dropdown-item" onclick="toggleDropdown(event)">
                 <div class="dropdown-toggle">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <span class="menu-icon">📚</span>
@@ -633,11 +633,22 @@
         };
 
         /* ── Library Dropdown ── */
-        function toggleDropdown() {
+        function toggleDropdown(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             const dropdown = document.getElementById('libraryDropdown');
             const arrow = document.getElementById('dropdownArrow');
             dropdown.classList.toggle('open');
             arrow.classList.toggle('open');
+            
+            // Save dropdown state
+            if (dropdown.classList.contains('open')) {
+                sessionStorage.setItem('libraryDropdownOpen', 'true');
+            } else {
+                sessionStorage.removeItem('libraryDropdownOpen');
+            }
         }
 
         /* ── Settings Dropdown ── */
@@ -809,15 +820,26 @@
                     item.classList.remove('active');
                     if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
                 });
-                if (isLibraryPage()) {
+                
+                // Check if library dropdown should be open
+                const shouldOpenLibrary = isLibraryPage() || sessionStorage.getItem('libraryDropdownOpen') === 'true';
+                if (shouldOpenLibrary) {
                     document.getElementById('libraryDropdown').classList.add('open');
                     document.getElementById('dropdownArrow').classList.add('open');
+                }
+                
+                // Restore scroll position
+                const savedScrollPosition = sessionStorage.getItem('sidebarScrollPosition');
+                if (savedScrollPosition) {
+                    const menu = document.querySelector('.menu');
+                    menu.scrollTop = parseInt(savedScrollPosition);
                 }
             }
         }
 
         document.querySelectorAll('.menu-item:not(.dropdown-item)').forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
                 if (link && link.startsWith('#')) {
@@ -830,7 +852,15 @@
 
         document.querySelectorAll('.dropdown-menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
+                e.preventDefault();
                 e.stopPropagation();
+                
+                // Store scroll position before navigation
+                const menu = document.querySelector('.menu');
+                const scrollPosition = menu.scrollTop;
+                sessionStorage.setItem('sidebarScrollPosition', scrollPosition);
+                sessionStorage.setItem('libraryDropdownOpen', 'true');
+                
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
                 if (link && link.startsWith('#')) {
@@ -842,6 +872,13 @@
         });
 
         setActiveMenuItem();
+        
+        // Save scroll position whenever user scrolls
+        const menu = document.querySelector('.menu');
+        menu.addEventListener('scroll', function() {
+            sessionStorage.setItem('sidebarScrollPosition', menu.scrollTop);
+        });
+        
         window.addEventListener('message', function(event) {
             if (event.data.type === 'pageChange') setActiveMenuItem();
         });

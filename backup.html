@@ -19,14 +19,13 @@
             <div class="header">
                 <h1 class="page-title">Backup &amp; Restore</h1>
                 <div class="header-right">
-                    <span id="connectionStatus" class="connection-status status-disconnected">Not Connected</span>
-                    <div class="user-info-pill">
-                        <div class="user-details">
-                            <div class="user-greeting" id="displayUsername">Hi, nfa_admin</div>
-                            <div class="user-role">Administrator</div>
-                        </div>
-                        <div class="user-avatar">N</div>
-                    </div>
+                    <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name" id="displayUsername">Hi, User</div>
+                    <div class="user-role" id="displayUserRole">USER</div>
+                </div>
+                <div class="user-avatar" id="displayAvatar">U</div>
+            </div>
                 </div>
             </div>
         </div>
@@ -319,6 +318,21 @@
         selectAllBtn.classList.add('deselect');
     }
 }
+
+window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            loadAllData();
+        });
 
 // Update the button text dynamically when individual checkboxes change
 document.addEventListener('DOMContentLoaded', function() {

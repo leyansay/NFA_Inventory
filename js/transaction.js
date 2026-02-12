@@ -253,6 +253,21 @@ function updateSummaryCards() {
     });
 }
 
+window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            loadAllData();
+        });
+
 function createSummaryCard(column, data) {
     const card = document.createElement('div');
     card.className = 'summary-card';

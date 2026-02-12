@@ -13,10 +13,10 @@
             <h1 class="page-title">Accountable Officer</h1>
             <div class="user-info">
                 <div class="user-details">
-                    <div class="user-name">Hi, nfa_admin</div>
-                    <div class="user-role">USER</div>
+                    <div class="user-name" id="displayUsername">Hi, User</div>
+                    <div class="user-role" id="displayUserRole">USER</div>
                 </div>
-                <div class="user-avatar">N</div>
+                <div class="user-avatar" id="displayAvatar">U</div>
             </div>
         </div>
         <div class="controls-section">
@@ -290,6 +290,21 @@ function renderWH(whs) {
         tb.appendChild(tr);
     });
 }
+
+ window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
+                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            loadAllData();
+        });
 
 function resetWH() {
     selWarehouse = null;
