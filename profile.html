@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile – NFA Inventory</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
+        :root {
+            --green-deep:   #1B5E20;
+            --green-mid:    #2E7D32;
+            --green-light:  #4CAF50;
+            --gold:         #F9A825;
+            --gold-light:   #FDD835;
+            --red:          #D84315;
+            --surface:      #F5F9F5;
+            --border:       #D4E6D4;
+            --text-dark:    #1a3a1c;
+            --text-mid:     #4a6b4c;
+            --text-light:   #7a9b7c;
+            --shadow-green: rgba(27,94,32,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 100%);
+            padding: 2rem 2.5rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: '🌾';
+            position: absolute;
+            right: 2rem; top: 50%;
+            transform: translateY(-50%);
+            font-size: 8rem;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: var(--surface);
+            border-radius: 40px 40px 0 0;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.25); transform: translateX(-2px); }
+        .header-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            color: white;
+            font-weight: 400;
+        }
+        .header-subtitle {
+            font-size: 0.82rem;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 0.15rem;
+        }
+
+        /* Main */
+        .main-content {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 3rem;
+        }
+
+        /* Avatar Card */
+        .avatar-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-green);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .avatar-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+        }
+        .avatar-wrapper { position: relative; flex-shrink: 0; }
+        .avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green-mid), var(--green-deep));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.4rem;
+            color: white;
+            box-shadow: 0 4px 16px rgba(27,94,32,0.3);
+            border: 3px solid var(--gold);
+            font-family: 'DM Serif Display', serif;
+            user-select: none;
+        }
+        .avatar-badge {
+            position: absolute;
+            bottom: 2px; right: 2px;
+            width: 22px; height: 22px;
+            background: var(--gold);
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem;
+        }
+        .avatar-info h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            font-weight: 400;
+        }
+        .session-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.4rem;
+        }
+        .session-time span { color: var(--green-mid); font-weight: 600; }
+
+        @media (max-width: 500px) {
+            .avatar-card { flex-direction: column; text-align: center; }
+        }
+
+        /* Section Card */
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.8rem;
+            box-shadow: 0 4px 20px var(--shadow-green);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .section-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--green-mid), var(--green-deep));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.15rem;
+            color: var(--text-dark);
+        }
+        .section-desc { font-size: 0.8rem; color: var(--text-light); margin-top: 0.1rem; }
+
+        /* Info rows */
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-icon { font-size: 1rem; width: 22px; text-align: center; }
+        .info-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            width: 100px;
+            flex-shrink: 0;
+        }
+        .info-value { font-size: 0.95rem; color: var(--text-dark); font-weight: 500; }
+
+        /* Form */
+        .form-group { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
+        .form-group:last-of-type { margin-bottom: 0; }
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-mid);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-wrapper { position: relative; }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.8rem 2.8rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background: var(--surface);
+            transition: all 0.25s ease;
+            outline: none;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--green-light);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(76,175,80,0.12);
+        }
+        input[readonly] {
+            background: #eef2ee;
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+        .input-icon {
+            position: absolute;
+            left: 0.9rem; top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .input-action {
+            position: absolute;
+            right: 0.9rem; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            cursor: pointer; font-size: 1rem;
+            color: var(--text-light);
+            transition: color 0.2s; padding: 0.2rem;
+        }
+        .input-action:hover { color: var(--green-mid); }
+
+        /* Strength bar */
+        .strength-bar {
+            height: 4px; border-radius: 4px;
+            background: var(--border); overflow: hidden; margin-top: 0.35rem;
+        }
+        .strength-fill {
+            height: 100%; border-radius: 4px; width: 0%;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+        .strength-label { font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem; }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.6rem; border: none; border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.25s ease;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green-mid), var(--green-deep));
+            color: white;
+            box-shadow: 0 4px 14px rgba(27,94,32,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(27,94,32,0.4); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-ghost {
+            background: transparent; color: var(--text-mid);
+            border: 2px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: var(--green-light); color: var(--green-mid); background: rgba(76,175,80,0.05); }
+        .btn-row { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.4rem; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background: white; border-radius: 14px;
+            padding: 1rem 1.4rem;
+            display: flex; align-items: center; gap: 0.8rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border-left: 4px solid var(--green-light);
+            z-index: 9999;
+            transform: translateY(100px); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            max-width: 320px;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { border-left-color: var(--red); }
+        .toast-icon { font-size: 1.3rem; }
+        .toast-text { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
+        .toast-sub  { font-size: 0.78rem; color: var(--text-light); margin-top: 0.1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <div class="header-inner">
+            <button class="back-btn" onclick="goBack()">◀</button>
+            <div>
+                <div class="header-title">My Profile</div>
+                <div class="header-subtitle">Manage your account details &amp; security</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- Avatar Card -->
+        <div class="avatar-card">
+            <div class="avatar-wrapper">
+                <div class="avatar" id="avatarInitial">N</div>
+                <div class="avatar-badge">✓</div>
+            </div>
+            <div class="avatar-info">
+                <h2 id="displayName">nfa_admin</h2>
+                <div class="session-time">Session started: <span id="sessionTime">—</span></div>
+            </div>
+        </div>
+
+        <!-- Account Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">ℹ️</div>
+                <div>
+                    <div class="section-title">Account Information</div>
+                    <div class="section-desc">Your current Firebase account details</div>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-icon">👤</span>
+                <span class="info-label">Username</span>
+                <span class="info-value" id="infoUsername">nfa_admin</span>
+            </div>
+            <div class="info-row">
+                <span class="info-icon">🔑</span>
+                <span class="info-label">Password</span>
+                <span class="info-value">••••••••</span>
+            </div>
+        </div>
+
+        <!-- Change Username -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">✏️</div>
+                <div>
+                    <div class="section-title">Change Username</div>
+                    <div class="section-desc">Update your login username</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Current Username</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="currentUsernameDisplay" value="nfa_admin" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>New Username</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">✏️</span>
+                    <input type="text" id="newUsername" placeholder="Enter new username" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirm with Current Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="usernameConfirmPass" placeholder="Enter your current password">
+                    <button class="input-action" onclick="toggleVis('usernameConfirmPass', this)" tabindex="-1">👁</button>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-ghost" onclick="resetUsernameForm()">Reset</button>
+                <button class="btn btn-primary" onclick="saveUsername()">💾 Save Username</button>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">🔑</div>
+                <div>
+                    <div class="section-title">Change Password</div>
+                    <div class="section-desc">Keep your account secure with a strong password</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="currentPassword" placeholder="Enter current password">
+                    <button class="input-action" onclick="toggleVis('currentPassword', this)" tabindex="-1">👁</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="newPassword" placeholder="Enter new password" oninput="checkStrength(this.value)">
+                    <button class="input-action" onclick="toggleVis('newPassword', this)" tabindex="-1">👁</button>
+                </div>
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                <div class="strength-label" id="strengthLabel">Password strength</div>
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">✅</span>
+                    <input type="password" id="confirmPassword" placeholder="Re-enter new password">
+                    <button class="input-action" onclick="toggleVis('confirmPassword', this)" tabindex="-1">👁</button>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-ghost" onclick="resetPasswordForm()">Reset</button>
+                <button class="btn btn-primary" onclick="savePassword()">🔐 Update Password</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon">✅</span>
+        <div>
+            <div class="toast-text" id="toastText">Success</div>
+            <div class="toast-sub" id="toastSub"></div>
+        </div>
+    </div>
+
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <script>
+        // ── Firebase init ──────────────────────────────────────────────────
+        const firebaseConfig = {
+            apiKey:            "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain:        "nfa-main.firebaseapp.com",
+            databaseURL:       "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId:         "nfa-main",
+            storageBucket:     "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId:             "1:314192469082:web:2f301895179a22dbe68c63"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Grab the logged-in user's Firebase key from sessionStorage
+        // Your login page should do: sessionStorage.setItem('userKey', 'user01')
+        const USER_KEY = sessionStorage.getItem('userKey') || 'user01';
+        const userRef  = db.ref('users/' + USER_KEY);
+
+        // In-memory cache of the user fetched from Firebase
+        let currentUser = { username: 'nfa_admin', password: '' };
+
+        // ── Helpers ──────────────────────────────────────────────────────
+
+        function updateUI(username) {
+            document.getElementById('avatarInitial').textContent    = username.charAt(0).toUpperCase();
+            document.getElementById('displayName').textContent      = username;
+            document.getElementById('infoUsername').textContent     = username;
+            document.getElementById('currentUsernameDisplay').value = username;
+        }
+
+        function goBack() {
+            if (window.parent !== window) window.parent.history.back();
+            else window.history.back();
+        }
+
+        function toggleVis(id, btn) {
+            var el = document.getElementById(id);
+            if (el.type === 'password') { el.type = 'text';     btn.textContent = '🙈'; }
+            else                        { el.type = 'password'; btn.textContent = '👁'; }
+        }
+
+        function checkStrength(val) {
+            var fill = document.getElementById('strengthFill');
+            var lbl  = document.getElementById('strengthLabel');
+            var s = 0;
+            if (val.length >= 8)          s++;
+            if (/[A-Z]/.test(val))        s++;
+            if (/[0-9]/.test(val))        s++;
+            if (/[^A-Za-z0-9]/.test(val)) s++;
+            var levels = [
+                { w: '0%',   c: '#ccc',    t: 'Password strength' },
+                { w: '25%',  c: '#D84315', t: 'Weak' },
+                { w: '50%',  c: '#F9A825', t: 'Fair' },
+                { w: '75%',  c: '#8BC34A', t: 'Good' },
+                { w: '100%', c: '#2E7D32', t: 'Strong ✓' }
+            ];
+            var l = val.length === 0 ? levels[0] : levels[Math.min(s, 4)];
+            fill.style.width = l.w; fill.style.background = l.c;
+            lbl.style.color  = l.c; lbl.textContent = l.t;
+        }
+
+        var toastTimer;
+        function showToast(text, sub, isError) {
+            sub = sub || ''; isError = !!isError;
+            var t = document.getElementById('toast');
+            document.getElementById('toastIcon').textContent = isError ? '❌' : '✅';
+            document.getElementById('toastText').textContent = text;
+            document.getElementById('toastSub').textContent  = sub;
+            t.classList.toggle('error', isError);
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3500);
+        }
+
+        function resetUsernameForm() {
+            document.getElementById('newUsername').value         = '';
+            document.getElementById('usernameConfirmPass').value = '';
+        }
+
+        function resetPasswordForm() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value     = '';
+            document.getElementById('confirmPassword').value = '';
+            checkStrength('');
+        }
+
+        // ── Load user data from Firebase on page load ─────────────────────
+        userRef.get().then(function(snap) {
+            if (!snap.exists()) {
+                showToast('User not found in database', '', true);
+                return;
+            }
+            currentUser = snap.val(); // { username, password }
+            updateUI(currentUser.username);
+
+            var now = new Date();
+            document.getElementById('sessionTime').textContent =
+                now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
+                now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        }).catch(function(err) {
+            showToast('Failed to load profile', err.message, true);
+        });
+
+        // ── Save Username → writes to Firebase users/user01/username ──────
+        function saveUsername() {
+            var newUser = document.getElementById('newUsername').value.trim();
+            var pass    = document.getElementById('usernameConfirmPass').value;
+
+            if (!newUser)           { showToast('New username is required', '', true); return; }
+            if (newUser.length < 3) { showToast('Username must be at least 3 characters', '', true); return; }
+            if (pass !== currentUser.password) {
+                showToast('Incorrect password', 'Please enter your current password to confirm.', true);
+                return;
+            }
+
+            // Write only the username field to Firebase
+            userRef.update({ username: newUser })
+                .then(function() {
+                    currentUser.username = newUser;   // update local cache
+                    updateUI(newUser);                // update all UI elements
+                    resetUsernameForm();
+                    showToast('Username updated!', 'New username: "' + newUser + '"');
+                })
+                .catch(function(err) {
+                    showToast('Failed to update username', err.message, true);
+                });
+        }
+
+        // ── Save Password → writes to Firebase users/user01/password ──────
+        function savePassword() {
+            var current = document.getElementById('currentPassword').value;
+            var newPass = document.getElementById('newPassword').value;
+            var confirm = document.getElementById('confirmPassword').value;
+
+            if (!current)                        { showToast('Current password is required', '', true); return; }
+            if (current !== currentUser.password){ showToast('Incorrect current password', '', true); return; }
+            if (!newPass || newPass.length < 6)  { showToast('New password must be at least 6 characters', '', true); return; }
+            if (newPass !== confirm)             { showToast('Passwords do not match', 'Make sure both fields are identical.', true); return; }
+
+            // Write only the password field to Firebase
+            userRef.update({ password: newPass })
+                .then(function() {
+                    currentUser.password = newPass;  // update local cache
+                    resetPasswordForm();
+                    showToast('Password updated successfully!', 'Use your new password on next login.');
+                })
+                .catch(function(err) {
+                    showToast('Failed to update password', err.message, true);
+                });
+        }
+    </script>
+</body>
+</html>

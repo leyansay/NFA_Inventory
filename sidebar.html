@@ -229,45 +229,139 @@
             border-left: 2px solid #FFB300;
         }
 
-        .logout-section {
+        /* ── Settings bottom section ── */
+        .settings-section {
             padding: 1rem 1.5rem;
             border-top: 2px solid rgba(249, 168, 37, 0.3);
             background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%);
+            position: relative;
         }
 
-        .logout-btn {
+        .settings-btn {
             width: 100%;
             padding: 0.85rem 1rem;
-            background: linear-gradient(135deg, #D84315 0%, #BF360C 100%);
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
             color: white;
-            border: none;
+            border: 2px solid rgba(249, 168, 37, 0.4);
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.95rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             gap: 0.8rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(216, 67, 21, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #BF360C 0%, #A52A14 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(216, 67, 21, 0.4);
+        .settings-btn:hover {
+            background: linear-gradient(135deg, rgba(249, 168, 37, 0.2) 0%, rgba(249, 168, 37, 0.1) 100%);
+            border-color: #F9A825;
+            color: #FDD835;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
         }
 
-        .logout-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(216, 67, 21, 0.2);
+        .settings-btn.open {
+            background: linear-gradient(135deg, rgba(249, 168, 37, 0.25) 0%, rgba(249, 168, 37, 0.15) 100%);
+            border-color: #FFB300;
+            color: #FDD835;
         }
 
-        .logout-icon {
+        .settings-btn-left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .settings-icon {
             font-size: 1.2rem;
+            transition: transform 0.5s ease;
         }
 
+        .settings-btn.open .settings-icon {
+            transform: rotate(90deg);
+        }
+
+        .settings-arrow {
+            font-size: 0.8rem;
+            color: #F9A825;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-btn.open .settings-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Settings dropdown panel (slides UP) */
+        .settings-dropdown {
+            position: absolute;
+            bottom: calc(100% - 0.5rem);
+            left: 0.75rem;
+            right: 0.75rem;
+            background: linear-gradient(135deg, #1a4a1e 0%, #163d1a 100%);
+            border: 1px solid rgba(249, 168, 37, 0.35);
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: max-height 0.35s ease, opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+            z-index: 100;
+        }
+
+        .settings-dropdown.open {
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .settings-dropdown-inner {
+            padding: 0.6rem 0.5rem;
+        }
+
+        .settings-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+
+        .settings-dropdown-item:hover {
+            background: rgba(249, 168, 37, 0.15);
+            color: #FDD835;
+            border-left-color: #F9A825;
+            transform: translateX(3px);
+        }
+
+        .settings-dropdown-item.logout-item:hover {
+            background: rgba(216, 67, 21, 0.2);
+            color: #FF8A65;
+            border-left-color: #D84315;
+        }
+
+        .settings-dropdown-divider {
+            height: 1px;
+            background: rgba(249, 168, 37, 0.15);
+            margin: 0.4rem 0.5rem;
+        }
+
+        .settings-dropdown-item-icon {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+
+        /* ── Modals ── */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -383,49 +477,23 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .menu::-webkit-scrollbar {
-            width: 6px;
-        }
+        .menu::-webkit-scrollbar { width: 6px; }
+        .menu::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        .menu::-webkit-scrollbar-thumb { background: rgba(249, 168, 37, 0.4); border-radius: 3px; }
+        .menu::-webkit-scrollbar-thumb:hover { background: rgba(249, 168, 37, 0.6); }
 
-        .menu::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .menu::-webkit-scrollbar-thumb {
-            background: rgba(249, 168, 37, 0.4);
-            border-radius: 3px;
-        }
-
-        .menu::-webkit-scrollbar-thumb:hover {
-            background: rgba(249, 168, 37, 0.6);
-        }
-
-        /* Subtle grain texture overlay */
         .sidebar::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(255, 255, 255, 0.01) 2px,
-                    rgba(255, 255, 255, 0.01) 4px
-                );
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px
+            );
             pointer-events: none;
             opacity: 0.5;
         }
@@ -448,34 +516,34 @@
 
         <ul class="menu">
             <li class="menu-item" data-page="home">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">🏠</span>
                 <span>Home</span>
             </li>
             <li class="menu-item" data-page="accountable">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">👤</span>
                 <span>Accountable Officer</span>
             </li>
             <li class="menu-item" data-page="transaction">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">💼</span>
                 <span>Transaction</span>
             </li>
             <li class="menu-item" data-page="inventory">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">📦</span>
                 <span>Inventory</span>
             </li>
             <li class="menu-item" data-page="report">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">📊</span>
                 <span>Report</span>
             </li>
             <li class="menu-item" data-page="backup">
-                <span class="menu-icon"></span>
+                <span class="menu-icon">💾</span>
                 <span>Backup Data</span>
             </li>
             
             <li class="menu-item dropdown-item" onclick="toggleDropdown()">
                 <div class="dropdown-toggle">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span class="menu-icon"></span>
+                        <span class="menu-icon">📚</span>
                         <span>Library</span>
                     </div>
                     <span class="dropdown-arrow" id="dropdownArrow">▼</span>
@@ -495,13 +563,34 @@
             </ul>
         </ul>
 
-        <div class="logout-section">
-            <button class="logout-btn" onclick="handleLogout()">
-                <span>Logout</span>
+        <!-- Settings Section (replaces logout) -->
+        <div class="settings-section">
+            <!-- Slide-up dropdown panel -->
+            <div class="settings-dropdown" id="settingsDropdown">
+                <div class="settings-dropdown-inner">
+                    <div class="settings-dropdown-item" onclick="goToProfile()">
+                        <span class="settings-dropdown-item-icon">👤</span>
+                        <span>Profile</span>
+                    </div>
+                    <div class="settings-dropdown-divider"></div>
+                    <div class="settings-dropdown-item logout-item" onclick="handleLogout()">
+                        <span class="settings-dropdown-item-icon">🚪</span>
+                        <span>Logout</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">
+                <span class="settings-btn-left">
+                    <span class="settings-icon">⚙️</span>
+                    <span>Settings</span>
+                </span>
+                <span class="settings-arrow">▼</span>
             </button>
         </div>
     </nav>
 
+    <!-- Logout Confirmation Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -543,6 +632,7 @@
             'settings': '#settings'
         };
 
+        /* ── Library Dropdown ── */
         function toggleDropdown() {
             const dropdown = document.getElementById('libraryDropdown');
             const arrow = document.getElementById('dropdownArrow');
@@ -550,7 +640,42 @@
             arrow.classList.toggle('open');
         }
 
+        /* ── Settings Dropdown ── */
+        function toggleSettings() {
+            const btn = document.getElementById('settingsBtn');
+            const panel = document.getElementById('settingsDropdown');
+            btn.classList.toggle('open');
+            panel.classList.toggle('open');
+        }
+
+        function closeSettings() {
+            const btn = document.getElementById('settingsBtn');
+            const panel = document.getElementById('settingsDropdown');
+            btn.classList.remove('open');
+            panel.classList.remove('open');
+        }
+
+        // Close settings dropdown if clicking anywhere outside
+        document.addEventListener('click', function(e) {
+            const section = document.querySelector('.settings-section');
+            if (!section.contains(e.target)) {
+                closeSettings();
+            }
+        });
+
+        /* ── Profile Navigation ── */
+        function goToProfile() {
+            closeSettings();
+            if (window.parent !== window) {
+                window.parent.location.href = 'profile.html';
+            } else {
+                window.location.href = 'profile.html';
+            }
+        }
+
+        /* ── Logout ── */
         function handleLogout() {
+            closeSettings();
             const modal = document.getElementById('logoutModal');
             
             if (window.parent !== window && window.parent.document.body) {
@@ -574,13 +699,11 @@
                     parentModal.classList.remove('active');
                     setTimeout(() => parentModal.remove(), 300);
                 };
-                
                 confirmBtn.onclick = function() {
                     confirmLogout();
                     parentModal.classList.remove('active');
                     setTimeout(() => parentModal.remove(), 300);
                 };
-                
                 parentModal.onclick = function(event) {
                     if (event.target === parentModal) {
                         parentModal.classList.remove('active');
@@ -595,7 +718,6 @@
         function closeLogoutModal() {
             const modal = document.getElementById('logoutModal');
             modal.classList.remove('active');
-            
             const parentModal = window.parent.document.getElementById('logoutModalParent');
             if (parentModal) {
                 parentModal.classList.remove('active');
@@ -605,44 +727,27 @@
 
         function confirmLogout() {
             closeLogoutModal();
-            
             sessionStorage.clear();
             localStorage.clear();
-            
             document.cookie.split(";").forEach(function(c) { 
                 document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
             });
             
             const overlay = document.createElement('div');
             overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(27, 94, 32, 0.85);
-                backdrop-filter: blur(8px);
-                z-index: 9999;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(27, 94, 32, 0.85); backdrop-filter: blur(8px);
+                z-index: 9999; display: flex; align-items: center; justify-content: center;
             `;
-            
             const logoutMessage = document.createElement('div');
             logoutMessage.style.cssText = `
                 background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
-                color: white;
-                padding: 2.5rem 4rem;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                font-size: 1.4rem;
-                font-weight: 700;
-                text-align: center;
-                animation: fadeInScale 0.3s ease-out;
+                color: white; padding: 2.5rem 4rem; border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5); font-size: 1.4rem;
+                font-weight: 700; text-align: center; animation: fadeInScale 0.3s ease-out;
                 border: 3px solid #F9A825;
             `;
-            logoutMessage.innerHTML = '🌾 Logging out...<br><small style="font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; display: block; color: #FDD835;">Redirecting to login page</small>';
-            
+            logoutMessage.innerHTML = '🌾 Logging out...<br><small style="font-size:0.9rem;font-weight:normal;opacity:0.9;margin-top:0.5rem;display:block;color:#FDD835;">Redirecting to login page</small>';
             overlay.appendChild(logoutMessage);
             
             if (window.parent !== window) {
@@ -654,21 +759,9 @@
             if (!document.getElementById('logoutAnimation')) {
                 const style = document.createElement('style');
                 style.id = 'logoutAnimation';
-                style.textContent = `
-                    @keyframes fadeInScale {
-                        from {
-                            opacity: 0;
-                            transform: scale(0.8);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: scale(1);
-                        }
-                    }
-                `;
+                style.textContent = `@keyframes fadeInScale { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }`;
                 document.head.appendChild(style);
             }
-            
             setTimeout(function() {
                 window.parent.location.href = 'index.html';
             }, 1500);
@@ -676,15 +769,13 @@
 
         document.addEventListener('click', function(event) {
             const modal = document.getElementById('logoutModal');
-            if (event.target === modal) {
-                closeLogoutModal();
-            }
+            if (event.target === modal) closeLogoutModal();
         });
 
+        /* ── Active Menu Highlighting ── */
         function getCurrentPage() {
             const path = window.parent.location.pathname;
             const filename = path.split('/').pop();
-            
             if (filename === 'home.html' || filename === '') return 'home';
             if (filename === 'accountable.html') return 'accountable';
             if (filename === 'transaction.html') return 'transaction';
@@ -698,40 +789,29 @@
             if (filename === 'sack_library.html') return 'sack';
             if (filename === 'warehouse_library.html') return 'warehouse-lib';
             if (filename === 'variety_library.html') return 'variety';
-            
             return null;
         }
 
         function isLibraryPage() {
             const currentPage = getCurrentPage();
-            const libraryPages = ['activity', 'cereal', 'location', 'sack', 'warehouse-lib', 'variety', 'examination', 'signatories', 'client'];
+            const libraryPages = ['activity','cereal','location','sack','warehouse-lib','variety','examination','signatories','client'];
             return libraryPages.includes(currentPage);
         }
 
         function setActiveMenuItem() {
             const currentPage = getCurrentPage();
             if (currentPage) {
-                const menuItems = document.querySelectorAll('.menu-item:not(.dropdown-item)');
-                menuItems.forEach(item => {
+                document.querySelectorAll('.menu-item:not(.dropdown-item)').forEach(item => {
                     item.classList.remove('active');
-                    if (item.getAttribute('data-page') === currentPage) {
-                        item.classList.add('active');
-                    }
+                    if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
                 });
-
-                const dropdownItems = document.querySelectorAll('.dropdown-menu-item');
-                dropdownItems.forEach(item => {
+                document.querySelectorAll('.dropdown-menu-item').forEach(item => {
                     item.classList.remove('active');
-                    if (item.getAttribute('data-page') === currentPage) {
-                        item.classList.add('active');
-                    }
+                    if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
                 });
-
                 if (isLibraryPage()) {
-                    const dropdown = document.getElementById('libraryDropdown');
-                    const arrow = document.getElementById('dropdownArrow');
-                    dropdown.classList.add('open');
-                    arrow.classList.add('open');
+                    document.getElementById('libraryDropdown').classList.add('open');
+                    document.getElementById('dropdownArrow').classList.add('open');
                 }
             }
         }
@@ -740,7 +820,6 @@
             item.addEventListener('click', function() {
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
-                
                 if (link && link.startsWith('#')) {
                     alert('Page "' + this.textContent.trim() + '" - Coming soon!');
                 } else if (link) {
@@ -754,7 +833,6 @@
                 e.stopPropagation();
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
-                
                 if (link && link.startsWith('#')) {
                     alert('Library: ' + this.textContent.trim() + ' - Coming soon!');
                 } else if (link) {
@@ -764,11 +842,8 @@
         });
 
         setActiveMenuItem();
-        
         window.addEventListener('message', function(event) {
-            if (event.data.type === 'pageChange') {
-                setActiveMenuItem();
-            }
+            if (event.data.type === 'pageChange') setActiveMenuItem();
         });
     </script>
 </body>
