@@ -46,9 +46,9 @@
         
         <!-- Action Buttons Container (appears when row is selected) -->
         <div class="action-buttons-container" id="actionButtonsContainer">
-            <button class="action-btn edit-btn" id="editTransactionBtn"> Edit Transaction
+            <button class="action-btn edit-btn" id="editTransactionBtn"> Add/Edit MASTERFILE
             </button>
-            <button class="action-btn delete-btn-action" id="deleteTransactionBtn">Delete Transaction
+            <button class="action-btn delete-btn-action" id="deleteTransactionBtn">DELETE ACCOUNTABLE OFFICER
             </button>
         </div>
     </div>
@@ -63,15 +63,16 @@
             <div class="modal-body">
                 <form id="accountableForm">
                     <div class="form-group">
-                        <label for="officerId">Officer ID</label>
+                        <label for="officerId">Officer ID <span style="color: red;">*</span></label>
                         <input type="text" id="officerId" required>
+                        <small style="color: #666; display: block; margin-top: 4px;">This ID must be unique</small>
                     </div>
                     <div class="form-group">
-                        <label for="firstName">First Name</label>
+                        <label for="firstName">First Name <span style="color: red;">*</span></label>
                         <input type="text" id="firstName" required>
                     </div>
                     <div class="form-group">
-                        <label for="lastName">Last Name</label>
+                        <label for="lastName">Last Name <span style="color: red;">*</span></label>
                         <input type="text" id="lastName" required>
                     </div>
                     <div class="form-group">
@@ -291,20 +292,19 @@ function renderWH(whs) {
     });
 }
 
- window.addEventListener('DOMContentLoaded', function() {
-            const currentUser = sessionStorage.getItem('currentUser');
-            if (currentUser) {
-                try {
-                    const user = JSON.parse(currentUser);
-                    document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
-                    document.getElementById('displayUserRole').textContent = user.role || 'USER';
-                    document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                }
-            }
-            loadAllData();
-        });
+function loadAllData() {
+    const currentUser = sessionStorage.getItem('currentUser');
+    if (currentUser) {
+        try {
+            const user = JSON.parse(currentUser);
+            document.getElementById('displayUsername').textContent = `Hi, ${user.username}`;
+            document.getElementById('displayUserRole').textContent = user.role || 'USER';
+            document.getElementById('displayAvatar').textContent = user.username.charAt(0).toUpperCase();
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+    }
+}
 
 function resetWH() {
     selWarehouse = null;
@@ -431,38 +431,77 @@ function attachRowClickHandlers() {
     });
 }
 
-// Add Accountable Officer form submission
+// ===================================================================
+// IMPROVED: Add Accountable Officer form submission with better validation
+// ===================================================================
 document.getElementById("accountableForm").addEventListener("submit", e => {
     e.preventDefault();
     
-    const officerId = document.getElementById("officerId").value.trim();
+    // Get and normalize input values
+    const officerId = document.getElementById("officerId").value.trim().toUpperCase();
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const middleName = document.getElementById("middleName").value.trim();
+    
+    // Validation
     if (!officerId) {
-        alert("Officer ID is required");
+        alert("⚠️ Officer ID is required");
+        document.getElementById("officerId").focus();
         return;
     }
     
+    if (!firstName || !lastName) {
+        alert("⚠️ First Name and Last Name are required");
+        return;
+    }
+    
+    // Get submit button and show loading state
+    const submitBtn = e.target.querySelector('.btn-submit');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Checking...';
+    
+    // Check for duplicate Officer ID
     db.ref('accountableOfficers').once('value').then(snap => {
         let isDuplicate = false;
+        let existingOfficerName = '';
         
         if (snap.exists()) {
             snap.forEach(c => {
                 const d = c.val();
-                if (d.officerId === officerId) {
+                // Case-insensitive comparison
+                if (d.officerId && d.officerId.toUpperCase() === officerId) {
                     isDuplicate = true;
+                    existingOfficerName = `${d.firstName} ${d.lastName}`;
                 }
             });
         }
         
         if (isDuplicate) {
-            alert(`Officer ID "${officerId}" already exists. Please use a different Officer ID.`);
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            
+            // Show detailed error message
+            alert(`❌ FAILED TO ADD ACCOUNTABLE OFFICER\n\n` +
+                  `Officer ID "${officerId}" already exists in the system.\n` +
+                  `Assigned to: ${existingOfficerName}\n\n` +
+                  `Please use a different Officer ID.`);
+            
+            // Focus on the Officer ID field
+            document.getElementById("officerId").focus();
+            document.getElementById("officerId").select();
             return;
         }
         
+        // No duplicate found - proceed with adding
+        submitBtn.textContent = 'Saving...';
+        
         const fd = {
             officerId: officerId,
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-            middleName: document.getElementById("middleName").value,
+            firstName: firstName,
+            lastName: lastName,
+            middleName: middleName,
             warehouse: "",
             warehouseName: "",
             fromDate: "",
@@ -473,17 +512,23 @@ document.getElementById("accountableForm").addEventListener("submit", e => {
         };
         
         db.ref('accountableOfficers').push().set(fd).then(() => {
-            alert("Officer added successfully!");
+            alert(`✅ SUCCESS!\n\nAccountable Officer "${officerId}" has been added successfully!`);
             document.getElementById("accountableModal").style.display = "none";
             e.target.reset();
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
             loadOfficers();
         }).catch(err => {
             console.error(err);
-            alert("Error: " + err.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            alert("❌ Error adding officer:\n" + err.message);
         });
     }).catch(err => {
         console.error(err);
-        alert("Error checking for duplicates: " + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        alert("❌ Error checking for duplicates:\n" + err.message);
     });
 });
 
@@ -714,6 +759,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initModals();
     loadOfficers();
     loadWH();
+    loadAllData();
 });
     </script>
 </body>

@@ -516,34 +516,40 @@
 
         <ul class="menu">
             <li class="menu-item" data-page="home">
-                <span class="menu-icon">🏠</span>
                 <span>Home</span>
             </li>
             <li class="menu-item" data-page="accountable">
-                <span class="menu-icon">👤</span>
                 <span>Accountable Officer</span>
             </li>
-            <li class="menu-item" data-page="transaction">
-                <span class="menu-icon">💼</span>
-                <span>Transaction</span>
+
+            <!-- ── Transaction Dropdown ── -->
+            <li class="menu-item dropdown-item" onclick="toggleTransactionDropdown(event)">
+                <div class="dropdown-toggle">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span>Transaction</span>
+                    </div>
+                    <span class="dropdown-arrow" id="transactionDropdownArrow">▼</span>
+                </div>
             </li>
+            <ul class="dropdown-menu" id="transactionDropdown">
+                <li class="dropdown-menu-item" data-page="stock-transaction">Stock Transaction</li>
+                <li class="dropdown-menu-item dropdown-menu-last" data-page="sack-transaction">Sack Transaction</li>
+            </ul>
+
             <li class="menu-item" data-page="inventory">
-                <span class="menu-icon">📦</span>
                 <span>Inventory</span>
             </li>
             <li class="menu-item" data-page="report">
-                <span class="menu-icon">📊</span>
                 <span>Report</span>
             </li>
             <li class="menu-item" data-page="backup">
-                <span class="menu-icon">💾</span>
                 <span>Backup Data</span>
             </li>
             
+            <!-- ── Library Dropdown ── -->
             <li class="menu-item dropdown-item" onclick="toggleDropdown(event)">
                 <div class="dropdown-toggle">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span class="menu-icon">📚</span>
                         <span>Library</span>
                     </div>
                     <span class="dropdown-arrow" id="dropdownArrow">▼</span>
@@ -563,7 +569,7 @@
             </ul>
         </ul>
 
-        <!-- Settings Section (replaces logout) -->
+        <!-- Settings Section -->
         <div class="settings-section">
             <!-- Slide-up dropdown panel -->
             <div class="settings-dropdown" id="settingsDropdown">
@@ -609,6 +615,8 @@
         const pageLinks = {
             'home': 'home.html',
             'accountable': 'accountable.html',
+            'stock-transaction': 'stock_transaction.html',
+            'sack-transaction': 'sack_transaction.html',
             'transaction': 'transaction.html',
             'inventory': 'inventory.html',
             'report': 'report.html',
@@ -630,23 +638,67 @@
             'settings': '#settings'
         };
 
+        /* ══════════════════════════════════════════════════════════════
+           IMPROVED: Auto-close dropdowns when clicking outside or 
+           navigating to non-dropdown pages
+        ═══════════════════════════════════════════════════════════════ */
+
+        /* ── Transaction Dropdown ── */
+        function toggleTransactionDropdown(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const dropdown = document.getElementById('transactionDropdown');
+            const arrow = document.getElementById('transactionDropdownArrow');
+            const isOpening = !dropdown.classList.contains('open');
+            
+            // Close library dropdown if opening transaction dropdown
+            if (isOpening) {
+                closeLibraryDropdown();
+            }
+            
+            dropdown.classList.toggle('open');
+            arrow.classList.toggle('open');
+
+            // Don't save state - let auto-management handle it
+        }
+
+        function closeTransactionDropdown() {
+            const dropdown = document.getElementById('transactionDropdown');
+            const arrow = document.getElementById('transactionDropdownArrow');
+            dropdown.classList.remove('open');
+            arrow.classList.remove('open');
+        }
+
         /* ── Library Dropdown ── */
         function toggleDropdown(event) {
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
             }
+            
             const dropdown = document.getElementById('libraryDropdown');
             const arrow = document.getElementById('dropdownArrow');
+            const isOpening = !dropdown.classList.contains('open');
+            
+            // Close transaction dropdown if opening library dropdown
+            if (isOpening) {
+                closeTransactionDropdown();
+            }
+            
             dropdown.classList.toggle('open');
             arrow.classList.toggle('open');
             
-            // Save dropdown state
-            if (dropdown.classList.contains('open')) {
-                sessionStorage.setItem('libraryDropdownOpen', 'true');
-            } else {
-                sessionStorage.removeItem('libraryDropdownOpen');
-            }
+            // Don't save state - let auto-management handle it
+        }
+
+        function closeLibraryDropdown() {
+            const dropdown = document.getElementById('libraryDropdown');
+            const arrow = document.getElementById('dropdownArrow');
+            dropdown.classList.remove('open');
+            arrow.classList.remove('open');
         }
 
         /* ── Settings Dropdown ── */
@@ -669,6 +721,26 @@
             const section = document.querySelector('.settings-section');
             if (!section.contains(e.target)) {
                 closeSettings();
+            }
+        });
+
+        /* ══════════════════════════════════════════════════════════════
+           AUTO-CLOSE DROPDOWNS: Click outside handler
+        ═══════════════════════════════════════════════════════════════ */
+        document.addEventListener('click', function(e) {
+            const transactionDropdownToggle = e.target.closest('.dropdown-item[onclick*="toggleTransactionDropdown"]');
+            const libraryDropdownToggle = e.target.closest('.dropdown-item[onclick*="toggleDropdown"]');
+            const transactionDropdown = document.getElementById('transactionDropdown');
+            const libraryDropdown = document.getElementById('libraryDropdown');
+            
+            // Close transaction dropdown if clicking outside
+            if (!transactionDropdownToggle && !transactionDropdown.contains(e.target)) {
+                closeTransactionDropdown();
+            }
+            
+            // Close library dropdown if clicking outside
+            if (!libraryDropdownToggle && !libraryDropdown.contains(e.target)) {
+                closeLibraryDropdown();
             }
         });
 
@@ -787,7 +859,9 @@
             const filename = path.split('/').pop();
             if (filename === 'home.html' || filename === '') return 'home';
             if (filename === 'accountable.html') return 'accountable';
-            if (filename === 'transaction.html') return 'transaction';
+            if (filename === 'stock_transaction.html') return 'stock-transaction';
+            if (filename === 'sack_transaction.html') return 'sack-transaction';
+            if (filename === 'transaction.html') return 'stock-transaction'; // fallback
             if (filename === 'inventory.html') return 'inventory';
             if (filename === 'report.html') return 'report';
             if (filename === 'backup.html') return 'backup';
@@ -807,23 +881,58 @@
             return libraryPages.includes(currentPage);
         }
 
+        function isTransactionPage() {
+            const currentPage = getCurrentPage();
+            const transactionPages = ['stock-transaction', 'sack-transaction'];
+            return transactionPages.includes(currentPage);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           IMPROVED: Auto-open/close dropdowns based on current page
+        ═══════════════════════════════════════════════════════════════ */
         function setActiveMenuItem() {
             const currentPage = getCurrentPage();
+            
             if (currentPage) {
+                // Remove active class from all items
                 document.querySelectorAll('.menu-item:not(.dropdown-item)').forEach(item => {
                     item.classList.remove('active');
-                    if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
-                });
-                document.querySelectorAll('.dropdown-menu-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
+                    if (item.getAttribute('data-page') === currentPage) {
+                        item.classList.add('active');
+                    }
                 });
                 
-                // Check if library dropdown should be open
-                const shouldOpenLibrary = isLibraryPage() || sessionStorage.getItem('libraryDropdownOpen') === 'true';
-                if (shouldOpenLibrary) {
+                document.querySelectorAll('.dropdown-menu-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('data-page') === currentPage) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                /* ═══════════════════════════════════════════════════════════
+                   AUTO-MANAGE DROPDOWNS:
+                   - Open Transaction dropdown ONLY if on transaction page
+                   - Open Library dropdown ONLY if on library page
+                   - Close both if on other pages
+                ════════════════════════════════════════════════════════════ */
+                
+                const isOnTransactionPage = isTransactionPage();
+                const isOnLibraryPage = isLibraryPage();
+                
+                if (isOnTransactionPage) {
+                    // Open transaction dropdown, close library dropdown
+                    document.getElementById('transactionDropdown').classList.add('open');
+                    document.getElementById('transactionDropdownArrow').classList.add('open');
+                    closeLibraryDropdown();
+                } else if (isOnLibraryPage) {
+                    // Open library dropdown, close transaction dropdown
                     document.getElementById('libraryDropdown').classList.add('open');
                     document.getElementById('dropdownArrow').classList.add('open');
+                    closeTransactionDropdown();
+                } else {
+                    // Close both dropdowns if on non-dropdown pages
+                    closeTransactionDropdown();
+                    closeLibraryDropdown();
                 }
                 
                 // Restore scroll position
@@ -835,6 +944,7 @@
             }
         }
 
+        /* ── Menu Item Click Handlers ── */
         document.querySelectorAll('.menu-item:not(.dropdown-item)').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -857,18 +967,18 @@
                 const menu = document.querySelector('.menu');
                 const scrollPosition = menu.scrollTop;
                 sessionStorage.setItem('sidebarScrollPosition', scrollPosition);
-                sessionStorage.setItem('libraryDropdownOpen', 'true');
                 
                 const page = this.getAttribute('data-page');
                 const link = pageLinks[page];
                 if (link && link.startsWith('#')) {
-                    alert('Library: ' + this.textContent.trim() + ' - Coming soon!');
+                    alert('Page: ' + this.textContent.trim() + ' - Coming soon!');
                 } else if (link) {
                     window.parent.location.href = link;
                 }
             });
         });
 
+        /* ── Initialize on page load ── */
         setActiveMenuItem();
         
         // Save scroll position whenever user scrolls

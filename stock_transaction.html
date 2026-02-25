@@ -16,6 +16,111 @@
         .table-container table tbody td {
             text-transform: uppercase;
         }
+
+        /* ── WSI Validation Error Modal ─────────────────────────────── */
+        #wsiErrorModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+        #wsiErrorModal.open { display: flex; }
+
+        .wsi-error-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 0;
+            width: 420px;
+            max-width: 92vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            overflow: hidden;
+            animation: wsiPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes wsiPop {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .wsi-error-header {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            padding: 1.4rem 1.6rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .wsi-error-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .wsi-error-title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .wsi-error-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .wsi-error-body {
+            padding: 1.5rem 1.6rem;
+        }
+        .wsi-stock-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.6rem;
+            font-size: 0.92rem;
+        }
+        .wsi-stock-row.available {
+            background: #eafaf1;
+            border: 1px solid #a9dfbf;
+            color: #1e8449;
+        }
+        .wsi-stock-row.requested {
+            background: #fdf2f0;
+            border: 1px solid #f1948a;
+            color: #c0392b;
+        }
+        .wsi-stock-label { font-weight: 600; }
+        .wsi-stock-value { font-weight: 700; font-size: 1rem; }
+
+        .wsi-error-msg {
+            margin-top: 1rem;
+            padding: 0.8rem 1rem;
+            background: #fef9e7;
+            border-left: 4px solid #f39c12;
+            border-radius: 6px;
+            font-size: 0.87rem;
+            color: #784212;
+            line-height: 1.5;
+        }
+
+        .wsi-error-footer {
+            padding: 1rem 1.6rem 1.4rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .wsi-ok-btn {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.65rem 2rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .wsi-ok-btn:hover { opacity: 0.88; }
     </style>
 </head>
 <body>
@@ -232,16 +337,17 @@
                                 <label for="cancelled">Cancelled</label>
                             </div>
                         </div>
+
+                        <!-- ── DOCUMENT TYPE: WSR (add) and WSI (subtract) only ── -->
                         <div class="form-group">
                             <label class="form-label">Document Type</label>
                             <select class="form-select" id="documentType">
                                 <option value="">Select</option>
-                                <option value="WSR">WSR</option>
-                                <option value="ESR">ESR</option>
-                                <option value="ESI">ESI</option>
-                                <option value="WSI">WSI</option>
+                                <option value="WSR">WSR — Receipt (adds to inventory)</option>
+                                <option value="WSI">WSI — Issuance (subtracts from inventory)</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label class="form-label">OR No.</label>
                             <input type="text" class="form-input" id="orNo">
@@ -318,9 +424,227 @@
         </div>
     </div>
 
+    <!-- ── WSI Validation Error Modal ──────────────────────────────── -->
+    <div id="wsiErrorModal">
+        <div class="wsi-error-box">
+            <div class="wsi-error-header">
+                <div class="wsi-error-icon">⛔</div>
+                <div>
+                    <div class="wsi-error-title" id="wsiErrorTitle">Cannot Process WSI</div>
+                    <div class="wsi-error-subtitle" id="wsiErrorSubtitle">Inventory validation failed</div>
+                </div>
+            </div>
+            <div class="wsi-error-body">
+                <div id="wsiStockRows">
+                    <!-- Filled dynamically -->
+                </div>
+                <div class="wsi-error-msg" id="wsiErrorMsg"></div>
+            </div>
+            <div class="wsi-error-footer">
+                <button class="wsi-ok-btn" onclick="closeWsiError()">OK, Go Back</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/transaction.js"></script>
     <script src="js/back-prevention.js"></script>
+
+    <!-- ── WSI Pile Validation ──────────────────────────────────────────
+         Intercepts the transaction form submit BEFORE transaction.js saves.
+         Runs only when documentType === "WSI".
+
+         Checks:
+           1. Pile No. field is not empty
+           2. The pile exists in the current inventory
+              (i.e. at least one non-cancelled WSR transaction matches
+               the same pileNo + varietyCode + warehouseId)
+           3. Available stock (WSR bags − WSI bags) >= requested bags
+              If not → shows a detailed error modal and blocks the save.
+    ─────────────────────────────────────────────────────────────────── -->
+    <script>
+    (function () {
+
+        // ── helpers ──────────────────────────────────────────────────────
+
+        function closeWsiError() {
+            document.getElementById('wsiErrorModal').classList.remove('open');
+        }
+
+        function showWsiError(title, subtitle, stockRows, message) {
+            document.getElementById('wsiErrorTitle').textContent    = title;
+            document.getElementById('wsiErrorSubtitle').textContent = subtitle;
+            document.getElementById('wsiErrorMsg').textContent      = message;
+
+            // Build stock rows HTML
+            var html = '';
+            stockRows.forEach(function (r) {
+                html += '<div class="wsi-stock-row ' + r.cls + '">' +
+                            '<span class="wsi-stock-label">' + r.label + '</span>' +
+                            '<span class="wsi-stock-value">' + r.value + '</span>' +
+                        '</div>';
+            });
+            document.getElementById('wsiStockRows').innerHTML = html;
+            document.getElementById('wsiErrorModal').classList.add('open');
+        }
+
+        // ── Firebase ref (reuse the one transaction.js initialises) ──────
+        // We wait for DOMContentLoaded so firebase is already loaded.
+
+        window.addEventListener('DOMContentLoaded', function () {
+
+            var form = document.getElementById('transactionForm');
+            if (!form) return;
+
+            // ── Named interceptor so we can temporarily detach it ────────
+            function submitInterceptor(e) {
+
+                var docType = (document.getElementById('documentType').value || '').toUpperCase().trim();
+                if (docType !== 'WSI') return;   // only validate for WSI
+
+                // Block default save — we'll re-fire after async checks pass
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var pileNo        = (document.getElementById('pileNo').value       || '').trim().toUpperCase();
+                var varietyCode   = (document.getElementById('varietyCode').value   || '').trim().toUpperCase();
+                var warehouseId   = (document.getElementById('warehouseId').value   || '').trim();
+                var requestedBags = parseFloat(document.getElementById('numberOfBags').value) || 0;
+                var requestedNet  = parseFloat(document.getElementById('netWeight').value)    || 0;
+
+                // ── Guard: Pile No. must be filled ────────────────────────
+                if (!pileNo || pileNo === '-') {
+                    showWsiError(
+                        'Pile No. Required',
+                        'A Pile Number is required for WSI transactions',
+                        [],
+                        'Please enter a valid Pile No. before saving a WSI transaction.'
+                    );
+                    return;
+                }
+
+                // ── Query Firebase ────────────────────────────────────────
+                var db;
+                try { db = firebase.database(); }
+                catch (err) { console.error('Firebase not ready:', err); return; }
+
+                db.ref('transactions').once('value').then(function (snapshot) {
+
+                    var wsrBags = 0, wsrNet = 0;
+                    var wsiBags = 0, wsiNet = 0;
+                    var pileExists = false;
+
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function (child) {
+                            var t = child.val();
+
+                            if (t.cancelled) return;  // cancelled → no inventory effect
+
+                            var tPile    = (t.pileNo       || '').toUpperCase().trim();
+                            var tVariety = (t.varietyCode  || '').toUpperCase().trim();
+                            var tWH      = (t.warehouseId  || '').trim();
+                            var tType    = (t.documentType || '').toUpperCase().trim();
+
+                            // Match same pile
+                            if (tPile !== pileNo) return;
+
+                            // Match same warehouse (if both provided)
+                            if (warehouseId && tWH && tWH !== warehouseId) return;
+
+                            // Match same variety (if both provided)
+                            if (varietyCode && tVariety && tVariety !== varietyCode) return;
+
+                            if (tType === 'WSR') {
+                                wsrBags += parseFloat(t.numberOfBags) || 0;
+                                wsrNet  += parseFloat(t.netWeight)    || 0;
+                                pileExists = true;
+                            } else if (tType === 'WSI') {
+                                wsiBags += parseFloat(t.numberOfBags) || 0;
+                                wsiNet  += parseFloat(t.netWeight)    || 0;
+                            }
+                        });
+                    }
+
+                    var availBags = wsrBags - wsiBags;
+                    var availNet  = wsrNet  - wsiNet;
+
+                    // ── Error 1: Pile not found ───────────────────────────
+                    if (!pileExists) {
+                        showWsiError(
+                            'Pile Not Found',
+                            'Pile No. "' + pileNo + '" has no inventory records',
+                            [
+                                {
+                                    cls:   'requested',
+                                    label: '❌ Pile Entered',
+                                    value: pileNo
+                                }
+                            ],
+                            'No WSR receipts were found for Pile "' + pileNo + '"' +
+                            (varietyCode ? ' (Variety: ' + varietyCode + ')' : '') + '. ' +
+                            'This pile does not exist in the current inventory. ' +
+                            'Please double-check the Pile No. and try again.'
+                        );
+                        return;
+                    }
+
+                    // ── Error 2: Over-issuance ────────────────────────────
+                    if (requestedBags > availBags) {
+                        showWsiError(
+                            'Insufficient Stock — Cannot Save WSI',
+                            'Pile No. "' + pileNo + '" does not have enough bags',
+                            [
+                                {
+                                    cls:   'available',
+                                    label: '✅ Available in Pile ' + pileNo,
+                                    value: availBags.toFixed(0) + ' bags  (' + availNet.toFixed(2) + ' kg)'
+                                },
+                                {
+                                    cls:   'requested',
+                                    label: '❌ Requested (this WSI)',
+                                    value: requestedBags.toFixed(0) + ' bags  (' + requestedNet.toFixed(2) + ' kg)'
+                                }
+                            ],
+                            'You are trying to issue ' + requestedBags.toFixed(0) +
+                            ' bags from Pile "' + pileNo + '", but only ' +
+                            availBags.toFixed(0) + ' bags (' + availNet.toFixed(2) +
+                            ' kg) are available. Please reduce the quantity or select a different pile.'
+                        );
+                        return;
+                    }
+
+                    // ── All checks passed: detach interceptor, re-fire, re-attach ──
+                    form.removeEventListener('submit', submitInterceptor, true);
+                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    setTimeout(function () {
+                        form.addEventListener('submit', submitInterceptor, true);
+                    }, 200);
+
+                }).catch(function (err) {
+                    console.error('WSI validation Firebase error:', err);
+                    // Fail-open on Firebase errors so the app isn't blocked
+                    form.removeEventListener('submit', submitInterceptor, true);
+                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    setTimeout(function () {
+                        form.addEventListener('submit', submitInterceptor, true);
+                    }, 200);
+                });
+
+            } // submitInterceptor
+
+            // Attach in capture phase → runs before transaction.js bubble listener
+            form.addEventListener('submit', submitInterceptor, true);
+
+        }); // DOMContentLoaded
+
+        // Close modal on outside click
+        document.addEventListener('click', function (e) {
+            var modal = document.getElementById('wsiErrorModal');
+            if (modal && e.target === modal) closeWsiError();
+        });
+
+    })();
+    </script>
 </body>
 </html>

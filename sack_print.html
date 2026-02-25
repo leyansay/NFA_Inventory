@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sack Transaction Report – NFA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #e8e8e8; color: #000; }
+
+        /* TOOLBAR */
+        .toolbar {
+            position: sticky; top: 0; z-index: 200;
+            background: #1B5E20;
+            padding: 0.65rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        .tbar-left { display:flex; flex-direction:column; }
+        .tbar-title { font-size:0.98rem; font-weight:700; color:#fff; }
+        .tbar-sub   { font-size:0.72rem; color:rgba(255,255,255,0.65); margin-top:1px; }
+        .tbar-btns  { display:flex; gap:0.6rem; align-items:center; }
+        .tbtn {
+            font-family:Arial,sans-serif; font-size:0.85rem; font-weight:700;
+            padding:0.5rem 1.2rem; border-radius:5px; cursor:pointer;
+            display:flex; align-items:center; gap:0.4rem; border:none; transition:all 0.15s;
+        }
+        .tbtn-back  { background:rgba(255,255,255,0.15); color:#fff; border:1.5px solid rgba(255,255,255,0.3); }
+        .tbtn-back:hover { background:rgba(255,255,255,0.25); }
+        .tbtn-print { background:#F9A825; color:#1B5E20; box-shadow:0 2px 8px rgba(249,168,37,0.4); }
+        .tbtn-print:hover { background:#FFB300; transform:translateY(-1px); }
+
+        /* DOCUMENT WRAPPER */
+        .doc-wrapper { max-width: 980px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+        .print-page  { background:#fff; border:1px solid #bbb; box-shadow:0 4px 18px rgba(0,0,0,0.12); padding:1.8rem 2rem 2.2rem; }
+
+        /* LETTERHEAD */
+        .letterhead {
+            display:flex; align-items:center; justify-content:center;
+            text-align:center; padding-bottom:0.8rem; gap:14px;
+            border-bottom:2px solid #000; margin-bottom:0;
+        }
+        .nfa-logo   { width:62px; height:62px; flex-shrink:0; }
+        .nfa-org    { font-size:1.45rem; font-weight:900; color:#000; letter-spacing:0.5px; line-height:1.15; }
+        .nfa-sub    { font-size:0.82rem; color:#555; margin-top:0.25rem; font-style:normal; }
+
+        hr.thick { border:none; border-top:2.5px solid #000; margin:0.8rem 0 0.75rem; }
+        .header-text-wrap { text-align:center; }
+        hr.thin  { border:none; border-top:1px solid #aaa; margin:0.45rem 0; }
+
+        /* META GRID */
+        .meta-grid {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:0.3rem 3rem; font-size:0.82rem; margin-bottom:0.7rem;
+        }
+        .meta-row  { display:flex; align-items:baseline; gap:0.3rem; }
+        .meta-key  { font-weight:700; white-space:nowrap; min-width:175px; }
+        .meta-val  { color:#000; }
+
+        /* TABLE */
+        .print-table { width:100%; border-collapse:collapse; font-size:0.75rem; margin-top:0.4rem; }
+        .print-table th {
+            border:1.5px solid #000; padding:0.42rem 0.5rem;
+            text-align:center; font-weight:700; font-size:0.7rem;
+            text-transform:uppercase; line-height:1.3; vertical-align:middle;
+            background:#fff;
+        }
+        .print-table td {
+            border:1px solid #555; padding:0.38rem 0.5rem;
+            text-align:center; vertical-align:middle; font-size:0.74rem;
+        }
+        .print-table tbody tr:nth-child(even) { background:#f9f9f9; }
+        .td-l  { text-align:left !important; }
+        .td-r  { text-align:right !important; }
+        .td-b  { font-weight:700; }
+        .total-row td { border:1.5px solid #000 !important; font-weight:700 !important; background:#efefef !important; }
+        .no-data { text-align:center; padding:2rem; color:#666; font-style:italic; }
+
+
+
+        /* PRINT */
+        @media print {
+            @page { size:A4 landscape; margin:1.2cm 1.5cm; }
+            body    { background:#fff !important; }
+            .toolbar{ display:none !important; }
+            .doc-wrapper{ max-width:100%; margin:0; padding:0; }
+            .print-page { border:none; box-shadow:none; padding:0; }
+            .print-table thead { display:table-header-group; }
+            .print-table tbody tr { page-break-inside:avoid; }
+            .sig-section { page-break-inside:avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+    <div class="tbar-left">
+        <span class="tbar-title">🖨&nbsp; Print Preview</span>
+        <span class="tbar-sub">Sack Transaction Report – National Food Authority</span>
+    </div>
+    <div class="tbar-btns">
+        <button class="tbtn tbtn-back" onclick="goBack()">&#8592; Back</button>
+        <button class="tbtn tbtn-print" onclick="window.print()">🖨&nbsp; Print / Save PDF</button>
+    </div>
+</div>
+
+<!-- DOCUMENT -->
+<div class="doc-wrapper">
+<div class="print-page">
+
+    <!-- LETTERHEAD — matches transaction_preview.html layout -->
+    <div class="letterhead">
+        <!-- Try real logo first; SVG fallback if image missing -->
+        <img src="images/nfa.png" alt="NFA Logo" class="nfa-logo"
+             onerror="this.style.display='none';document.getElementById('nfaSvg').style.display='block';">
+        <svg id="nfaSvg" class="nfa-logo" style="display:none;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="49" fill="#003082"/>
+            <circle cx="50" cy="50" r="43" fill="#fff"/>
+            <circle cx="50" cy="50" r="40" fill="#003082"/>
+            <circle cx="50" cy="50" r="35" fill="#fff"/>
+            <circle cx="50" cy="16" r="2.5" fill="#FFD700"/>
+            <circle cx="62" cy="20" r="2"   fill="#FFD700"/>
+            <circle cx="72" cy="29" r="2"   fill="#FFD700"/>
+            <circle cx="38" cy="20" r="2"   fill="#FFD700"/>
+            <circle cx="28" cy="29" r="2"   fill="#FFD700"/>
+            <circle cx="78" cy="42" r="1.8" fill="#FFD700"/>
+            <circle cx="22" cy="42" r="1.8" fill="#FFD700"/>
+            <circle cx="50" cy="48" r="12"  fill="#CC0000"/>
+            <text x="50" y="52" text-anchor="middle" font-family="Arial" font-size="9" font-weight="900" fill="#fff">NFA</text>
+            <rect x="30" y="62" width="40" height="8" rx="2" fill="#003082"/>
+            <text x="50" y="69" text-anchor="middle" font-family="Arial" font-size="6" font-weight="700" fill="#FFD700">1972</text>
+        </svg>
+        <div class="header-text-wrap">
+            <div class="nfa-org">NATIONAL FOOD AUTHORITY</div>
+            <div class="nfa-sub">Statement of Sack Transactions</div>
+        </div>
+    </div>
+
+
+    <hr class="thick">
+
+    <!-- META -->
+    <div class="meta-grid">
+        <div class="meta-row"><span class="meta-key">Name of Accountable Officer:</span><span class="meta-val" id="mOfficer">—</span></div>
+        <div class="meta-row"><span class="meta-key">Rundate:</span><span class="meta-val" id="mRundate">—</span></div>
+        <div class="meta-row"><span class="meta-key">Warehouse Name &amp; Location:</span><span class="meta-val" id="mWarehouse">—</span></div>
+        <div class="meta-row"><span class="meta-key">Page:</span><span class="meta-val">1</span></div>
+        <div class="meta-row"><span class="meta-key">Period Covered:</span><span class="meta-val" id="mPeriod">—</span></div>
+        <div class="meta-row"><span class="meta-key">Total Transactions:</span><span class="meta-val" id="mTotal">0</span></div>
+    </div>
+
+    <hr class="thin">
+
+    <!-- TABLE -->
+    <table class="print-table">
+        <thead>
+            <tr>
+                <th>DATE OF<br>TRANSACTION</th>
+                <th>DOCUMENT NO.</th>
+                <th>DOC<br>TYPE</th>
+                <th>OR NO.</th>
+                <th>SAI NO.</th>
+                <th>RECEIVED FROM /<br>ISSUED TO</th>
+                <th>SACK<br>CODE</th>
+                <th>SACK<br>CONDITION</th>
+                <th>ACTIVITY</th>
+                <th>NO. OF<br>SACKS</th>
+            </tr>
+        </thead>
+        <tbody id="tBody"><tr><td colspan="10" class="no-data">Loading…</td></tr></tbody>
+        <tfoot id="tFoot"></tfoot>
+    </table>
+
+
+
+</div>
+</div>
+
+<script>
+(function(){
+    function esc(s){ return s&&s!=='—'?String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'):'—'; }
+    function n(v){ return (parseInt(v)||0).toLocaleString(); }
+
+    var raw = sessionStorage.getItem('sack_print_data');
+    if(!raw){
+        document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="no-data">⚠ No data. Open this page from the Sack Transaction list.</td></tr>';
+        return;
+    }
+
+    var p    = JSON.parse(raw);
+    var data = p.transactions||[];
+    var from = p.filterFrom||null;
+    var to   = p.filterTo||null;
+
+    // meta
+    document.getElementById('mRundate').textContent  = p.generatedAt||new Date().toLocaleString();
+    document.getElementById('mTotal').textContent    = data.length;
+    document.getElementById('mPeriod').textContent   = from&&to?from+' to '+to:from?'From '+from:to?'Up to '+to:'All Records';
+
+    // Use officer/warehouse passed directly from the Select Report modal
+    document.getElementById('mOfficer').textContent   = p.officerName  || '—';
+    document.getElementById('mWarehouse').textContent = p.warehouseName
+        ? (p.warehouseLoc && p.warehouseLoc !== p.warehouseName
+            ? p.warehouseName + ' – ' + p.warehouseLoc
+            : p.warehouseName)
+        : '—';
+
+    if(!data.length){
+        document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="no-data">No transactions found.</td></tr>';
+        return;
+    }
+
+    var totalSacks=0;
+    var rows=data.map(function(t,i){
+        var s=parseInt(t.noSacks)||0; totalSacks+=s;
+        return '<tr>'
+            +'<td>'+(t.txDate||t.periodFrom||'—')+'</td>'
+            +'<td class="td-b">'+esc(t.docNo)+'</td>'
+            +'<td class="td-b">'+esc(t.docType)+'</td>'
+            +'<td>'+(t.orNo&&t.orNo!=='—'?esc(t.orNo):'—')+'</td>'
+            +'<td>'+(t.saiNo&&t.saiNo!=='—'?esc(t.saiNo):'—')+'</td>'
+            +'<td class="td-l">'+(t.refWsi&&t.refWsi!=='—'?esc(t.refWsi):'—')+'</td>'
+            +'<td class="td-b">'+esc(t.sackCode)+'</td>'
+            +'<td>'+esc(t.sackCond)+'</td>'
+            +'<td>'+esc(t.activity)+'</td>'
+            +'<td class="td-r td-b">'+n(s)+'</td>'
+            +'</tr>';
+    });
+    document.getElementById('tBody').innerHTML=rows.join('');
+    document.getElementById('tFoot').innerHTML='<tr class="total-row"><td colspan="9" style="text-align:right;padding-right:0.7rem;">TOTAL NUMBER OF SACKS</td><td class="td-r">'+totalSacks.toLocaleString()+'</td></tr>';
+})();
+
+function goBack() {
+    if (window.opener && !window.opener.closed) {
+        window.opener.location.href = 'sack_transaction.html';
+        window.close();
+    } else {
+        window.location.href = 'sack_transaction.html';
+    }
+}
+</script>
+</body>
+</html>

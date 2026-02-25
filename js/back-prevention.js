@@ -10,7 +10,8 @@
     const protectedPages = [
         'home.html',
         'accountable.html', 
-        'transaction.html',
+        'sack_transaction.html',
+        'stock_transaction.html',
         'inventory.html',
         'report.html',
         'activity_library.html',

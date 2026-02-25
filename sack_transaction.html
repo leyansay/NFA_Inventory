@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sack Transaction - NFA Inventory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-dark:#1B5E20; --green-mid:#2E7D32; --green-light:#388E3C;
+            --gold:#F9A825; --gold-light:#FDD835; --gold-muted:#E8D8B5;
+            --cream:#F5F0E8; --cream-dark:#EDE6D6; --white:#FFFFFF;
+            --text-dark:#1a2e1a; --text-mid:#3d5a3d; --text-muted:#7a9a7a;
+            --red:#D84315; --red-dark:#BF360C;
+            --shadow-sm:0 2px 8px rgba(27,94,32,0.10);
+            --shadow-md:0 6px 20px rgba(27,94,32,0.14);
+            --shadow-lg:0 16px 48px rgba(27,94,32,0.18);
+            --radius:14px; --radius-sm:8px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;display:flex;}
+
+        /* SIDEBAR */
+        #sidebar-container{width:260px;min-width:260px;height:100vh;position:fixed;top:0;left:0;z-index:500;}
+        #sidebar-frame{width:100%;height:100%;border:none;display:block;}
+
+        /* PAGE WRAPPER */
+        .page-wrapper{margin-left:260px;flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh;}
+
+        /* HEADER */
+        .header{background:linear-gradient(135deg,var(--green-mid) 0%,var(--green-dark) 100%);border-radius:var(--radius);margin:1.2rem 1.5rem 0;padding:1.1rem 1.8rem;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);}
+        .header-left{display:flex;align-items:center;gap:0.75rem;}
+        .header-bar{width:5px;height:28px;background:var(--gold);border-radius:3px;}
+        .header-title{font-size:1.35rem;font-weight:700;color:var(--white);letter-spacing:0.3px;}
+        .user-info{display:flex;align-items:center;gap:0.75rem;background:rgba(255,255,255,0.12);border-radius:12px;padding:0.5rem 0.85rem;}
+        .user-text{text-align:right;}
+        .user-name{font-size:0.9rem;font-weight:600;color:var(--white);}
+        .user-role{font-size:0.72rem;color:var(--gold);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;}
+        .user-avatar{width:38px;height:38px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--green-dark);}
+
+        /* MAIN */
+        .main{padding:1.4rem 1.5rem 2rem;display:flex;flex-direction:column;gap:1.2rem;}
+
+        /* CONTROLS */
+        .controls-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+        .controls-left{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;}
+        .control-group{display:flex;align-items:center;gap:0.6rem;}
+        .control-label{font-size:0.9rem;font-weight:600;color:var(--text-mid);white-space:nowrap;}
+        .select-box{font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:500;padding:0.55rem 2rem 0.55rem 0.9rem;border:1.5px solid var(--gold-muted);border-radius:var(--radius-sm);background:var(--cream-dark) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232E7D32' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 0.7rem center;-webkit-appearance:none;appearance:none;color:var(--text-dark);cursor:pointer;}
+        .select-box:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(46,125,50,0.12);}
+        .date-input{font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:500;padding:0.55rem 0.9rem;border:1.5px solid var(--gold-muted);border-radius:var(--radius-sm);background:var(--cream-dark);color:var(--text-dark);cursor:pointer;}
+        .date-input:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(46,125,50,0.12);}
+        .filter-sep{font-size:0.85rem;color:var(--text-muted);font-weight:500;}
+        .btn-clear{font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;padding:0.55rem 1.1rem;background:var(--gold-muted);color:var(--text-mid);border:1.5px solid #d0c4a4;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;}
+        .btn-clear:hover{background:#d4c5a9;color:var(--green-dark);}
+        .btn-add{font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;padding:0.65rem 1.4rem;background:linear-gradient(135deg,var(--green-mid) 0%,var(--green-dark) 100%);color:var(--white);border:none;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:all 0.25s;box-shadow:0 4px 12px rgba(46,125,50,0.3);white-space:nowrap;}
+        .btn-add:hover{background:linear-gradient(135deg,var(--green-light) 0%,var(--green-mid) 100%);transform:translateY(-1px);box-shadow:0 6px 16px rgba(46,125,50,0.4);}
+        .btn-add-icon{width:20px;height:20px;background:rgba(255,255,255,0.25);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;}
+        .btn-preview{font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;padding:0.65rem 1.4rem;background:var(--white);color:var(--green-mid);border:2px solid var(--green-mid);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:all 0.25s;white-space:nowrap;}
+        .btn-preview:hover{background:rgba(46,125,50,0.07);transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,125,50,0.15);}
+        .btn-preview-icon{font-size:1rem;}
+
+        /* SUMMARY */
+        .summary-section{background:var(--white);border-radius:var(--radius);padding:1.4rem 1.6rem;box-shadow:var(--shadow-sm);border:1.5px solid var(--cream-dark);}
+        .summary-title-row{display:flex;align-items:center;gap:0.65rem;margin-bottom:1rem;}
+        .summary-icon{font-size:1.4rem;}
+        .summary-title{font-size:1.1rem;font-weight:700;color:var(--green-mid);}
+        .summary-cards{display:flex;gap:1rem;flex-wrap:wrap;}
+        .summary-card{background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--cream-dark);border-top:3px solid var(--gold);padding:1rem 1.4rem;min-width:200px;flex:1;}
+        .summary-card-title{font-size:0.85rem;font-weight:700;color:var(--text-mid);margin-bottom:0.25rem;}
+        .summary-card-sub{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem;}
+        .summary-card-divider{height:1px;background:var(--cream-dark);margin-bottom:0.8rem;}
+        .summary-val{font-size:1.6rem;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;line-height:1;}
+        .summary-val-label{font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:0.3rem;}
+
+        /* TABLE */
+        .table-section{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1.5px solid var(--cream-dark);overflow:hidden;}
+        .table-wrapper{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;min-width:900px;}
+        thead tr{background:linear-gradient(90deg,var(--green-mid) 0%,var(--green-dark) 100%);}
+        thead th{padding:1rem 1.1rem;text-align:left;font-size:0.75rem;font-weight:700;color:var(--white);letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap;border-bottom:3px solid var(--gold);}
+        tbody tr{border-bottom:1px solid var(--cream-dark);transition:background 0.18s;cursor:pointer;}
+        tbody tr:last-child{border-bottom:none;}
+        tbody tr:nth-child(even){background:var(--cream);}
+        tbody tr:hover{background:rgba(249,168,37,0.08);}
+        tbody tr.selected{background:rgba(46,125,50,0.09);border-left:3px solid var(--green-mid);}
+        tbody td{padding:0.85rem 1.1rem;font-size:0.88rem;color:var(--text-dark);white-space:nowrap;text-transform:uppercase;}
+        .td-id{font-weight:700;color:var(--green-mid);font-family:'DM Mono',monospace;}
+        .badge{display:inline-flex;align-items:center;padding:0.22rem 0.65rem;border-radius:5px;font-size:0.75rem;font-weight:700;}
+        .badge-other{background:rgba(216,67,21,0.1);color:var(--red);}
+        .dash-cell{color:var(--text-muted);text-transform:none;}
+        /* Sack condition badges */
+        .sack-badge{font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:5px;font-weight:700;text-transform:none;white-space:nowrap;}
+        .sack-bn{background:rgba(46,125,50,0.13);color:#1B5E20;}
+        .sack-sh{background:rgba(249,168,37,0.18);color:#7B5800;}
+        .sack-mn{background:rgba(33,150,243,0.12);color:#0D47A1;}
+        .sack-other{background:rgba(0,0,0,0.07);color:var(--text-muted);}
+
+        /* ACTION BAR */
+        .table-action-bar{display:none;padding:0.9rem 1.3rem;background:linear-gradient(90deg,rgba(27,94,32,0.04) 0%,transparent 100%);border-top:1px solid var(--cream-dark);gap:0.75rem;justify-content:flex-end;animation:slideDown 0.22s ease;}
+        .table-action-bar.visible{display:flex;}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+        .btn-edit{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;padding:0.65rem 1.5rem;background:linear-gradient(135deg,var(--green-mid) 0%,var(--green-dark) 100%);color:var(--white);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.22s;box-shadow:0 3px 10px rgba(46,125,50,0.3);}
+        .btn-edit:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(46,125,50,0.4);}
+        .btn-delete{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;padding:0.65rem 1.5rem;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:var(--white);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.22s;box-shadow:0 3px 10px rgba(216,67,21,0.3);}
+        .btn-delete:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(216,67,21,0.4);}
+
+        /* MODAL OVERLAY */
+        .modal-overlay{position:fixed;inset:0;background:rgba(27,94,32,0.55);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
+        .modal-overlay.active{display:flex;animation:fadeIn 0.25s ease;}
+        @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+        /* MODAL BOX */
+        .modal{background:var(--white);border-radius:20px;box-shadow:var(--shadow-lg);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;animation:slideUp 0.28s ease;position:relative;border:2px solid var(--cream-dark);}
+        .modal-wide{max-width:860px;}
+        .modal-mid{max-width:500px;}
+        @keyframes slideUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+        .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%);border-radius:20px 20px 0 0;}
+        .modal-header{padding:1.6rem 1.8rem 0;display:flex;align-items:center;justify-content:space-between;}
+        .modal-title-wrap{display:flex;flex-direction:column;gap:0.2rem;}
+        .modal-eyebrow{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);}
+        .modal-title{font-size:1.3rem;font-weight:700;color:var(--green-dark);}
+        .modal-close{width:32px;height:32px;background:var(--cream-dark);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text-mid);transition:all 0.2s;}
+        .modal-close:hover{background:#d0c4a4;color:var(--text-dark);}
+        .modal-divider{height:1px;background:var(--cream-dark);margin:1rem 1.8rem;}
+
+        /* OFFICER TABLE */
+        .officer-table-wrap{padding:0 1.8rem 1.8rem;overflow-x:auto;}
+        .officer-table{width:100%;border-collapse:collapse;min-width:640px;}
+        .officer-table thead tr{background:linear-gradient(90deg,var(--green-mid) 0%,var(--green-dark) 100%);}
+        .officer-table thead th{padding:0.8rem 1rem;text-align:left;font-size:0.72rem;font-weight:700;color:var(--white);letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap;border-bottom:3px solid var(--gold);}
+        .officer-table tbody tr{border-bottom:1px solid var(--cream-dark);transition:background 0.15s;}
+        .officer-table tbody tr:nth-child(even){background:var(--cream);}
+        .officer-table tbody tr:hover{background:rgba(249,168,37,0.07);}
+        .officer-table tbody td{padding:0.8rem 1rem;font-size:0.87rem;color:var(--text-dark);white-space:nowrap;text-transform:uppercase;}
+        .officer-table .td-id{font-weight:700;color:var(--green-mid);font-family:'DM Mono',monospace;}
+        .btn-select{font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;padding:0.42rem 1.1rem;background:linear-gradient(135deg,var(--gold) 0%,#e09800 100%);color:var(--green-dark);border:none;border-radius:20px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(249,168,37,0.3);white-space:nowrap;}
+        .btn-select:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(249,168,37,0.5);}
+
+        /* STATUS BADGE */
+        .status-badge{display:inline-flex;align-items:center;padding:0.2rem 0.6rem;border-radius:4px;font-size:0.72rem;font-weight:700;letter-spacing:0.4px;}
+        .status-active{background:rgba(46,125,50,0.12);color:var(--green-mid);}
+        .status-inactive{background:rgba(216,67,21,0.1);color:var(--red);}
+        .status-none{background:rgba(0,0,0,0.06);color:var(--text-muted);}
+
+        /* PICKER TABLE (Sack Code & Activity Code) */
+        .picker-table-wrap{padding:0 1.8rem 1.8rem;overflow-x:auto;}
+        .picker-table{width:100%;border-collapse:collapse;}
+        .picker-table thead tr{background:linear-gradient(90deg,var(--green-mid) 0%,var(--green-dark) 100%);}
+        .picker-table thead th{padding:0.8rem 1rem;text-align:left;font-size:0.72rem;font-weight:700;color:var(--white);letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap;border-bottom:3px solid var(--gold);}
+        .picker-table tbody tr{border-bottom:1px solid var(--cream-dark);transition:background 0.15s;cursor:pointer;}
+        .picker-table tbody tr:nth-child(even){background:var(--cream);}
+        .picker-table tbody tr:hover{background:rgba(46,125,50,0.08);}
+        .picker-table tbody td{padding:0.8rem 1rem;font-size:0.87rem;color:var(--text-dark);text-transform:uppercase;}
+        .picker-table .td-code{font-weight:700;color:var(--green-mid);font-family:'DM Mono',monospace;}
+
+        /* MODAL SEARCH */
+        .modal-search-wrap{padding:0 1.8rem 1rem;}
+        .modal-search{font-family:'DM Sans',sans-serif;font-size:0.88rem;width:100%;padding:0.6rem 1rem;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-dark);}
+        .modal-search:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(46,125,50,0.12);}
+
+        /* OFFICER COUNT BADGE */
+        .officer-count{display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.75rem;background:rgba(46,125,50,0.08);border-radius:20px;font-size:0.8rem;font-weight:600;color:var(--green-mid);margin:0 1.8rem 0.75rem;}
+
+        /* READ-ONLY INFO PANEL */
+        .modal-info-section{padding:0 1.8rem;margin-bottom:0.8rem;}
+        .modal-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.9rem 1rem;border:1.5px solid var(--cream-dark);}
+        .modal-info-item{display:flex;flex-direction:column;gap:0.15rem;}
+        .modal-info-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);}
+        .modal-info-value{font-size:0.88rem;font-weight:600;color:var(--text-dark);font-family:'DM Mono',monospace;}
+
+        /* FORM */
+        .modal-form{padding:0 1.8rem 1.8rem;}
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .form-group{display:flex;flex-direction:column;gap:0.4rem;}
+        .form-label{font-size:0.8rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;}
+        .form-label .req{color:var(--red);margin-left:2px;}
+        .form-input,.form-select{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;padding:0.65rem 0.9rem;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-dark);transition:border-color 0.2s,box-shadow 0.2s;text-transform:uppercase;}
+        .form-select{-webkit-appearance:none;appearance:none;background:var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232E7D32' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 0.8rem center;cursor:pointer;padding-right:2.2rem;}
+        .form-input:focus,.form-select:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(46,125,50,0.12);background:var(--white);}
+        .picker-btn{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;padding:0.65rem 0.9rem;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-dark);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;transition:all 0.2s;text-align:left;width:100%;}
+        .picker-btn:hover{border-color:var(--green-mid);background:#eef7ee;}
+        .picker-btn .ph{color:var(--text-muted);}
+        .picker-btn .pv{color:var(--text-dark);font-weight:600;text-transform:uppercase;}
+        .picker-btn .pa{font-size:0.75rem;color:var(--green-mid);flex-shrink:0;}
+        .form-checkbox-row{display:flex;align-items:center;gap:0.6rem;padding:0.65rem 0.9rem;background:var(--cream);border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);}
+        .form-checkbox{width:18px;height:18px;accent-color:var(--green-mid);cursor:pointer;}
+        .form-checkbox-label{font-size:0.9rem;font-weight:500;color:var(--text-dark);cursor:pointer;}
+        .modal-form-divider{height:1px;background:var(--cream-dark);margin:1rem 0;}
+        .modal-buttons{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.2rem;}
+        .btn-modal-cancel{font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;padding:0.7rem 1.6rem;background:var(--cream-dark);color:var(--text-mid);border:1.5px solid #d0c4a4;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;}
+        .btn-modal-cancel:hover{background:#d4c5a9;}
+        .btn-modal-save{font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;padding:0.7rem 1.8rem;background:linear-gradient(135deg,var(--green-mid) 0%,var(--green-dark) 100%);color:var(--white);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(46,125,50,0.3);}
+        .btn-modal-save:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(46,125,50,0.4);}
+
+        /* DELETE CONFIRM */
+        .confirm-modal{text-align:center;padding:2.2rem 2rem 1.8rem;}
+        .confirm-icon{font-size:3.2rem;margin-bottom:1rem;}
+        .confirm-title{font-size:1.4rem;font-weight:700;color:var(--text-dark);margin-bottom:0.6rem;}
+        .confirm-msg{font-size:0.95rem;color:var(--text-muted);line-height:1.6;margin-bottom:1.8rem;}
+        .confirm-buttons{display:flex;gap:0.75rem;justify-content:center;}
+        .btn-confirm-delete{font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;padding:0.7rem 1.8rem;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:var(--white);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(216,67,21,0.3);}
+        .btn-confirm-delete:hover{transform:translateY(-1px);}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:2rem;right:2rem;padding:0.85rem 1.4rem;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;color:var(--white);box-shadow:var(--shadow-md);z-index:9999;transform:translateY(20px);opacity:0;transition:all 0.3s ease;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.success{background:linear-gradient(135deg,var(--green-mid),var(--green-dark));}
+        .toast.error{background:linear-gradient(135deg,var(--red),var(--red-dark));}
+
+        /* LOADING */
+        .loading-state{text-align:center;padding:3rem 1rem;color:var(--text-muted);}
+        .loading-state .spin{display:inline-block;width:32px;height:32px;border:3px solid var(--cream-dark);border-top-color:var(--green-mid);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted);}
+        .empty-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+        .empty-text{font-size:0.95rem;font-weight:500;}
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar{width:6px;height:6px;}
+        ::-webkit-scrollbar-track{background:var(--cream-dark);border-radius:3px;}
+        ::-webkit-scrollbar-thumb{background:rgba(46,125,50,0.4);border-radius:3px;}
+        ::-webkit-scrollbar-thumb:hover{background:rgba(46,125,50,0.65);}
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar-container">
+    <iframe id="sidebar-frame" src="sidebar.html"></iframe>
+</div>
+
+<div class="page-wrapper">
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-left">
+        <div class="header-bar"></div>
+        <span class="header-title">Sack Transaction</span>
+    </div>
+    <div class="user-info">
+        <div class="user-text">
+            <div class="user-name" id="displayUsername">Hi, User</div>
+            <div class="user-role" id="displayUserRole">User</div>
+        </div>
+        <div class="user-avatar" id="displayAvatar">U</div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- Controls -->
+    <div class="controls-row">
+        <div class="controls-left">
+            <div class="control-group">
+                <span class="control-label">Sort by:</span>
+                <select class="select-box" id="sortSelect" onchange="applyFilters()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="rr">RR Only</option>
+                    <option value="si">SI Only</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <span class="control-label">Filter by Period:</span>
+                <input type="date" class="date-input" id="filterFrom" onchange="applyFilters()">
+                <span class="filter-sep">to</span>
+                <input type="date" class="date-input" id="filterTo" onchange="applyFilters()">
+                <button class="btn-clear" onclick="clearFilter()">Clear Filter</button>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+            <button class="btn-preview" onclick="openPrintPreview()">
+                <span class="btn-preview-icon">🖨</span>
+                Print Preview
+            </button>
+            <button class="btn-add" onclick="openOfficerModal()">
+                <span class="btn-add-icon">+</span>
+                Add Transaction
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-section">
+        <div class="summary-title-row">
+            <span class="summary-icon">🪡</span>
+            <span class="summary-title">Sack Summary</span>
+        </div>
+        <div class="summary-cards" id="summaryCards">
+            <div class="summary-card">
+                <div class="summary-card-title" style="color:var(--text-muted)">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-section">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Officer ID</th><th>Officer Name</th><th>Warehouse ID</th>
+                        <th>Warehouse Name</th><th>Period From</th><th>Period To</th>
+                        <th>Document No.</th><th>Document Type</th><th>OR No.</th>
+                        <th>SAI No.</th><th>Sack Code</th><th>Sack Cond.</th>
+                        <th>No. of Sacks</th><th>Activity</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="15">
+                        <div class="loading-state">
+                            <div class="spin"></div>
+                            <div>Loading transactions...</div>
+                        </div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-action-bar" id="actionBar">
+            <button class="btn-edit" onclick="openEditModal()">Edit Transaction</button>
+            <button class="btn-delete" onclick="openDeleteConfirm()">Delete Transaction</button>
+        </div>
+    </div>
+
+</div><!-- /.main -->
+
+<!-- ══ MODAL 1: SELECT ACCOUNTABLE OFFICER ══ -->
+<div class="modal-overlay" id="officerModal">
+    <div class="modal modal-wide">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-eyebrow">Step 1 of 2</span>
+                <span class="modal-title">Select Accountable Officer</span>
+            </div>
+            <button class="modal-close" onclick="closeOfficerModal()">✕</button>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-search-wrap">
+            <input type="text" class="modal-search" id="officerSearch" placeholder="🔍 Search officer name or ID..." oninput="filterOfficers()">
+        </div>
+        <!-- Dynamic count badge -->
+        <div class="officer-count" id="officerCountBadge">Loading...</div>
+        <div class="officer-table-wrap">
+            <table class="officer-table">
+                <thead>
+                    <tr>
+                        <th>Officer ID</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>Middle Name</th>
+                        <th>Warehouse Code</th>
+                        <th>Warehouse Name</th>
+                        <th>Period From</th>
+                        <th>Period To</th>
+                        <th>Status</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody id="officerTableBody">
+                    <tr><td colspan="10">
+                        <div class="loading-state"><div class="spin"></div><div>Loading officers...</div></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL 2: ADD / EDIT SACK TRANSACTION ══ -->
+<div class="modal-overlay" id="formModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-eyebrow">Data Entry</span>
+                <span class="modal-title" id="modalTitleText">Sack Transaction</span>
+            </div>
+            <button class="modal-close" onclick="closeFormModal()">✕</button>
+        </div>
+        <div class="modal-divider"></div>
+
+        <div class="modal-info-section">
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Accountable Officer</span>
+                    <span class="modal-info-value" id="infoOfficer">—</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Warehouse</span>
+                    <span class="modal-info-value" id="infoWarehouse">—</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Period From</span>
+                    <span class="modal-info-value" id="infoPeriodFrom">—</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Period To</span>
+                    <span class="modal-info-value" id="infoPeriodTo">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Document No. <span class="req">*</span></label>
+                    <input type="text" class="form-input" id="fDocNo" placeholder="e.g. 26800870">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Document Type <span class="req">*</span></label>
+                    <select class="form-select" id="fDocType">
+                        <option value="">— Select —</option>
+                        <option value="RR">RR</option>
+                        <option value="SI">SI</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">OR No.</label>
+                    <input type="text" class="form-input" id="fOrNo" placeholder="e.g. 2452545">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SAI No.</label>
+                    <input type="text" class="form-input" id="fSaiNo" placeholder="e.g. 26587505">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Recd from / Issd to</label>
+                    <input type="text" class="form-input" id="fRefWsi" placeholder="Received from / Issued to">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transaction Date <span class="req">*</span></label>
+                    <input type="date" class="form-input" id="fTxDate" style="text-transform:none;">
+                </div>
+
+                <!-- Activity Code — Table Picker -->
+                <div class="form-group">
+                    <label class="form-label">Activity Code <span class="req">*</span></label>
+                    <button type="button" class="picker-btn" id="activityPickerBtn" onclick="openActivityModal()">
+                        <span id="activityDisplay" class="ph">Click to select...</span>
+                        <span class="pa">▼</span>
+                    </button>
+                    <input type="hidden" id="fActivity">
+                </div>
+
+                <!-- Sack Code — Table Picker -->
+                <div class="form-group">
+                    <label class="form-label">Sack Code <span class="req">*</span></label>
+                    <button type="button" class="picker-btn" id="sackCodePickerBtn" onclick="openSackCodeModal()">
+                        <span id="sackCodeDisplay" class="ph">Click to select...</span>
+                        <span class="pa">▼</span>
+                    </button>
+                    <input type="hidden" id="fSackCode">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sack Condition <span class="req">*</span></label>
+                    <select class="form-select" id="fSackCond" onchange="onSackCondChange()">
+                        <option value="">— Select Condition —</option>
+                        <option value="Brand New">Brand New</option>
+                        <option value="Second Hand">Second Hand</option>
+                        <option value="Mendable">Mendable</option>
+                    </select>
+                    <!-- Weight hint shown after a sack code AND condition are both selected -->
+                    <div id="sackCondHint" style="display:none;margin-top:0.35rem;padding:0.4rem 0.75rem;background:rgba(46,125,50,0.07);border-radius:6px;border-left:3px solid var(--green-mid);font-size:0.8rem;color:var(--text-mid);font-family:'DM Mono',monospace;"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">No. of Sacks <span class="req">*</span></label>
+                    <input type="number" class="form-input" id="fNoSacks" min="0" value="0" style="text-transform:none;">
+                </div>
+            </div>
+            <div class="modal-form-divider"></div>
+            <div class="modal-buttons">
+                <button class="btn-modal-cancel" onclick="closeFormModal()">Cancel</button>
+                <button class="btn-modal-save" id="saveBtn" onclick="saveTransaction()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL 3: ACTIVITY CODE PICKER ══ -->
+<div class="modal-overlay" id="activityModal">
+    <div class="modal modal-mid">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-eyebrow">Activity Library</span>
+                <span class="modal-title">Select Activity Code</span>
+            </div>
+            <button class="modal-close" onclick="closeActivityModal()">✕</button>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-search-wrap">
+            <input type="text" class="modal-search" id="activitySearch" placeholder="🔍 Search activity code or description..." oninput="filterActivities()">
+        </div>
+        <div class="picker-table-wrap">
+            <table class="picker-table">
+                <thead>
+                    <tr>
+                        <th>Activity Code</th>
+                        <th>Description</th>
+                        <th>Abbreviation</th>
+                        <th>In TA</th>
+                        <th>In Whse</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                    <tr><td colspan="5">
+                        <div class="loading-state"><div class="spin"></div><div>Loading activities...</div></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL 4: SACK CODE PICKER ══ -->
+<div class="modal-overlay" id="sackCodeModal">
+    <div class="modal modal-mid">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-eyebrow">Sack Library</span>
+                <span class="modal-title">Select Sack Code</span>
+            </div>
+            <button class="modal-close" onclick="closeSackCodeModal()">✕</button>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-search-wrap">
+            <input type="text" class="modal-search" id="sackSearch" placeholder="🔍 Search sack code..." oninput="filterSackCodes()">
+        </div>
+        <div class="picker-table-wrap">
+            <table class="picker-table">
+                <thead>
+                    <tr>
+                        <th>Sack Code</th>
+                        <th>Brand New (kg)</th>
+                        <th>Second Hand (kg)</th>
+                        <th>Mendable (kg)</th>
+                    </tr>
+                </thead>
+                <tbody id="sackCodeTableBody">
+                    <tr><td colspan="4">
+                        <div class="loading-state"><div class="spin"></div><div>Loading sack codes...</div></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL 5: DELETE CONFIRM ══ -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal modal-mid">
+        <div class="confirm-modal">
+            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-title">Delete Transaction?</div>
+            <p class="confirm-msg">This action cannot be undone. The selected sack transaction record will be permanently removed from the database.</p>
+            <div class="confirm-buttons">
+                <button class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="confirmDelete()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══ MODAL 6: SELECT REPORT TO PREVIEW ══ -->
+<div class="modal-overlay" id="prModal">
+    <div class="modal" style="max-width:680px;">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-eyebrow">Print Preview</span>
+                <span class="modal-title">Select Report to Preview</span>
+            </div>
+            <button class="modal-close" onclick="closePrModal()">✕</button>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Officer ID <span class="req">*</span></label>
+                    <input type="text" class="form-input" id="prOfficerId"
+                           placeholder="Enter Officer ID"
+                           oninput="prOfficerIdChange()"
+                           style="text-transform:uppercase;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Officer Name</label>
+                    <input type="text" class="form-input" id="prOfficerName"
+                           placeholder="" readonly
+                           style="background:var(--cream-dark);color:var(--text-muted);cursor:default;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Warehouse Name</label>
+                    <input type="text" class="form-input" id="prWarehouseName"
+                           placeholder="" readonly
+                           style="background:var(--cream-dark);color:var(--text-muted);cursor:default;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Warehouse Location</label>
+                    <input type="text" class="form-input" id="prWarehouseLoc"
+                           placeholder="" readonly
+                           style="background:var(--cream-dark);color:var(--text-muted);cursor:default;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Period From <span class="req">*</span></label>
+                    <input type="date" class="form-input" id="prPeriodFrom"
+                           style="text-transform:none;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Period To <span class="req">*</span></label>
+                    <input type="date" class="form-input" id="prPeriodTo"
+                           style="text-transform:none;">
+                </div>
+            </div>
+            <div class="modal-form-divider"></div>
+            <button onclick="doPrintTransaction()"
+                style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:800;
+                       padding:0.85rem 1rem;background:var(--gold);color:var(--green-dark);
+                       border:none;border-radius:var(--radius-sm);cursor:pointer;
+                       letter-spacing:1px;text-transform:uppercase;
+                       box-shadow:0 4px 14px rgba(249,168,37,0.35);transition:all 0.2s;">
+                PRINT TRANSACTION
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+</div><!-- /.page-wrapper -->
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="js/back-prevention.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// FIREBASE INIT
+// ═══════════════════════════════════════════════════════
+const firebaseConfig = {
+    apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+    authDomain: "nfa-main.firebaseapp.com",
+    databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "nfa-main",
+    storageBucket: "nfa-main.firebasestorage.app",
+    messagingSenderId: "314192469082",
+    appId: "1:314192469082:web:2f301895179a22dbe68c63",
+    measurementId: "G-ZEJP0S67SY"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ═══════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════
+let allTransactions  = [];
+let officersList     = [];
+let sackCodesList    = [];
+let activitiesList   = [];
+let filteredOfficers = [];
+let filteredSacks    = [];
+let filteredActs     = [];
+
+let selectedRow      = null;
+let selectedKey      = null;
+let editMode         = false;
+let currentOfficer   = null;
+
+// ═══════════════════════════════════════════════════════
+// USER INFO
+// ═══════════════════════════════════════════════════════
+(function(){
+    try {
+        const u = sessionStorage.getItem('currentUser');
+        if (u) {
+            const p = JSON.parse(u);
+            document.getElementById('displayUsername').textContent = `Hi, ${p.username}`;
+            document.getElementById('displayUserRole').textContent = p.role || 'USER';
+            document.getElementById('displayAvatar').textContent   = p.username.charAt(0).toUpperCase();
+        }
+    } catch(e){}
+})();
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type}`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD DATA FROM FIREBASE (real-time listeners)
+// ═══════════════════════════════════════════════════════
+
+// 1. Load Sack Transactions
+function loadTransactions() {
+    db.ref('sack_transactions').on('value', snapshot => {
+        allTransactions = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                allTransactions.push({ key: child.key, ...child.val() });
+            });
+        }
+        applyFilters();
+        renderSummary();
+    }, err => {
+        console.error('Transaction load error:', err);
+        showToast('Failed to load transactions', 'error');
+    });
+}
+
+// 2. Load Officers — reads from 'accountableOfficers' (matches accountable.html)
+//    Fields used in that page: officerId, firstName, lastName, middleName,
+//    warehouse (code), warehouseName, fromDate, toDate, statusExam
+function loadOfficers() {
+    db.ref('accountableOfficers').on('value', snapshot => {
+        officersList = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                officersList.push({ key: child.key, ...child.val() });
+            });
+        }
+        filteredOfficers = [...officersList];
+        console.log(`Loaded ${officersList.length} officers from accountableOfficers`);
+    }, err => {
+        console.error('Officers load error:', err);
+        showToast('Failed to load officers', 'error');
+    });
+}
+
+// 3. Load Sack Codes from `sacks` collection
+function loadSackCodes() {
+    db.ref('sacks').on('value', snapshot => {
+        sackCodesList = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                sackCodesList.push({ key: child.key, ...child.val() });
+            });
+        }
+        filteredSacks = [...sackCodesList];
+    }, err => console.error('Sacks load error:', err));
+}
+
+// 4. Load Activities from `activities` collection
+function loadActivities() {
+    db.ref('activities').on('value', snapshot => {
+        activitiesList = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                activitiesList.push({ key: child.key, ...child.val() });
+            });
+        }
+        filteredActs = [...activitiesList];
+    }, err => console.error('Activities load error:', err));
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN TABLE
+// ═══════════════════════════════════════════════════════
+function applyFilters() {
+    let data = [...allTransactions];
+
+    // Date filter
+    const from = document.getElementById('filterFrom').value;
+    const to   = document.getElementById('filterTo').value;
+    if (from || to) {
+        data = data.filter(t => {
+            const d = t.periodFrom || '';
+            if (from && to) return d >= from && d <= to;
+            if (from) return d >= from;
+            if (to)   return d <= to;
+            return true;
+        });
+    }
+
+    // REPLACE WITH:
+const sort = document.getElementById('sortSelect').value;
+if (sort === 'newest') data.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+if (sort === 'oldest') data.sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+if (sort === 'rr')     data = data.filter(t => (t.docType||'').toUpperCase() === 'RR');
+if (sort === 'si')     data = data.filter(t => (t.docType||'').toUpperCase() === 'SI');
+
+    renderTable(data);
+}
+
+function clearFilter() {
+    document.getElementById('filterFrom').value = '';
+    document.getElementById('filterTo').value   = '';
+    applyFilters();
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No sack transactions found.</div></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = data.map(t => `
+        <tr data-key="${t.key}" onclick="selectRow(this,'${t.key}')">
+            <td class="td-id">${t.officerId||'—'}</td>
+            <td>${t.officerName||'—'}</td>
+            <td>${t.warehouseId||'—'}</td>
+            <td>${t.warehouseName||'—'}</td>
+            <td style="text-transform:none;">${t.periodFrom||'—'}</td>
+            <td style="text-transform:none;">${t.periodTo||'—'}</td>
+            <td>${t.docNo||'—'}</td>
+            <td><span class="badge ${getBadge(t.docType)}">${t.docType||'—'}</span></td>
+            <td>${t.orNo||'<span class="dash-cell">—</span>'}</td>
+            <td>${t.saiNo||'<span class="dash-cell">—</span>'}</td>
+            <td>${t.sackCode||'—'}</td>
+            <td>${getSackCondBadge(t.sackCond)}</td>
+            <td><strong>${t.noSacks||0}</strong></td>
+            <td>${t.activity||'—'}</td>
+            
+        </tr>`).join('');
+}
+
+function getBadge(type) {
+    if (type==='WSI') return 'badge-wsi';
+    if (type==='WSR') return 'badge-wsr';
+    return 'badge-other';
+}
+
+function getSackCondBadge(cond) {
+    if (!cond) return '<span class="dash-cell">—</span>';
+    const map = {
+        'Brand New':   'sack-bn',
+        'Second Hand': 'sack-sh',
+        'Mendable':    'sack-mn'
+    };
+    const cls = map[cond] || 'sack-other';
+    return `<span class="badge sack-badge ${cls}">${cond}</span>`;
+}
+
+function selectRow(row, key) {
+    if (selectedRow === row) {
+        row.classList.remove('selected');
+        selectedRow = null; selectedKey = null;
+        document.getElementById('actionBar').classList.remove('visible');
+        return;
+    }
+    if (selectedRow) selectedRow.classList.remove('selected');
+    row.classList.add('selected');
+    selectedRow = row; selectedKey = key;
+    document.getElementById('actionBar').classList.add('visible');
+}
+
+function deselectRow() {
+    if (selectedRow) selectedRow.classList.remove('selected');
+    selectedRow = null; selectedKey = null;
+    document.getElementById('actionBar').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════════
+// SUMMARY CARDS
+// ═══════════════════════════════════════════════════════
+function renderSummary() {
+    let net = 0;
+
+    allTransactions.forEach(t => {
+        const n = parseInt(t.noSacks) || 0;
+        if (t.docType === 'RR') net += n;
+        else if (t.docType === 'SI') net -= n;
+    });
+
+    const netColor = net >= 0 ? 'var(--gold)' : 'var(--red)';
+
+    document.getElementById('summaryCards').innerHTML = `
+        <div class="summary-card">
+            <div class="summary-card-title">Remaining Sacks</div>
+            <div class="summary-card-sub">Total Sacks On Hand</div>
+            <div class="summary-card-divider"></div>
+            <div class="summary-val" style="color:${netColor};">${net.toLocaleString()}</div>
+            <div class="summary-val-label">Total Sacks</div>
+        </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL 1 — SELECT OFFICER
+// Uses 'accountableOfficers' node which stores:
+//   officerId, firstName, lastName, middleName,
+//   warehouse (code), warehouseName, fromDate, toDate, statusExam
+// ═══════════════════════════════════════════════════════
+function openOfficerModal() {
+    document.getElementById('officerSearch').value = '';
+    filteredOfficers = [...officersList];
+    renderOfficerTable(filteredOfficers);
+    document.getElementById('officerModal').classList.add('active');
+}
+function closeOfficerModal() {
+    document.getElementById('officerModal').classList.remove('active');
+}
+function filterOfficers() {
+    const q = document.getElementById('officerSearch').value.trim().toLowerCase();
+    filteredOfficers = officersList.filter(o =>
+        (o.officerId||'').toLowerCase().includes(q) ||
+        (o.lastName||'').toLowerCase().includes(q) ||
+        (o.firstName||'').toLowerCase().includes(q) ||
+        (o.middleName||'').toLowerCase().includes(q) ||
+        (o.warehouseName||'').toLowerCase().includes(q) ||
+        (o.warehouse||'').toLowerCase().includes(q)
+    );
+    renderOfficerTable(filteredOfficers);
+}
+
+function renderOfficerTable(list) {
+    const tbody      = document.getElementById('officerTableBody');
+    const countBadge = document.getElementById('officerCountBadge');
+
+    // Update count badge
+    countBadge.textContent = `${list.length} officer${list.length !== 1 ? 's' : ''} found`;
+
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2.5rem;color:var(--text-muted)">
+            <div style="font-size:1.8rem;margin-bottom:0.5rem;">🔍</div>
+            <div style="font-weight:600;">No officers found</div>
+            <div style="font-size:0.8rem;margin-top:0.25rem;">Try a different search term</div>
+        </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = list.map(o => {
+        // Normalize field names: accountable.html saves as:
+        //   warehouse (code), warehouseName, fromDate, toDate, statusExam
+        const wCode   = o.warehouse    || o.warehouseCode || o.warehouseId || '—';
+        const wName   = o.warehouseName || '—';
+        const pFrom   = o.fromDate     || o.periodFrom    || '—';
+        const pTo     = o.toDate       || o.periodTo      || '—';
+        const status  = o.statusExam   || o.status        || '';
+        const statusClass = status === 'Active'   ? 'status-active'
+                          : status === 'Inactive' ? 'status-inactive'
+                          : 'status-none';
+        const statusLabel = status || '—';
+
+        return `
+        <tr>
+            <td class="td-id">${o.officerId || o.key}</td>
+            <td>${o.lastName  || '—'}</td>
+            <td>${o.firstName || '—'}</td>
+            <td>${o.middleName|| '—'}</td>
+            <td>${wCode}</td>
+            <td>${wName}</td>
+            <td style="text-transform:none;">${pFrom}</td>
+            <td style="text-transform:none;">${pTo}</td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+            <td><button class="btn-select" onclick="selectOfficer('${o.key}')">Select</button></td>
+        </tr>`;
+    }).join('');
+}
+
+function selectOfficer(key) {
+    const o = officersList.find(x => x.key === key);
+    if (!o) return;
+    currentOfficer = o;
+
+    // Normalize field names to match what accountable.html saves
+    const wCode   = o.warehouse    || o.warehouseCode || o.warehouseId || '';
+    const wName   = o.warehouseName || '';
+    const pFrom   = o.fromDate     || o.periodFrom    || '';
+    const pTo     = o.toDate       || o.periodTo      || '';
+    const fullName = [o.lastName, o.firstName, o.middleName]
+                        .filter(Boolean).join(', ').trim()
+                     || o.officerId || o.key;
+
+    document.getElementById('infoOfficer').textContent   = `${o.officerId || o.key} — ${fullName}`;
+    document.getElementById('infoWarehouse').textContent  = wCode && wName ? `${wCode} — ${wName}` : (wCode || wName || '—');
+    document.getElementById('infoPeriodFrom').textContent = pFrom || '—';
+    document.getElementById('infoPeriodTo').textContent   = pTo   || '—';
+
+    // Store normalized values on the object for easy access in saveTransaction()
+    currentOfficer._wCode  = wCode;
+    currentOfficer._wName  = wName;
+    currentOfficer._pFrom  = pFrom;
+    currentOfficer._pTo    = pTo;
+    currentOfficer._name   = fullName;
+
+    closeOfficerModal();
+    editMode = false;
+    document.getElementById('modalTitleText').textContent = 'Add Sack Transaction';
+    clearForm();
+    document.getElementById('formModal').classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL 2 — ADD / EDIT FORM
+// ═══════════════════════════════════════════════════════
+function openEditModal() {
+    if (!selectedKey) return;
+    const t = allTransactions.find(x => x.key === selectedKey);
+    if (!t) return;
+    editMode = true;
+    document.getElementById('modalTitleText').textContent = 'Edit Sack Transaction';
+    document.getElementById('infoOfficer').textContent    = `${t.officerId||'—'} — ${t.officerName||'—'}`;
+    document.getElementById('infoWarehouse').textContent  = `${t.warehouseId||'—'} — ${t.warehouseName||'—'}`;
+    document.getElementById('infoPeriodFrom').textContent = t.periodFrom||'—';
+    document.getElementById('infoPeriodTo').textContent   = t.periodTo||'—';
+
+    document.getElementById('fDocNo').value    = t.docNo||'';
+    document.getElementById('fDocType').value  = t.docType||'';
+    document.getElementById('fOrNo').value     = (t.orNo==='—'||!t.orNo) ? '' : t.orNo;
+    document.getElementById('fSaiNo').value    = (t.saiNo==='—'||!t.saiNo) ? '' : t.saiNo;
+    document.getElementById('fRefWsi').value   = (t.refWsi==='—'||!t.refWsi) ? '' : t.refWsi;
+    document.getElementById('fTxDate').value   = t.txDate||'';
+    document.getElementById('fNoSacks').value  = t.noSacks||0;
+    document.getElementById('fSackCond').value = t.sackCond||'';
+
+    // Restore weight hint if sack code is known
+    _selectedSackWeights = null;
+    if (t.sackCode) {
+        const s = sackCodesList.find(x => (x.sackCode||x.key) === t.sackCode);
+        if (s) {
+            _selectedSackWeights = {
+                'Brand New':   s.brandNew,
+                'Second Hand': s.secondHand,
+                'Mendable':    s.mendable
+            };
+        }
+    }
+    updateSackCondHint();
+
+    // Set activity picker
+    document.getElementById('fActivity').value = t.activity||'';
+    const actDisp = document.getElementById('activityDisplay');
+    if (t.activity) { actDisp.textContent = t.activity; actDisp.className = 'pv'; }
+    else            { actDisp.textContent = 'Click to select...'; actDisp.className = 'ph'; }
+
+    // Set sack code picker
+    document.getElementById('fSackCode').value = t.sackCode||'';
+    const sackDisp = document.getElementById('sackCodeDisplay');
+    if (t.sackCode) { sackDisp.textContent = t.sackCode; sackDisp.className = 'pv'; }
+    else            { sackDisp.textContent = 'Click to select...'; sackDisp.className = 'ph'; }
+
+    document.getElementById('formModal').classList.add('active');
+}
+function closeFormModal() {
+    document.getElementById('formModal').classList.remove('active');
+    currentOfficer = null;
+}
+function clearForm() {
+    ['fDocNo','fOrNo','fSaiNo','fRefWsi'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('fDocType').value  = '';
+    document.getElementById('fTxDate').value   = '';
+    document.getElementById('fNoSacks').value  = 0;
+    document.getElementById('fSackCond').value = '';
+
+    document.getElementById('fActivity').value = '';
+    const actDisp = document.getElementById('activityDisplay');
+    actDisp.textContent = 'Click to select...'; actDisp.className = 'ph';
+
+    document.getElementById('fSackCode').value = '';
+    const sackDisp = document.getElementById('sackCodeDisplay');
+    sackDisp.textContent = 'Click to select...'; sackDisp.className = 'ph';
+
+    _selectedSackWeights = null;
+    document.getElementById('sackCondHint').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL 3 — ACTIVITY CODE PICKER
+// ═══════════════════════════════════════════════════════
+function openActivityModal() {
+    document.getElementById('activitySearch').value = '';
+    filteredActs = [...activitiesList];
+    renderActivityTable(filteredActs);
+    document.getElementById('activityModal').classList.add('active');
+}
+function closeActivityModal() {
+    document.getElementById('activityModal').classList.remove('active');
+}
+function filterActivities() {
+    const q = document.getElementById('activitySearch').value.trim().toLowerCase();
+    filteredActs = activitiesList.filter(a =>
+        (a.activityCode||'').toLowerCase().includes(q) ||
+        (a.description||'').toLowerCase().includes(q) ||
+        (a.abbreviation||'').toLowerCase().includes(q)
+    );
+    renderActivityTable(filteredActs);
+}
+function renderActivityTable(list) {
+    const tbody = document.getElementById('activityTableBody');
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">No activities found.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(a => `
+        <tr onclick="selectActivity('${a.key}')">
+            <td class="td-code">${a.activityCode||'—'}</td>
+            <td>${a.description||'—'}</td>
+            <td>${a.abbreviation||'—'}</td>
+            <td>${a.includeTA||a.includeInTA||'—'}</td>
+            <td>${a.inWhse||a.inWhseAct||'—'}</td>
+        </tr>`).join('');
+}
+function selectActivity(key) {
+    const a = activitiesList.find(x => x.key === key);
+    if (!a) return;
+    document.getElementById('fActivity').value = a.activityCode||a.key;
+    const disp = document.getElementById('activityDisplay');
+    disp.textContent = a.activityCode + (a.description ? ` — ${a.description}` : '');
+    disp.className   = 'pv';
+    closeActivityModal();
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL 4 — SACK CODE PICKER
+// ═══════════════════════════════════════════════════════
+function openSackCodeModal() {
+    document.getElementById('sackSearch').value = '';
+    filteredSacks = [...sackCodesList];
+    renderSackTable(filteredSacks);
+    document.getElementById('sackCodeModal').classList.add('active');
+}
+function closeSackCodeModal() {
+    document.getElementById('sackCodeModal').classList.remove('active');
+}
+function filterSackCodes() {
+    const q = document.getElementById('sackSearch').value.trim().toLowerCase();
+    filteredSacks = sackCodesList.filter(s =>
+        (s.sackCode||'').toLowerCase().includes(q)
+    );
+    renderSackTable(filteredSacks);
+}
+function renderSackTable(list) {
+    const tbody = document.getElementById('sackCodeTableBody');
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted)">No sack codes found.</td></tr>`;
+        return;
+    }
+    const fmt = v => (v !== undefined && v !== null) ? parseFloat(v).toFixed(3) : '—';
+    tbody.innerHTML = list.map(s => `
+        <tr onclick="selectSackCode('${s.key}')">
+            <td class="td-code">${s.sackCode||'—'}</td>
+            <td>${fmt(s.brandNew)}</td>
+            <td>${fmt(s.secondHand)}</td>
+            <td>${fmt(s.mendable)}</td>
+        </tr>`).join('');
+}
+// Cache weights of the currently selected sack code for the hint
+let _selectedSackWeights = null;
+
+function selectSackCode(key) {
+    const s = sackCodesList.find(x => x.key === key);
+    if (!s) return;
+    document.getElementById('fSackCode').value = s.sackCode||s.key;
+    const disp = document.getElementById('sackCodeDisplay');
+    disp.textContent = s.sackCode||s.key;
+    disp.className   = 'pv';
+
+    // Cache the weight values so condition dropdown can show them
+    _selectedSackWeights = {
+        'Brand New':   s.brandNew,
+        'Second Hand': s.secondHand,
+        'Mendable':    s.mendable
+    };
+
+    updateSackCondHint();
+    closeSackCodeModal();
+}
+
+// Called whenever sack condition dropdown changes
+function onSackCondChange() {
+    updateSackCondHint();
+}
+
+function updateSackCondHint() {
+    const hint   = document.getElementById('sackCondHint');
+    const condEl = document.getElementById('fSackCond');
+    const cond   = condEl ? condEl.value : '';
+
+    if (!cond || !_selectedSackWeights) {
+        hint.style.display = 'none';
+        return;
+    }
+
+    const kg  = _selectedSackWeights[cond];
+    const fmt = v => (v !== undefined && v !== null && v !== '') ? parseFloat(v).toFixed(3) : '—';
+
+    hint.textContent  = `⚖ ${cond} weight: ${fmt(kg)} kg`;
+    hint.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE TRANSACTION
+// ═══════════════════════════════════════════════════════
+function saveTransaction() {
+    const docNo    = document.getElementById('fDocNo').value.trim();
+    const docType  = document.getElementById('fDocType').value;
+    const txDate   = document.getElementById('fTxDate').value;
+    const activity = document.getElementById('fActivity').value;
+    const sackCode = document.getElementById('fSackCode').value;
+    const sackCond = document.getElementById('fSackCond').value;
+    const noSacks  = parseInt(document.getElementById('fNoSacks').value)||0;
+
+    if (!docNo || !docType || !txDate || !activity || !sackCode || !sackCond) {
+        showToast('Please fill in all required fields (*)', 'error');
+        return;
+    }
+
+    let officerId, officerName, warehouseId, warehouseName, periodFrom, periodTo;
+
+    if (editMode) {
+        const ex = allTransactions.find(x => x.key === selectedKey);
+        if (!ex) return;
+        ({ officerId, officerName, warehouseId, warehouseName, periodFrom, periodTo } = ex);
+    } else {
+        if (!currentOfficer) { showToast('No officer selected', 'error'); return; }
+
+        // Use normalized values set in selectOfficer()
+        officerId     = currentOfficer.officerId || currentOfficer.key;
+        officerName   = currentOfficer._name || [
+                            currentOfficer.lastName,
+                            currentOfficer.firstName,
+                            currentOfficer.middleName
+                        ].filter(Boolean).join(', ').trim();
+        warehouseId   = currentOfficer._wCode || '';
+        warehouseName = currentOfficer._wName || '';
+        periodFrom    = currentOfficer._pFrom || '';
+        periodTo      = currentOfficer._pTo   || '';
+    }
+
+    const entry = {
+        officerId, officerName, warehouseId, warehouseName, periodFrom, periodTo,
+        docNo:     docNo.toUpperCase(),
+        docType,
+        orNo:      document.getElementById('fOrNo').value.trim().toUpperCase()   || '—',
+        saiNo:     document.getElementById('fSaiNo').value.trim().toUpperCase()  || '—',
+        refWsi:    document.getElementById('fRefWsi').value.trim().toUpperCase() || '—',
+        txDate, activity, sackCode,
+        sackCond,
+        noSacks,
+        timestamp: Date.now()
+    };
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const ref = editMode
+        ? db.ref('sack_transactions/' + selectedKey).update(entry)
+        : db.ref('sack_transactions').push(entry);
+
+    ref.then(() => {
+        showToast(editMode ? '✅ Transaction updated!' : '✅ Transaction saved!');
+        closeFormModal();
+        deselectRow();
+    }).catch(err => {
+        console.error(err);
+        showToast('❌ Error saving: ' + err.message, 'error');
+    }).finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════════════
+function openDeleteConfirm()  { if (selectedKey) document.getElementById('deleteModal').classList.add('active'); }
+function closeDeleteModal()   { document.getElementById('deleteModal').classList.remove('active'); }
+function confirmDelete() {
+    if (!selectedKey) return;
+    db.ref('sack_transactions/' + selectedKey).remove()
+        .then(() => {
+            showToast('🗑️ Transaction deleted.');
+            closeDeleteModal();
+            deselectRow();
+        })
+        .catch(err => {
+            showToast('❌ Error deleting: ' + err.message, 'error');
+        });
+}
+
+// ═══════════════════════════════════════════════════════
+// CLOSE ON OVERLAY CLICK
+// ═══════════════════════════════════════════════════════
+['officerModal','formModal','activityModal','sackCodeModal','deleteModal','prModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+});
+
+// ═══════════════════════════════════════════════════════
+// PRINT PREVIEW — opens Select Report modal
+// ═══════════════════════════════════════════════════════
+function openPrintPreview() {
+    // Clear previous values
+    document.getElementById('prOfficerId').value    = '';
+    document.getElementById('prOfficerName').value  = '';
+    document.getElementById('prWarehouseName').value= '';
+    document.getElementById('prWarehouseLoc').value = '';
+    document.getElementById('prPeriodFrom').value   = '';
+    document.getElementById('prPeriodTo').value     = '';
+    document.getElementById('prModal').classList.add('active');
+}
+function closePrModal() {
+    document.getElementById('prModal').classList.remove('active');
+}
+
+// Auto-fill officer fields when Officer ID is typed/changed
+function prOfficerIdChange() {
+    const val = document.getElementById('prOfficerId').value.trim().toUpperCase();
+    if (!val) {
+        document.getElementById('prOfficerName').value   = '';
+        document.getElementById('prWarehouseName').value = '';
+        document.getElementById('prWarehouseLoc').value  = '';
+        document.getElementById('prPeriodFrom').value    = '';
+        document.getElementById('prPeriodTo').value      = '';
+        return;
+    }
+    const o = officersList.find(x =>
+        (x.officerId||'').toUpperCase() === val ||
+        (x.key||'').toUpperCase() === val
+    );
+    if (o) {
+        const fullName = [o.lastName, o.firstName, o.middleName].filter(Boolean).join(', ');
+        document.getElementById('prOfficerName').value   = fullName || '';
+        document.getElementById('prWarehouseName').value = o.warehouseName || '';
+        document.getElementById('prWarehouseLoc').value  = o.warehouseName || o.warehouse || '';
+        document.getElementById('prPeriodFrom').value    = o.fromDate || o.periodFrom || '';
+        document.getElementById('prPeriodTo').value      = o.toDate   || o.periodTo   || '';
+    }
+}
+
+function buildPrintPayload(mode) {
+    const officerId  = document.getElementById('prOfficerId').value.trim();
+    const pFrom      = document.getElementById('prPeriodFrom').value;
+    const pTo        = document.getElementById('prPeriodTo').value;
+
+    if (!officerId) { showToast('Please enter an Officer ID', 'error'); return null; }
+    if (!pFrom || !pTo) { showToast('Please set Period From and Period To', 'error'); return null; }
+
+    // Filter transactions by officer + period
+    let data = allTransactions.filter(t => {
+        const matchOfficer = !officerId ||
+            (t.officerId||'').toUpperCase() === officerId.toUpperCase();
+        const txDate = t.txDate || t.periodFrom || '';
+        const inPeriod = (!pFrom || txDate >= pFrom) && (!pTo || txDate <= pTo);
+        return matchOfficer && inPeriod;
+    });
+
+    const sort = document.getElementById('sortSelect').value;
+    if (sort === 'newest')  data.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    if (sort === 'oldest')  data.sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+
+    return {
+        transactions:  data,
+        officerId:     officerId,
+        officerName:   document.getElementById('prOfficerName').value,
+        warehouseName: document.getElementById('prWarehouseName').value,
+        warehouseLoc:  document.getElementById('prWarehouseLoc').value,
+        filterFrom:    pFrom,
+        filterTo:      pTo,
+        mode:          mode,
+        generatedAt:   new Date().toLocaleString()
+    };
+}
+
+function doPrintTransaction() {
+    const payload = buildPrintPayload('transaction');
+    if (!payload) return;
+    sessionStorage.setItem('sack_print_data', JSON.stringify(payload));
+    closePrModal();
+    window.open('sack_print.html', '_blank');
+}
+
+function doRecap() {
+    const payload = buildPrintPayload('recap');
+    if (!payload) return;
+    sessionStorage.setItem('sack_print_data', JSON.stringify(payload));
+    closePrModal();
+    window.open('sack_print.html', '_blank');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadTransactions();
+loadOfficers();
+loadSackCodes();
+loadActivities();
+</script>
+
+</body>
+</html>
